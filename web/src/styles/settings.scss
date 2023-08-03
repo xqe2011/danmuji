@@ -1,0 +1,19 @@
+/**
+ * src/styles/settings.scss
+ *
+ * Configures SASS variables and Vuetify overwrites
+ */
+
+// https://vuetifyjs.com/features/sass-variables/`
+// @use 'vuetify/settings' with (
+//   $color-pack: false
+// );
+
+$nuozi-deep-blue: #2057bc;
+
+/* 导入FrontAwesome */
+$fa-font-path: "https://cdn.staticfile.org/font-awesome/6.4.0/webfonts/";
+@import '@fortawesome/fontawesome-free/scss/fontawesome.scss';
+@import '@fortawesome/fontawesome-free/scss/regular.scss';
+@import '@fortawesome/fontawesome-free/scss/brands.scss';
+@import '@fortawesome/fontawesome-free/scss/solid.scss';
