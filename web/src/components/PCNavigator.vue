@@ -1,25 +1,33 @@
 <template>
-    <!-- <v-navigation-drawer permanent elevation="10">
-        <v-list nav class="text-white" aria-label="导航栏" role="menu">
-            <template v-for="(route, index) in router.options.routes" :key="index">
-                <v-list-item :prepend-icon="route.meta?.icon" :title="route.meta?.name" :value="route.meta?.name" :to="route.path" link tabindex="1" role="menuitem"></v-list-item>
-            </template>
-        </v-list>
-    </v-navigation-drawer> -->
+    <v-toolbar>
+        <template v-for="(route, index) in router.options.routes" :key="index">
+            <a class="text-white link" :href="route.path" :class="{ selected: router.currentRoute.value.path == route.path }"><p>{{ route.meta?.name }}</p></a>
+        </template>
+    </v-toolbar>
 </template>
 
 <style scoped lang="scss">
 @import "../styles/settings.scss";
 
-.v-navigation-drawer {
-  background-color: $nuozi-deep-blue;
-  border: none;
+.v-toolbar {
+    background-color: #2057bc;
 }
-.v-list-item__prepend>.v-avatar {
-  margin-inline-end: 0 !important;
+.link {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
 }
-.footer {
-    white-space: pre-line;
+.link > p {
+    padding-left: 32px;
+    padding-right: 32px;
+}
+.link:hover {
+    background-color: rgba($color: (#000000), $alpha: 0.1);
+}
+.selected {
+    background-color: rgba($color: (#000000), $alpha: 0.2);
 }
 </style>
 

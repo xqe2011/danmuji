@@ -1,9 +1,9 @@
 from bilibili_api import live, Credential
-from pyee import EventEmitter
+from pyee import AsyncIOEventEmitter
 from .config import BILI_LIVE_ID, BILI_SESSDATA, BILI_JCT, BILI_UID
 from .logger import timeLog
 
-liveEvent = EventEmitter()
+liveEvent = AsyncIOEventEmitter()
 room = live.LiveDanmaku(BILI_LIVE_ID, credential=Credential(BILI_SESSDATA, BILI_JCT))
 
 @room.on('DANMU_MSG')
@@ -11,9 +11,9 @@ async def onDanmuCallback(event):
     uid = event["data"]["info"][2][0]
     msg = event['data']['info'][1]
     uname = event["data"]["info"][2][1]
-    isFansMedalBelongToLive = event["data"]["data"]["fans_medal"]["anchor_roomid"] == BILI_UID
-    fansMedalLevel = event["data"]["data"]["fans_medal"]["medal_level"]
-    fansMedalGuardLevel = event["data"]["data"]["fans_medal"]["guard_level"]
+    isFansMedalBelongToLive = False
+    fansMedalLevel = 0
+    fansMedalGuardLevel = 0
     if uid == BILI_UID:
         return
     timeLog(f"[Danmu] {uname}: {msg}")

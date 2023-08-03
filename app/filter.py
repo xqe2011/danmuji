@@ -47,7 +47,7 @@ def filterGuardBuy(uid, uname, newGuard, giftName, num):
     return True
 
 likedUids = {}
-def filterLike(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
+def filterLike(uid, uname):
     if not dynamicConfig["filter"]["like"]["enable"]:
         return False
     if dynamicConfig["filter"]["like"]["deduplicate"]:

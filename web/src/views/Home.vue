@@ -1,36 +1,33 @@
 <template>
-    <v-container class="pa-0">
+    <v-container fluid class="pa-0">
         <v-row no-gutters>
             <v-col cols="12" md="3">
-                <v-sheet class="pa-2 ma-2 bg-transparent">
-                    <ConfigPanel style="height: 90vh;"/>
+                <v-sheet class="pa-2 bg-transparent" style="height: 90vh;">
+                    <ConfigPanel style="height: 100%;"/>
                 </v-sheet>
             </v-col>
             <v-col cols="12" md="4">
-                <v-sheet class="pa-2 ma-2 bg-transparent">
-                    <LogPanel style="height: 90vh;"/>
+                <v-sheet class="pa-2 bg-transparent" style="height: 90vh;">
+                    <LogPanel style="height: 100%;" :data="logEvent"/>
                 </v-sheet>
             </v-col>
-            <v-col cols="12" md="3">
-                <v-sheet class="pa-2 ma-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;"/>
+            <v-col cols="12" md="3" class="graph-container">
+                <v-sheet class="pa-2 bg-transparent" style="height: 45vh;">
+                    <GraphPanel style="height: 100%;" name="原始数据" :columes="['弹幕', '礼物', '入场', '其他']" :data="rawGraphData"/>
                 </v-sheet>
-                <v-sheet class="pa-2 ma-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;"/>
-                </v-sheet>
-                <v-sheet class="pa-2 ma-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;"/>
+                <v-sheet class="pa-2 bg-transparent" style="height: 45vh;">
+                    <GraphPanel style="height: 100%;" name="过滤后数据" :columes="['弹幕', '礼物', '入场', '其他']" :data="filteredGraphData"/>
                 </v-sheet>
             </v-col>
             <v-col cols="12" md="2">
-                <v-sheet class="pa-2 ma-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;"/>
+                <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
+                    <GraphPanel style="height: 100%;" name="CPU占用率" :columes="['百分比']" :data="[[]]"/>
                 </v-sheet>
-                <v-sheet class="pa-2 ma-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;"/>
+                <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
+                    <GraphPanel style="height: 100%;" name="输出队列高度" :columes="['高度']" :data="messagesQueueLegnth"/>
                 </v-sheet>
-                <v-sheet class="pa-2 ma-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;"/>
+                <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
+                    <GraphPanel style="height: 100%;" name="平均延迟" :columes="['毫秒']" :data="[[]]"/>
                 </v-sheet>
             </v-col>
         </v-row>
@@ -38,19 +35,35 @@
 </template>
 
 <style scoped>
-.v-list-group__items .v-list-item {
-    padding-inline-start: unset !important;
-}
-
-.v-list-item--one-line .v-list-item-subtitle {
-    line-clamp: unset !important;
-}
 </style>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
 import ConfigPanel from '@/components/ConfigPanel.vue'
 import LogPanel from '@/components/LogPanel.vue';
 import GraphPanel from '@/components/GraphPanel.vue';
+import { registerCallback } from '@/services/Database';
+import { ref, Ref } from 'vue';
+import { WebsocketBroadcastMessage } from '@/types/WebsocketBroadcastMessage';
+
+const rawGraphData: Ref<number[][]> = ref([[], [], [], []]);
+const filteredGraphData: Ref<number[][]> = ref([[], [], [], []]);
+const messagesQueueLegnth: Ref<number[][]> = ref([[]]);
+const logEvent: Ref<WebsocketBroadcastMessage['events']> = ref([]);
+
+
+registerCallback((data) => {
+    logEvent.value = logEvent.value.concat(data.events);
+    rawGraphData.value[0].push(data.stats.rawDanmu);
+    rawGraphData.value[1].push(data.stats.rawGift);
+    rawGraphData.value[2].push(data.stats.rawWelcome);
+    rawGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe);
+
+    filteredGraphData.value[0].push(data.stats.rawDanmu);
+    filteredGraphData.value[1].push(data.stats.rawGift);
+    filteredGraphData.value[2].push(data.stats.rawWelcome);
+    filteredGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe);
+
+    messagesQueueLegnth.value[0].push(data.stats.messagesQueueLength);
+});
 
 </script>

@@ -12,6 +12,8 @@
 .v-layout {
   background-color: #dae4f5;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 .mobile-copyright {
   white-space: pre-line;
@@ -21,6 +23,7 @@
 <script lang="ts" setup>
 import PCNavigator from "./components/PCNavigator.vue";
 import router from "./router";
+import { init } from "./services/Database";
 
 router.beforeResolve((to, from, next) => {
   if (to.meta?.name) {
@@ -28,5 +31,8 @@ router.beforeResolve((to, from, next) => {
   }
   next();
 });
+
+var url = new URL(document.URL);
+init(url.searchParams.get("token") as string).then(() => console.log('[Database] Connected'))
 
 </script>

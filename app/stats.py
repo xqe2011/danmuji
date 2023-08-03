@@ -1,15 +1,19 @@
 import asyncio
-from pyee import EventEmitter
+from pyee import AsyncIOEventEmitter
 from .logger import timeLog
 
-statsEvent = EventEmitter()
+statsEvent = AsyncIOEventEmitter()
 registeredStatsCount = []
 lastDurationStats = None
 messagesQueue = []
 
-async def resetDuration():
-    global lastDurationStats, registeredStatsCount
-    lastDurationStats = {}
+def resetDuration():
+    global lastDurationStats, registeredStatsCount, messagesQueue
+    messagesQueue = []
+    lastDurationStats = {
+        'cpu_usage': 50,
+        'messagesQueueLength': lastDurationStats['messagesQueueLength'] if lastDurationStats else 0
+    }
     for type in registeredStatsCount:
         lastDurationStats["raw" + type[0].upper() + type[1:]] = 0
         lastDurationStats["filtered" + type[0].upper() + type[1:]] = 0
@@ -17,7 +21,7 @@ async def resetDuration():
 def statsFunctionGenerator(type):
     global registeredStatsCount
     registeredStatsCount.append(type)
-    async def statsFunction(filterd, **args):
+    def statsFunction(filterd, **args):
         global lastDurationStats, messagesQueue
         lastDurationStats["raw" + type[0].upper() + type[1:]] += 1
         if filterd:
@@ -36,10 +40,19 @@ appendLikeFilteredStats = statsFunctionGenerator('like')
 appendGuardBuyFilteredStats = statsFunctionGenerator('guardBuy')
 appendSubscribeFilteredStats = statsFunctionGenerator('subscribe')
 
+def setOutputMessagesLength(messagesQueueLength):
+    global lastDurationStats
+    lastDurationStats['messagesQueueLength'] = messagesQueueLength
+
+resetDuration()
+
 async def statsTask():
-    await resetDuration()
+    resetDuration()
     while True:
-        await asyncio.sleep(10)
-        statsEvent.emit('stats', lastDurationStats)
+        await asyncio.sleep(1)
+        statsEvent.emit('stats', {
+            'events': messagesQueue,
+            'stats': lastDurationStats
+        })
         timeLog(f'[Stats] {lastDurationStats}')
-        await resetDuration()
+        resetDuration()

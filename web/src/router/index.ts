@@ -6,7 +6,6 @@ const routes = [
         path: '/',
         component: () => import('@/views/Home.vue'),
         meta: {
-            icon: "fas fa-house",
             name: "配置",
             seo: {
                 description: "配置页面"

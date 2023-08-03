@@ -1,6 +1,6 @@
 from quart import Quart, request, websocket
 from .config import updateDynamicConfig, getDynamicConfig
-import random, string, asyncio
+import random, string, asyncio, json
 from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
 
@@ -14,6 +14,7 @@ def checkToken(func):
         if request.args.get('token') != token:
             return { 'status': -1, 'msg': 'token error' }, 401
         return await func(*args, **kwargs)
+    wrappedFunc.__name__ = func.__name__
     return wrappedFunc
 
 @app.route('/flush')
@@ -34,10 +35,9 @@ async def updateConfig():
     return { 'status': 0, 'msg': 'ok' }
 
 @app.websocket('/ws')
-@checkToken
 async def ws():
     try:
-        allWSClients.append(websocket)
+        allWSClients.append(websocket._get_current_object())
         while True:
             await websocket.receive()
     except asyncio.CancelledError:
@@ -54,9 +54,9 @@ async def cleanup():
     for task in app.background_tasks:
         task.cancel()
 
-async def brocastWSMessage(message):
+async def broadcastWSMessage(message):
     for ws in allWSClients:
-        asyncio.create_task(ws.send(message))
+        await ws.send(json.dumps(message, ensure_ascii=False))
 
 def startHttpServer(backgroundTasks):
     global tasks
