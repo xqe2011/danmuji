@@ -65,9 +65,9 @@
 </style>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { DynamicConfig } from "../types/DynamicConfig";
-import { getDynamicConfig, setDynamicConfig } from '@/services/Database';
+import { getDynamicConfig, setDynamicConfig, onWSState } from '@/services/Database';
 
 const config = ref(undefined as unknown as DynamicConfig);
 config.value = {
@@ -114,7 +114,6 @@ const saving = ref(false);
 function onRead() {
     reading.value = true;
     getDynamicConfig().then(msg => {
-        console.log(msg);
         config.value = msg;
         reading.value = false;
     }).catch(err => {
@@ -145,7 +144,9 @@ function onSave() {
     });
 }
 
-onMounted(() => {
-    onRead();
+onWSState.subscribe(data => {
+    if (data == 'connected') {
+        onRead();
+    }
 });
 </script>

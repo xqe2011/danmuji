@@ -31,22 +31,22 @@ async def onGift(uid, uname, price, giftName, num):
             'type': 'gift',
             'uid': uid,
             'uname': uname,
-            'gift_name': giftName,
+            'giftName': giftName,
             'num': num
         })
     else:
         appendGiftFilteredStats(uid=uid, uname=uname, giftName=giftName, num=num, filterd=True)
 
-@liveEvent.on('guard_buy')
+@liveEvent.on('guardBuy')
 async def onGuardBuy(uid, uname, newGuard, giftName, num):
     if filterGuardBuy(uid, uname, newGuard, giftName, num):
         appendGuardBuyFilteredStats(uid=uid, uname=uname, newGuard=newGuard, giftName=giftName, num=num, filterd=False)
         messagesQueueAppend({
-            'type': 'guard_buy',
+            'type': 'guardBuy',
             'uid': uid,
             'uname': uname,
-            'new_guard': newGuard,
-            'gift_name': giftName,
+            'newGuard': newGuard,
+            'giftName': giftName,
             'num': num
         })
     else:

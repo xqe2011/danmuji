@@ -41,7 +41,7 @@
 import ConfigPanel from '@/components/ConfigPanel.vue'
 import LogPanel from '@/components/LogPanel.vue';
 import GraphPanel from '@/components/GraphPanel.vue';
-import { registerCallback } from '@/services/Database';
+import { onWSMessages } from '@/services/Database';
 import { ref, Ref } from 'vue';
 import { WebsocketBroadcastMessage } from '@/types/WebsocketBroadcastMessage';
 
@@ -53,7 +53,7 @@ const cpuUsage: Ref<number[][]> = ref([[]]);
 const delay: Ref<number[][]> = ref([[]]);
 
 
-registerCallback((data) => {
+onWSMessages.subscribe((data) => {
     logEvent.value = logEvent.value.concat(data.events);
     rawGraphData.value[0].push(data.stats.rawDanmu);
     rawGraphData.value[1].push(data.stats.rawGift);

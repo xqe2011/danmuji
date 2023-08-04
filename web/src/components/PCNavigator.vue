@@ -3,6 +3,8 @@
         <template v-for="(route, index) in router.options.routes" :key="index">
             <a class="text-white link" :href="route.path" :class="{ selected: router.currentRoute.value.path == route.path }"><p>{{ route.meta?.name }}</p></a>
         </template>
+        <v-spacer></v-spacer>
+        <div class="text-white link"><p>{{ websocketStatus }}</p></div>
     </v-toolbar>
 </template>
 
@@ -33,6 +35,17 @@
 
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
+import { onWSState } from '@/services/Database';
+import { ref } from 'vue';
 
 const router = useRouter();
+const websocketStatus = ref('未连接');
+
+onWSState.subscribe(data => {
+    if (data == 'connected') {
+        websocketStatus.value = '已连接';
+    } else {
+        websocketStatus.value = '未连接';
+    }
+});
 </script>

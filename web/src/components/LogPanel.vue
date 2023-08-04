@@ -15,7 +15,7 @@
                     </thead>
                     <tbody>
                         <template v-for="(item, index) in props.data as WebsocketBroadcastMessage['events']" :key="index">
-                            <tr v-if="index" :class="{ filterd: item.filterd }">
+                            <tr :class="{ filterd: item.filterd }">
                                 <td>{{ item.uname }}</td>
                                 <td v-if="item.type == 'danmu'">弹幕</td>
                                 <td v-if="item.type == 'danmu'">{{ item.msg }}</td>
@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import { WebsocketBroadcastMessage } from "@/types/WebsocketBroadcastMessage";
 import { onUpdated } from "vue";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 
 const container = ref<HTMLDivElement | null>(null);
 const locked = ref(true);
