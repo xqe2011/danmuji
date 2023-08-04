@@ -44,6 +44,9 @@ dynamicConfig = {
         "subscribe": {
             "enable": iniConfig.getboolean('dynamic', 'filter.subscribe.enable'),
         },
+        "superChat": {
+            "enable": iniConfig.getboolean('dynamic', 'filter.superChat.enable'),
+        }
     }
 }
 timeLog(f'[Config] Loaded dynamic config: {json.dumps(dynamicConfig, ensure_ascii=False)}')

@@ -1,7 +1,7 @@
 from .live import liveEvent
 from .logger import timeLog
-from .filter import filterDanmu, filterGift, filterGuardBuy, filterLike, filterSubscribe, filterWelcome
-from .stats import setOutputMessagesLength, appendDanmuFilteredStats, appendGiftFilteredStats, appendWelcomeFilteredStats, appendLikeFilteredStats, appendGuardBuyFilteredStats, appendSubscribeFilteredStats
+from .filter import filterDanmu, filterGift, filterGuardBuy, filterLike, filterSubscribe, filterWelcome, filterSuperChat
+from .stats import setOutputMessagesLength, appendDanmuFilteredStats, appendGiftFilteredStats, appendWelcomeFilteredStats, appendLikeFilteredStats, appendGuardBuyFilteredStats, appendSubscribeFilteredStats, appendSuperChatFilteredStats
 
 messagesQueue = []
 
@@ -11,9 +11,9 @@ def messagesQueueAppend(data):
     setOutputMessagesLength(len(messagesQueue))
 
 @liveEvent.on('danmu')
-async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg):
-    if filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg):
-        appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, filterd=False)
+async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
+    if filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
+        appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, isEmoji=isEmoji, filterd=False)
         messagesQueueAppend({
             'type': 'danmu',
             'uid': uid,
@@ -21,7 +21,7 @@ async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedal
             'msg': msg
         })
     else:
-        appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, filterd=True)
+        appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, isEmoji=isEmoji, filterd=True)
 
 @liveEvent.on('gift')
 async def onGift(uid, uname, price, giftName, num):
@@ -63,6 +63,18 @@ async def onLike(uid, uname):
         })
     else:
         appendLikeFilteredStats(uid=uid, uname=uname, filterd=True)
+
+@liveEvent.on('superChat')
+async def onSuperChat(uid, uname, price, msg):
+    if filterSuperChat(uid, uname, price, msg):
+        appendSuperChatFilteredStats(uid=uid, uname=uname, price=price, msg=msg, filterd=False)
+        messagesQueueAppend({
+            'type': 'superChat',
+            'uid': uid,
+            'uname': uname
+        })
+    else:
+        appendSuperChatFilteredStats(uid=uid, uname=uname, price=price, msg=msg, filterd=True)
 
 @liveEvent.on('subscribe')
 async def onSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):

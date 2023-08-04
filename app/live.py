@@ -6,18 +6,32 @@ from .logger import timeLog
 liveEvent = AsyncIOEventEmitter()
 room = live.LiveDanmaku(BILI_LIVE_ID, credential=Credential(BILI_SESSDATA, BILI_JCT))
 
+# 0为普通用户，1为总督，2位提督，3为舰长
+guardLevelMap = {
+    0: 0,
+    1: 3,
+    2: 2,
+    3: 1
+}
+
 @room.on('DANMU_MSG')
 async def onDanmuCallback(event):
     uid = event["data"]["info"][2][0]
     msg = event['data']['info'][1]
     uname = event["data"]["info"][2][1]
-    isFansMedalBelongToLive = False
-    fansMedalLevel = 0
-    fansMedalGuardLevel = 0
+    if len(event["data"]["info"][3]) != 0:
+        isFansMedalBelongToLive = event["data"]["info"][3][3] == BILI_LIVE_ID
+        fansMedalLevel = event["data"]["info"][3][0]
+        fansMedalGuardLevel = guardLevelMap[event["data"]["info"][3][10]]
+    else:
+        isFansMedalBelongToLive = False
+        fansMedalLevel = 0
+        fansMedalGuardLevel = 0
+    isEmoji = (msg[0] == '[' and msg[-1] == ']') or event['data']['info'][0][12] == 1
     if uid == BILI_UID:
         return
     timeLog(f"[Danmu] {uname}: {msg}")
-    liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg)
+    liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji)
 
 @room.on('USER_TOAST_MSG')
 async def onGuardBuyCallback(event):
@@ -37,8 +51,8 @@ async def onSCCallback(event):
     uname = event["data"]["data"]["user_info"]["uname"]
     price = event["data"]["data"]["price"]
     msg = event["data"]["data"]["message"]
-    timeLog(f"[SC] {uname} bought {price}元的SC: {msg}")
-    liveEvent.emit('sc', uid, uname, price, msg)
+    timeLog(f"[SuperChat] {uname} bought {price}元的SC: {msg}")
+    liveEvent.emit('superChat', uid, uname, price, msg)
 
 @room.on('SEND_GIFT')
 async def onGiftCallback(event):
@@ -57,9 +71,9 @@ async def onInteractWordCallback(event):
         return
     uid = event["data"]["data"]["uid"]
     uname = event["data"]["data"]["uname"]
-    isFansMedalBelongToLive = event["data"]["data"]["fans_medal"]["anchor_roomid"] == BILI_UID
+    isFansMedalBelongToLive = event["data"]["data"]["fans_medal"]["anchor_roomid"] == BILI_LIVE_ID
     fansMedalLevel = event["data"]["data"]["fans_medal"]["medal_level"]
-    fansMedalGuardLevel = event["data"]["data"]["fans_medal"]["guard_level"]
+    fansMedalGuardLevel = guardLevelMap[event["data"]["data"]["fans_medal"]["guard_level"]]
     isSubscribe = event["data"]["data"]["msg_type"] == 2
     timeLog(f"[Interact] {uname} {'subscribe' if isSubscribe else 'enter'} the stream.")
     if isSubscribe:

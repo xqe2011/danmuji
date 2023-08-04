@@ -31,5 +31,8 @@ export type DynamicConfig = {
         "subscribe": {
             "enable": boolean,
         },
+        "superChat": {
+            "enable": boolean,
+        }
     }
 };

@@ -36,6 +36,9 @@
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.subscribe.enable" inset color="blue" label="启用关注朗读"></v-switch>
+            <v-divider></v-divider>
+
+            <v-switch v-model="config.filter.superChat.enable" inset color="blue" label="启用醒目留言朗读"></v-switch>
         </v-form>
     </v-card>
 </template>
@@ -99,6 +102,9 @@ config.value = {
         },
         subscribe: {
             enable: true
+        },
+        superChat: {
+            enable: true
         }
     }
 };
@@ -128,7 +134,7 @@ function onSave() {
     config.value.filter.gift.moneyGiftPriceBigger = Number(config.value.filter.gift.moneyGiftPriceBigger);
     config.value.filter.welcome.fansMedalGuardLevelBigger = Number(config.value.filter.welcome.fansMedalGuardLevelBigger);
     config.value.filter.welcome.fansMedalLevelBigger = Number(config.value.filter.welcome.fansMedalLevelBigger);
-    
+
     setDynamicConfig(config.value).then(val => {
         saving.value = false;
         alert('保存成功');

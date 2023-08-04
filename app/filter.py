@@ -1,6 +1,6 @@
 from .config import getDynamicConfig
 
-def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg):
+def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
     dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["danmu"]["enable"]:
         return False
@@ -9,7 +9,8 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
     if dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"] != 0 and fansMedalGuardLevel < dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"]:
         return False
     if dynamicConfig["filter"]["danmu"]["lengthShorter"] != 0 and len(msg) > dynamicConfig["filter"]["danmu"]["lengthShorter"]:
-        print(msg, len(msg), dynamicConfig["filter"]["danmu"]["lengthShorter"])
+        return False
+    if not dynamicConfig["filter"]["danmu"]["emojiEnable"] and isEmoji:
         return False
     if uid in dynamicConfig["filter"]["danmu"]["blacklistUsers"]:
         return False
@@ -60,11 +61,16 @@ def filterLike(uid, uname):
         if uid in likedUids:
             return False
         likedUids[uid] = True
-        return True
     return True
 
 def filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
     dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["subscribe"]["enable"]:
+        return False
+    return True
+
+def filterSuperChat(uid, uname, price, msg):
+    dynamicConfig = getDynamicConfig()
+    if not dynamicConfig["filter"]["superChat"]["enable"]:
         return False
     return True
