@@ -2,6 +2,7 @@ from bilibili_api import live, Credential
 from pyee import AsyncIOEventEmitter
 from .config import BILI_LIVE_ID, BILI_SESSDATA, BILI_JCT, BILI_UID
 from .logger import timeLog
+from .tool import isAllCharactersEmoji
 
 liveEvent = AsyncIOEventEmitter()
 room = live.LiveDanmaku(BILI_LIVE_ID, credential=Credential(BILI_SESSDATA, BILI_JCT))
@@ -27,7 +28,7 @@ async def onDanmuCallback(event):
         isFansMedalBelongToLive = False
         fansMedalLevel = 0
         fansMedalGuardLevel = 0
-    isEmoji = (msg[0] == '[' and msg[-1] == ']') or event['data']['info'][0][12] == 1
+    isEmoji = event['data']['info'][0][12] == 1 or isAllCharactersEmoji(msg)
     if uid == BILI_UID:
         return
     timeLog(f"[Danmu] {uname}: {msg}")
