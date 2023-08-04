@@ -54,10 +54,11 @@ const option = ref({
     },
     legend: {},
     grid: {
-        top: '0%',
-        left: '0%',
+        top: '3%',
+        left: '1%',
         right: '0%',
-        bottom: '0%'
+        bottom: '0%',
+        containLabel: true
     },
     dataZoom: [{
         type: 'inside',
@@ -75,7 +76,8 @@ const option = ref({
     ],
     yAxis: [
         {
-            type: 'value'
+            type: 'value',
+            
         }
     ],
     series: [] as any[]

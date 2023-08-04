@@ -5,3 +5,4 @@ include
 pyvenv.cfg
 __pycache__
 node_modules
+config.ini

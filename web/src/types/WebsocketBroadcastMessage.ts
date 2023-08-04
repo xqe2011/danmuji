@@ -1,6 +1,6 @@
 export type DanmuEvent = {
     'type': 'danmu',
-    'valid': boolean,
+    'filterd': boolean,
     'uid': number,
     'uname': string,
     'msg': string
@@ -8,40 +8,40 @@ export type DanmuEvent = {
 
 export type GiftEvent = {
     'type': 'gift',
-    'valid': boolean,
+    'filterd': boolean,
     'uid': number,
     'uname': string,
-    'gift_name': string,
+    'giftName': string,
     'num': number
 };
 
 export type GuardBuyEvent = {
-    'type': 'guard_buy',
-    'valid': boolean,
+    'type': 'guardBuy',
+    'filterd': boolean,
     'uid': number,
     'uname': string,
-    'new_guard': number,
-    'gift_name': string,
+    'newGuard': number,
+    'giftName': string,
     'num': number
 };
 
 export type LikeEvent = {
     'type': 'like',
-    'valid': boolean,
+    'filterd': boolean,
     'uid': number,
     'uname': string
 };
 
 export type SubscribeEvent = {
     'type': 'subscribe',
-    'valid': boolean,
+    'filterd': boolean,
     'uid': number,
     'uname': string
 };
 
 export type WelcomeEvent = {
     'type': 'welcome',
-    'valid': boolean,
+    'filterd': boolean,
     'uid': number,
     'uname': string
 };
@@ -61,7 +61,7 @@ export type WebsocketBroadcastMessage = {
         'rawGuardBuy': number,
         'filteredSubscribe': number,
         'rawSubscribe': number,
-        'cpu_usage': number,
+        'cpuUsage': number,
         'messagesQueueLength': number,
         'delay': number
     }

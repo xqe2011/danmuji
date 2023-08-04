@@ -21,13 +21,13 @@
             </v-col>
             <v-col cols="12" md="2">
                 <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;" name="CPU占用率" :columes="['百分比']" :data="[[]]"/>
+                    <GraphPanel style="height: 100%;" name="CPU占用率" :columes="['百分比']" :data="cpuUsage"/>
                 </v-sheet>
                 <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
                     <GraphPanel style="height: 100%;" name="输出队列高度" :columes="['高度']" :data="messagesQueueLegnth"/>
                 </v-sheet>
                 <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;" name="平均延迟" :columes="['毫秒']" :data="[[]]"/>
+                    <GraphPanel style="height: 100%;" name="平均延迟" :columes="['毫秒']" :data="delay"/>
                 </v-sheet>
             </v-col>
         </v-row>
@@ -49,6 +49,8 @@ const rawGraphData: Ref<number[][]> = ref([[], [], [], []]);
 const filteredGraphData: Ref<number[][]> = ref([[], [], [], []]);
 const messagesQueueLegnth: Ref<number[][]> = ref([[]]);
 const logEvent: Ref<WebsocketBroadcastMessage['events']> = ref([]);
+const cpuUsage: Ref<number[][]> = ref([[]]);
+const delay: Ref<number[][]> = ref([[]]);
 
 
 registerCallback((data) => {
@@ -58,12 +60,16 @@ registerCallback((data) => {
     rawGraphData.value[2].push(data.stats.rawWelcome);
     rawGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe);
 
-    filteredGraphData.value[0].push(data.stats.rawDanmu);
-    filteredGraphData.value[1].push(data.stats.rawGift);
-    filteredGraphData.value[2].push(data.stats.rawWelcome);
-    filteredGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe);
+    filteredGraphData.value[0].push(data.stats.rawDanmu - data.stats.filteredDanmu);
+    filteredGraphData.value[1].push(data.stats.rawGift - data.stats.filteredGift);
+    filteredGraphData.value[2].push(data.stats.rawWelcome - data.stats.filteredWelcome);
+    filteredGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe - (data.stats.filteredGuardBuy + data.stats.filteredLike + data.stats.filteredSubscribe));
 
     messagesQueueLegnth.value[0].push(data.stats.messagesQueueLength);
+
+    cpuUsage.value[0].push(data.stats.cpuUsage);
+
+    delay.value[0].push(data.stats.delay);
 });
 
 </script>

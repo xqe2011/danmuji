@@ -1,13 +1,15 @@
-from .config import dynamicConfig
+from .config import getDynamicConfig
 
 def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg):
+    dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["danmu"]["enable"]:
         return False
     if dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"]:
         return False
     if dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"] != 0 and fansMedalGuardLevel < dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"]:
         return False
-    if dynamicConfig["filter"]["danmu"]["lengthDhorter"] != 0 and len(msg) < dynamicConfig["filter"]["danmu"]["lengthDhorter"]:
+    if dynamicConfig["filter"]["danmu"]["lengthShorter"] != 0 and len(msg) > dynamicConfig["filter"]["danmu"]["lengthShorter"]:
+        print(msg, len(msg), dynamicConfig["filter"]["danmu"]["lengthShorter"])
         return False
     if uid in dynamicConfig["filter"]["danmu"]["blacklistUsers"]:
         return False
@@ -19,6 +21,7 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
     return True
 
 def filterGift(uid, uname, price, giftName, num):
+    dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["gift"]["enable"]:
         return False
     if price == 0:
@@ -33,6 +36,7 @@ def filterGift(uid, uname, price, giftName, num):
         return True
 
 def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
+    dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["welcome"]["enable"]:
         return False
     if dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"]:
@@ -42,12 +46,14 @@ def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedal
     return True
 
 def filterGuardBuy(uid, uname, newGuard, giftName, num):
+    dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["guardBuy"]["enable"]:
         return False
     return True
 
 likedUids = {}
 def filterLike(uid, uname):
+    dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["like"]["enable"]:
         return False
     if dynamicConfig["filter"]["like"]["deduplicate"]:
@@ -58,6 +64,7 @@ def filterLike(uid, uname):
     return True
 
 def filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
+    dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["subscribe"]["enable"]:
         return False
     return True

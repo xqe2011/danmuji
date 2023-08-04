@@ -9,6 +9,7 @@ BILI_LIVE_ID = iniConfig.getint('common', 'bili.liveID')
 BILI_UID = iniConfig.getint('common', 'bili.uid')
 BILI_SESSDATA = iniConfig.get('common', 'bili.sessdata')
 BILI_JCT = iniConfig.get('common', 'bili.jct')
+HTTP_TOKEN = iniConfig.get('common', 'http.token')
 
 dynamicConfig = {
     "filter": {
@@ -53,5 +54,5 @@ async def updateDynamicConfig(config):
     dynamicConfig = config
     timeLog(f'[Config] Updated dynamic config: {json.dumps(dynamicConfig, ensure_ascii=False)}')
 
-async def getDynamicConfig():
+def getDynamicConfig():
     return dynamicConfig
