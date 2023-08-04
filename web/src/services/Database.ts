@@ -30,6 +30,10 @@ export async function setDynamicConfig(config: DynamicConfig) {
     await httpExecute('config', 'POST', config);
 }
 
+export async function flushQueue() {
+    await httpExecute('flush', 'POST');
+}
+
 export async function init(loginToken: string) {
     token = loginToken;
     websocketClient = new WebSocket(`ws://${functionURL}/ws`);

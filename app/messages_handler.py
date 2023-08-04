@@ -2,8 +2,17 @@ from .live import liveEvent
 from .logger import timeLog
 from .filter import filterDanmu, filterGift, filterGuardBuy, filterLike, filterSubscribe, filterWelcome, filterSuperChat
 from .stats import setOutputMessagesLength, appendDanmuFilteredStats, appendGiftFilteredStats, appendWelcomeFilteredStats, appendLikeFilteredStats, appendGuardBuyFilteredStats, appendSubscribeFilteredStats, appendSuperChatFilteredStats
+import time
 
 messagesQueue = []
+
+def popMessagesQueue():
+    global messagesQueue
+    if len(messagesQueue) == 0:
+        return None
+    data = messagesQueue.pop(0)
+    setOutputMessagesLength(len(messagesQueue))
+    return data
 
 def messagesQueueAppend(data):
     global messagesQueue
@@ -16,6 +25,7 @@ async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedal
         appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, isEmoji=isEmoji, filterd=False)
         messagesQueueAppend({
             'type': 'danmu',
+            'time': time.time(),
             'uid': uid,
             'uname': uname,
             'msg': msg
@@ -29,6 +39,7 @@ async def onGift(uid, uname, price, giftName, num):
         appendGiftFilteredStats(uid=uid, uname=uname, giftName=giftName, num=num, filterd=False)
         messagesQueueAppend({
             'type': 'gift',
+            'time': time.time(),
             'uid': uid,
             'uname': uname,
             'giftName': giftName,
@@ -43,6 +54,7 @@ async def onGuardBuy(uid, uname, newGuard, giftName, num):
         appendGuardBuyFilteredStats(uid=uid, uname=uname, newGuard=newGuard, giftName=giftName, num=num, filterd=False)
         messagesQueueAppend({
             'type': 'guardBuy',
+            'time': time.time(),
             'uid': uid,
             'uname': uname,
             'newGuard': newGuard,
@@ -58,6 +70,7 @@ async def onLike(uid, uname):
         appendLikeFilteredStats(uid=uid, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'like',
+            'time': time.time(),
             'uid': uid,
             'uname': uname
         })
@@ -70,6 +83,7 @@ async def onSuperChat(uid, uname, price, msg):
         appendSuperChatFilteredStats(uid=uid, uname=uname, price=price, msg=msg, filterd=False)
         messagesQueueAppend({
             'type': 'superChat',
+            'time': time.time(),
             'uid': uid,
             'uname': uname
         })
@@ -82,6 +96,7 @@ async def onSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansM
         appendSubscribeFilteredStats(uid=uid, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'subscribe',
+            'time': time.time(),
             'uid': uid,
             'uname': uname
         })
@@ -94,6 +109,7 @@ async def onWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMed
         appendWelcomeFilteredStats(uid=uid, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'welcome',
+            'time': time.time(),
             'uid': uid,
             'uname': uname
         })

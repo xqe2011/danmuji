@@ -27,7 +27,7 @@
                     <GraphPanel style="height: 100%;" name="输出队列高度" :columes="['高度']" :data="messagesQueueLegnth"/>
                 </v-sheet>
                 <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;" name="平均延迟" :columes="['毫秒']" :data="delay"/>
+                    <GraphPanel style="height: 100%;" name="平均延迟" :columes="['秒']" :data="delay"/>
                 </v-sheet>
             </v-col>
         </v-row>

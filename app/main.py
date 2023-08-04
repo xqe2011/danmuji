@@ -4,6 +4,7 @@ from .logger import timeLog
 from .messages_handler import *
 from .http import startHttpServer, broadcastWSMessage
 from .stats import statsTask, statsEvent
+from .tts import ttsTask
 
 @statsEvent.on('stats')
 async def statsHandler(stats):
@@ -16,6 +17,7 @@ async def main():
 try:
     startHttpServer([
         statsTask,
+        ttsTask,
         main
     ])
 except KeyboardInterrupt:

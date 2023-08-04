@@ -18,7 +18,7 @@ def checkToken(func):
     wrappedFunc.__name__ = func.__name__
     return wrappedFunc
 
-@app.route('/flush')
+@app.route('/flush', methods=['POST'])
 @checkToken
 async def flush():
     await markAllMessagesInvalid()

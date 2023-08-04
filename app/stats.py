@@ -10,12 +10,13 @@ messagesQueue = []
 delaysQueue = []
 
 def resetDuration():
-    global lastDurationStats, registeredStatsCount, messagesQueue
+    global lastDurationStats, registeredStatsCount, messagesQueue, delaysQueue
     messagesQueue = []
+    delaysQueue = []
     lastDurationStats = {
         'cpuUsage': 0,
         'messagesQueueLength': lastDurationStats['messagesQueueLength'] if lastDurationStats else 0,
-        'delay': sum(delaysQueue) / len(delaysQueue) if len(delaysQueue) > 0 else 0
+        'delay': 0
     }
     for type in registeredStatsCount:
         lastDurationStats["raw" + type[0].upper() + type[1:]] = 0
@@ -60,6 +61,7 @@ async def statsTask():
     while True:
         await asyncio.sleep(5)
         lastDurationStats['cpuUsage'] = cpu_percent(interval=None)
+        lastDurationStats['delay'] = sum(delaysQueue) / len(delaysQueue) if len(delaysQueue) > 0 else 0
         statsEvent.emit('stats', {
             'events': messagesQueue,
             'stats': lastDurationStats

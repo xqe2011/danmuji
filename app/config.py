@@ -19,9 +19,9 @@ dynamicConfig = {
             "fansMedalLevelBigger": iniConfig.getint('dynamic', 'filter.danmu.fansMedalLevelBigger'),
             "fansMedalGuardLevelBigger": iniConfig.getint('dynamic', 'filter.danmu.fansMedalGuardLevelBigger'),
             "lengthShorter": iniConfig.getint('dynamic', 'filter.danmu.lengthShorter'),
-            "blacklistKeywords": iniConfig.get('dynamic', 'filter.danmu.blacklistKeywords').split(','),
-            "blacklistUsers": iniConfig.get('dynamic', 'filter.danmu.blacklistUsers').split(','),
-            "whitelistUsers": iniConfig.get('dynamic', 'filter.danmu.whitelistUsers').split(','),
+            "blacklistKeywords": iniConfig.get('dynamic', 'filter.danmu.blacklistKeywords').split(',') if iniConfig.get('dynamic', 'filter.danmu.blacklistKeywords') else [],
+            "blacklistUsers": iniConfig.get('dynamic', 'filter.danmu.blacklistUsers').split(',') if iniConfig.get('dynamic', 'filter.danmu.blacklistUsers') else [],
+            "whitelistUsers": iniConfig.get('dynamic', 'filter.danmu.whitelistUsers').split(',') if iniConfig.get('dynamic', 'filter.danmu.whitelistUsers') else [],
         },
         "gift": {
             "enable": iniConfig.getboolean('dynamic', 'filter.gift.enable'),

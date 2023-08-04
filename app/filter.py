@@ -4,6 +4,8 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
     dynamicConfig = getDynamicConfig()
     if not dynamicConfig["filter"]["danmu"]["enable"]:
         return False
+    if uid in dynamicConfig["filter"]["danmu"]["whitelistUsers"]:
+        return True
     if dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"]:
         return False
     if dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"] != 0 and fansMedalGuardLevel < dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"]:
@@ -14,8 +16,6 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
         return False
     if uid in dynamicConfig["filter"]["danmu"]["blacklistUsers"]:
         return False
-    if uid in dynamicConfig["filter"]["danmu"]["whitelistUsers"]:
-        return True
     for keyword in dynamicConfig["filter"]["danmu"]["blacklistKeywords"]:
         if keyword in msg:
             return False
