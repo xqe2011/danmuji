@@ -50,3 +50,7 @@ urllib3==2.0.3
 Werkzeug==2.3.6
 wsproto==1.2.0
 yarl==1.9.2
+pyttsx3
+emoji
+psutil
+quart_cors

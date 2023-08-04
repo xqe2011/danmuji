@@ -1,10 +1,26 @@
 import asyncio, time
 from .messages_handler import popMessagesQueue
 from .stats import appendDelay
+import pyttsx3
 
-async def tts(text):
-    # 模拟tts发音延迟
-    await asyncio.sleep(len(text) * 0.1)
+
+ttsEngine = pyttsx3.init()  # object creation
+ttsEngine.setProperty('volume', 1.0)    # setting up volume level  between 0 and 1
+voices = ttsEngine.getProperty('voices')       #getting details of current voice
+for voice in voices:
+    print(voice.id)
+    print(voice.name)
+    # print(voice.languages)
+ttsEngine.setProperty('voice', voices[0].id)   #changing index, changes voices. 1 for female
+ttsEngine.setProperty('rate', 1000)     # setting up new voice rate
+ttsEngine.say("tts 初始化成功")
+ttsEngine.runAndWait()
+
+
+def tts(text):
+    global ttsEngine
+    ttsEngine.say(text)
+    ttsEngine.runAndWait()
 
 def messagesToText(msg):
     if msg['type'] == 'danmu':
@@ -30,4 +46,7 @@ async def ttsTask():
             continue
         appendDelay(time.time() - msg['time'])
         text = messagesToText(msg)
-        await tts(text)
+        tts(text)
+
+if __name__ == '__main__':
+    pass
