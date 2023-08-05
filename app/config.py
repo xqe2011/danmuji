@@ -10,6 +10,9 @@ BILI_UID = iniConfig.getint('common', 'bili.uid')
 BILI_SESSDATA = iniConfig.get('common', 'bili.sessdata')
 BILI_JCT = iniConfig.get('common', 'bili.jct')
 HTTP_TOKEN = iniConfig.get('common', 'http.token')
+REMOTE_ENABLE = iniConfig.getboolean('common', 'remote.enable')
+REMOTE_SERVER = iniConfig.get('common', 'remote.server')
+REMOTE_PASSWORD = iniConfig.get('common', 'remote.password')
 
 dynamicConfig = {
     "filter": {

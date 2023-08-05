@@ -8,3 +8,5 @@ node_modules
 config.ini
 venv
 .idea
+dist
+static

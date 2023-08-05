@@ -7,9 +7,6 @@ const routes = [
         component: () => import('@/views/Home.vue'),
         meta: {
             name: "配置",
-            seo: {
-                description: "配置页面"
-            }
         }
     },
 ]

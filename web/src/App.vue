@@ -33,6 +33,6 @@ router.beforeResolve((to, from, next) => {
 });
 
 var url = new URL(document.URL);
-init(url.searchParams.get("token") as string).then(() => console.log('[Database] Connected'))
+init(url.searchParams.get("token") as string);
 
 </script>

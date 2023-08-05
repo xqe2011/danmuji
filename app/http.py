@@ -10,6 +10,9 @@ app = cors(app, allow_origin='*')
 tasks = []
 allWSClients = []
 
+async def fakeRequest(url, query, method, data):
+    return await (await app.test_client().open(path=url, query_string=query, method=method, json=data)).json
+
 def checkToken(func):
     async def wrappedFunc(*args, **kwargs):
         if request.args.get('token') != HTTP_TOKEN:
@@ -18,18 +21,18 @@ def checkToken(func):
     wrappedFunc.__name__ = func.__name__
     return wrappedFunc
 
-@app.route('/flush', methods=['POST'])
+@app.route('/api/flush', methods=['POST'])
 @checkToken
 async def flush():
     await markAllMessagesInvalid()
     return { 'status': 0, 'msg': 'ok' }
 
-@app.route('/config', methods=['GET'])
+@app.route('/api/config', methods=['GET'])
 @checkToken
 async def getConfig():
     return { 'status': 0, 'msg': getDynamicConfig() }
 
-@app.route('/config', methods=['POST'])
+@app.route('/api/config', methods=['POST'])
 @checkToken
 async def updateConfig():
     await updateDynamicConfig(await request.json)
