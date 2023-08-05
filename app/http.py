@@ -38,8 +38,11 @@ async def updateConfig():
     await updateDynamicConfig(await request.json)
     return { 'status': 0, 'msg': 'ok' }
 
-@app.websocket('/ws')
+@app.websocket('/ws/client')
 async def ws():
+    if 'token' not in websocket.args or websocket.args['token'] != HTTP_TOKEN:
+        await websocket.close(code=-1, reason='token error')
+        return
     try:
         allWSClients.append(websocket._get_current_object())
         while True:

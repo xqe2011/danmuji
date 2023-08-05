@@ -23,9 +23,6 @@ async def initRemote():
                 websocketClient = websocket
                 while True:
                     data = json.loads(await websocket.recv())
-                    if 'status' in data and data['status'] != 0:
-                        timeLog(f"[Remote] Error: {data['msg']}")
-                        break
                     if data['type'] == 'request':
                         await websocket.send(json.dumps({
                             "type": "response",
@@ -35,6 +32,9 @@ async def initRemote():
         except (websockets.exceptions.ConnectionClosedError, ConnectionRefusedError):
             websocketClient = None
             timeLog('[Remote] Error: ConnectionClosedError')
+        except websockets.exceptions.InvalidStatusCode:
+            websocketClient = None
+            timeLog(f'[Remote] Error: Server rejected')
         except asyncio.CancelledError:
             websocketClient = None
             break

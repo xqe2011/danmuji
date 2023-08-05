@@ -37,8 +37,7 @@ async def proxyRequest(path):
 async def wsClient():
     global danmuji
     if 'token' not in websocket.args or websocket.args['token'] not in danmuji:
-        await websocket.send_json({ 'status': -1, 'msg': 'token error' })
-        await websocket.close(0)
+        await websocket.close(code=-1, reason='token error')
         return
     token = websocket.args['token']
     timeLog(f'[Client] New connection from token: {token}, ip: {websocket.remote_addr}')
@@ -55,17 +54,17 @@ async def wsClient():
 async def wsServer():
     if 'password' not in websocket.args or 'token' not in websocket.args:
         timeLog(f'[Server] Password or token not found from ip: {websocket.remote_addr}')
-        await websocket.send_json({ 'status': -1003, 'msg': 'password or token not found!' })
-        await websocket.close(0)
+        await websocket.close(code=-1003, reason='password or token not found!')
+        return
     if websocket.args['password'] != HTTP_SERVER_PASSWORD:
         timeLog(f'[Server] Password incorrect from ip: {websocket.remote_addr}')
-        await websocket.send_json({ 'status': -1002, 'msg': 'server password is incorrect!' })
-        await websocket.close(0)
+        await websocket.close(code=-1002, reason='server password is incorrect!')
+        return
     global danmuji
     token = websocket.args['token']
     if token in danmuji:
-        await websocket.send_json({ 'status': -1001, 'msg': 'this token has been used!' })
-        await websocket.close(0)
+        await websocket.close(code=-1001, reason='this token has been used!')
+        return
     danmuji[token] = {
         'client': [],
         'server': websocket._get_current_object(),

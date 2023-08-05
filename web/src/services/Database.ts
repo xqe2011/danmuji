@@ -10,8 +10,12 @@ export const onWSMessages = new Subscriber<(data: WebsocketBroadcastMessage) => 
 export const onWSState = new Subscriber<(state: 'connecting' | 'connected') => void>(true);
 
 async function httpExecute(url: string, method: 'GET' | 'POST', data?: any) {
+    let protocol = 'http://';
+    if (window.location.protocol == 'https:') {
+        protocol = 'https://';
+    }
     const result = (await axios.request({
-        url: `http://${functionURL}/api/${url}?token=${token}`,
+        url: `${protocol}${functionURL}/api/${url}?token=${token}`,
         method: method,
         data: data
     })).data;
@@ -40,7 +44,11 @@ export async function init(loginToken: string) {
         alert('无法登陆到服务器，未携带有效token');
         return;
     }
-    websocketClient = new WebSocket(`ws://${functionURL}/ws/client?token=${token}`);
+    let protocol = 'ws://';
+    if (window.location.protocol == 'https:') {
+        protocol = 'wss://';
+    }
+    websocketClient = new WebSocket(`${protocol}${functionURL}/ws/client?token=${token}`);
     websocketClient.onmessage = (event) => {
         const data = JSON.parse(event.data);
         onWSMessages.emit(data);
