@@ -1,6 +1,6 @@
 <template>
     <v-card class="mx-auto" elevation="4">
-        <v-card-title tabindex="2">
+        <v-card-title>
             <div><p>弹幕日记</p></div>
             <v-btn :color="locked ? 'green': 'red'" @click="toggleLock">{{ locked ? '关闭自动滚动': '启动自动滚动' }}</v-btn>
         </v-card-title>

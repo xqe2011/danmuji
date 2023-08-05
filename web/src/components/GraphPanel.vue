@@ -1,6 +1,6 @@
 <template>
     <v-card class="mx-auto" elevation="4">
-        <v-card-title tabindex="2">{{ props.name }}</v-card-title>
+        <v-card-title>{{ props.name }}</v-card-title>
         <v-chart class="chart" :option="option" />
     </v-card>
 </template>
@@ -23,7 +23,6 @@ import { LineChart } from "echarts/charts";
 import { TitleComponent, TooltipComponent, LegendComponent, DataZoomComponent, GridComponent } from "echarts/components";
 import VChart from "vue-echarts";
 import { ref, watch } from "vue";
-import { Ref } from "vue";
 
 const props = defineProps({
     name: {

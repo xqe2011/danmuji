@@ -2,44 +2,44 @@
     <v-card class="mx-auto" elevation="4">
         <v-card-title tabindex="2">
             <div><p>综合配置</p></div>
-            <v-btn :loading="flushing" color="red" @click="onFlush">清空缓存</v-btn>
-            <v-btn :loading="reading" color="green" @click="onRead">读取</v-btn>
-            <v-btn :loading="saving" color="blue" @click="onSave">保存</v-btn>
+            <v-btn :loading="flushing" color="red" @click="onFlush" tabindex="2">清空缓存</v-btn>
+            <v-btn :loading="reading" color="green" @click="onRead" tabindex="2">读取</v-btn>
+            <v-btn :loading="saving" color="blue" @click="onSave" tabindex="2">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
-            <v-switch v-model="config.filter.danmu.enable" inset color="blue" label="启用弹幕朗读"></v-switch>
-            <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用弹幕表情朗读"></v-switch>
-            <v-text-field v-model="config.filter.danmu.fansMedalGuardLevelBigger" label="大航海大于等于"></v-text-field>
-            <v-text-field v-model="config.filter.danmu.fansMedalLevelBigger" label="粉丝牌等级大于等于"></v-text-field>
-            <v-text-field v-model="config.filter.danmu.lengthShorter" label="文本长度小于等于"></v-text-field>
-            <v-combobox v-model="config.filter.danmu.blacklistKeywords" label="黑名单关键词" chips multiple></v-combobox>
-            <v-combobox v-model="config.filter.danmu.blacklistUsers" label="黑名单用户UID" chips multiple></v-combobox>
-            <v-combobox v-model="config.filter.danmu.whitelistUsers" label="白名单用户UID" chips multiple></v-combobox>
+            <v-switch v-model="config.filter.danmu.enable" inset color="blue" label="启用弹幕朗读" tabindex="2" aria-label="启用弹幕朗读"></v-switch>
+            <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用弹幕表情朗读" tabindex="2" aria-label="启用弹幕表情朗读"></v-switch>
+            <v-select v-model="config.filter.danmu.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" tabindex="2" aria-label="弹幕大航海大于等于"></v-select>
+            <v-text-field v-model="config.filter.danmu.fansMedalLevelBigger" label="粉丝牌等级大于等于" tabindex="2" aria-label="弹幕粉丝牌等级大于等于"></v-text-field>
+            <v-text-field v-model="config.filter.danmu.lengthShorter" label="文本长度小于等于" tabindex="2" aria-label="弹幕文本长度小于等于"></v-text-field>
+            <v-combobox v-model="config.filter.danmu.blacklistKeywords" label="黑名单关键词" chips multiple tabindex="2" aria-label="弹幕黑名单关键词"></v-combobox>
+            <v-combobox v-model="config.filter.danmu.blacklistUsers" label="黑名单用户UID" chips multiple tabindex="2" aria-label="弹幕黑名单用户UID"></v-combobox>
+            <v-combobox v-model="config.filter.danmu.whitelistUsers" label="白名单用户UID" chips multiple tabindex="2" aria-label="弹幕白名单用户UID"></v-combobox>
             <v-divider></v-divider>
 
-            <v-switch v-model="config.filter.gift.enable" inset color="blue" label="启用礼物朗读"></v-switch>
-            <v-switch v-model="config.filter.gift.freeGiftEnable" inset color="blue" label="启用免费礼物朗读"></v-switch>
-            <v-text-field v-model="config.filter.gift.freeGiftCountBigger" label="免费礼物数量大于等于"></v-text-field>
-            <v-text-field v-model="config.filter.gift.moneyGiftPriceBigger" label="付费礼物金额大于等于"></v-text-field>
+            <v-switch v-model="config.filter.gift.enable" inset color="blue" label="启用礼物朗读" tabindex="2" aria-label="启用礼物朗读"></v-switch>
+            <v-switch v-model="config.filter.gift.freeGiftEnable" inset color="blue" label="启用免费礼物朗读" tabindex="2" aria-label="启用免费礼物朗读"></v-switch>
+            <v-text-field v-model="config.filter.gift.freeGiftCountBigger" label="免费礼物数量大于等于" tabindex="2" aria-label="免费礼物数量大于等于"></v-text-field>
+            <v-text-field v-model="config.filter.gift.moneyGiftPriceBigger" label="付费礼物金额大于等于" tabindex="2" aria-label="付费礼物金额大于等于"></v-text-field>
             <v-divider></v-divider>
 
-            <v-switch v-model="config.filter.guardBuy.enable" inset color="blue" label="启用舰长朗读"></v-switch>
+            <v-switch v-model="config.filter.guardBuy.enable" inset color="blue" label="启用舰长朗读" tabindex="2" aria-label="启用舰长朗读"></v-switch>
             <v-divider></v-divider>
 
-            <v-switch v-model="config.filter.like.enable" inset color="blue" label="启用点赞朗读"></v-switch>
-            <v-switch v-model="config.filter.like.deduplicate" inset color="blue" label="去除重复点赞"></v-switch>
+            <v-switch v-model="config.filter.like.enable" inset color="blue" label="启用点赞朗读" tabindex="2" aria-label="启用点赞朗读"></v-switch>
+            <v-switch v-model="config.filter.like.deduplicate" inset color="blue" label="去除重复点赞" tabindex="2" aria-label="去除重复点赞"></v-switch>
             <v-divider></v-divider>
 
-            <v-switch v-model="config.filter.welcome.enable" inset color="blue" label="启用进入直播间朗读"></v-switch>
-            <v-text-field v-model="config.filter.welcome.fansMedalGuardLevelBigger" label="大航海大于等于"></v-text-field>
-            <v-text-field v-model="config.filter.welcome.fansMedalLevelBigger" label="粉丝牌等级大于等于"></v-text-field>
+            <v-switch v-model="config.filter.welcome.enable" inset color="blue" label="启用进入直播间朗读" tabindex="2" aria-label="启用进入直播间朗读"></v-switch>
+            <v-select v-model="config.filter.welcome.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" tabindex="2" aria-label="直播间朗读大航海大于等于"></v-select>
+            <v-text-field v-model="config.filter.welcome.fansMedalLevelBigger" label="粉丝牌等级大于等于" tabindex="2" aria-label="直播间朗读粉丝牌等级大于等于"></v-text-field>
             <v-divider></v-divider>
 
-            <v-switch v-model="config.filter.subscribe.enable" inset color="blue" label="启用关注朗读"></v-switch>
+            <v-switch v-model="config.filter.subscribe.enable" inset color="blue" label="启用关注朗读" tabindex="2" aria-label="启用关注朗读"></v-switch>
             <v-divider></v-divider>
 
-            <v-switch v-model="config.filter.superChat.enable" inset color="blue" label="启用醒目留言朗读"></v-switch>
+            <v-switch v-model="config.filter.superChat.enable" inset color="blue" label="启用醒目留言朗读" tabindex="2" aria-label="启用醒目留言朗读"></v-switch>
         </v-form>
     </v-card>
 </template>

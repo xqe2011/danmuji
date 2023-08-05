@@ -4,6 +4,7 @@ from .config import updateDynamicConfig, getDynamicConfig, HTTP_TOKEN
 import asyncio, json, os
 from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
+import webbrowser
 
 staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), './static')
 app = Quart(__name__, static_folder=staticFilesPath, static_url_path='/')
@@ -59,6 +60,7 @@ async def ws():
 
 @app.before_serving
 async def startup():
+    webbrowser.open('http://127.0.0.1:8080/?token=' + HTTP_TOKEN, new=1, autoraise=True)
     for task in tasks:
         app.add_background_task(task)
 
