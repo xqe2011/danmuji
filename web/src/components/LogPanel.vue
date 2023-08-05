@@ -26,10 +26,11 @@
                                 <td v-if="item.type == 'guardBuy'">上舰</td>
                                 <td v-if="item.type == 'guardBuy'">赠送了{{ item.num }}个月{{ item.giftName }}</td>
 
-                                <td v-if="item.type == 'like' || item.type == 'subscribe' || item.type == 'welcome'">其他</td>
+                                <td v-if="item.type == 'like' || item.type == 'subscribe' || item.type == 'welcome' || item.type == 'superChat'">其他</td>
                                 <td v-if="item.type == 'like'">点赞</td>
                                 <td v-if="item.type == 'subscribe'">关注</td>
                                 <td v-if="item.type == 'welcome'">欢迎</td>
+                                <td v-if="item.type == 'superChat'">发送了{{ item.price }}元的SC: {{ item.msg }}</td>
                             </tr>
                         </template>
                     </tbody>

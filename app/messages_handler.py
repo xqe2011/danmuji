@@ -85,7 +85,9 @@ async def onSuperChat(uid, uname, price, msg):
             'type': 'superChat',
             'time': time.time(),
             'uid': uid,
-            'uname': uname
+            'uname': uname,
+            'price': price,
+            'msg': msg
         })
     else:
         appendSuperChatFilteredStats(uid=uid, uname=uname, price=price, msg=msg, filterd=True)

@@ -1,32 +1,37 @@
-import asyncio, time
+import asyncio, time, re
 from .messages_handler import popMessagesQueue
 from .stats import appendDelay
-import pyttsx3
+from .config import TTS_VOLUME, TTS_VOICE, TTS_RATE, TTS_ENABLE_JAPANESE
+from .logger import timeLog
 import concurrent.futures
-import functools
+import win32com.client as wincl
 
 ttsEngine = None
 
-def tts_init():
+def init():
     global ttsEngine
-    ttsEngine = pyttsx3.init()  # object creation
-    ttsEngine.setProperty('volume', 1.0)    # setting up volume level  between 0 and 1
-    voices = ttsEngine.getProperty('voices')       #getting details of current voice
-    for voice in voices:
-        print(voice.id)
-        print(voice.name)
-    ttsEngine.setProperty('voice', voices[0].id)   #changing index, changes voices. 1 for female
-    ttsEngine.setProperty('rate', 1000)     # setting up new voice rate
-    ttsEngine.say("tts 初始化成功")
-    ttsEngine.runAndWait()
+    ttsEngine = wincl.Dispatch("SAPI.SpVoice")
+    vcs = ttsEngine.GetVoices()
+    targetVoice = None
+    for i in range(0, vcs.Count):
+        item = vcs.Item(i)
+        name = item.GetAttribute("Name")
+        timeLog(f'[TTS] Found tts voices: {name}')
+        if TTS_VOICE in name:
+            targetVoice = item
+    timeLog(f'[TTS] Use voice: {targetVoice.GetAttribute("Name")} as target voice')
+    ttsEngine.Voice = targetVoice
+    ttsEngine.Rate = int((TTS_RATE - 50) / 5)
+    ttsEngine.Volume = TTS_VOLUME
+    tts("TTS模块初始化成功")
 
 
 def tts(text):
     global ttsEngine
-    if ttsEngine == None:
-        tts_init()
-    ttsEngine.say(text)
-    ttsEngine.runAndWait()
+    # 支持日语
+    if TTS_ENABLE_JAPANESE:
+        text = re.sub(r'[\u3040-\u309F\u30A0-\u30FF]+', r'<lang langid="411">\g<0></lang>', text)
+    ttsEngine.Speak('<lang langid="804">' + text + '</lang>')
 
 def messagesToText(msg):
     if msg['type'] == 'danmu':
@@ -45,10 +50,9 @@ def messagesToText(msg):
         return f"欢迎{msg['uname']}进入直播间"
 
 async def ttsTask():
+    init()
     loop = asyncio.get_running_loop()
     with concurrent.futures.ThreadPoolExecutor() as pool:
-        await loop.run_in_executor(pool, tts_init)
-
         while True:
             msg = popMessagesQueue()
             if msg == None:
@@ -56,7 +60,4 @@ async def ttsTask():
                 continue
             appendDelay(time.time() - msg['time'])
             text = messagesToText(msg)
-            await loop.run_in_executor(pool, functools.partial(tts, text))
-
-if __name__ == '__main__':
-    pass
+            await loop.run_in_executor(pool, tts, text)

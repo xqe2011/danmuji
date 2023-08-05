@@ -58,12 +58,12 @@ onWSMessages.subscribe((data) => {
     rawGraphData.value[0].push(data.stats.rawDanmu);
     rawGraphData.value[1].push(data.stats.rawGift);
     rawGraphData.value[2].push(data.stats.rawWelcome);
-    rawGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe);
+    rawGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe + data.stats.rawSuperChat);
 
     filteredGraphData.value[0].push(data.stats.rawDanmu - data.stats.filteredDanmu);
     filteredGraphData.value[1].push(data.stats.rawGift - data.stats.filteredGift);
     filteredGraphData.value[2].push(data.stats.rawWelcome - data.stats.filteredWelcome);
-    filteredGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe - (data.stats.filteredGuardBuy + data.stats.filteredLike + data.stats.filteredSubscribe));
+    filteredGraphData.value[3].push(data.stats.rawGuardBuy + data.stats.rawLike + data.stats.rawSubscribe + data.stats.rawSuperChat - (data.stats.filteredGuardBuy + data.stats.filteredLike + data.stats.filteredSubscribe + data.stats.filteredSuperChat));
 
     messagesQueueLegnth.value[0].push(data.stats.messagesQueueLength);
 

@@ -13,6 +13,10 @@ HTTP_TOKEN = iniConfig.get('common', 'http.token')
 REMOTE_ENABLE = iniConfig.getboolean('common', 'remote.enable')
 REMOTE_SERVER = iniConfig.get('common', 'remote.server')
 REMOTE_PASSWORD = iniConfig.get('common', 'remote.password')
+TTS_VOLUME = iniConfig.getint('common', 'tts.volume')
+TTS_VOICE = iniConfig.get('common', 'tts.voice')
+TTS_RATE = iniConfig.getint('common', 'tts.rate')
+TTS_ENABLE_JAPANESE = iniConfig.getboolean('common', 'tts.enableJapanese')
 
 dynamicConfig = {
     "filter": {

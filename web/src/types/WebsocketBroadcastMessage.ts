@@ -46,8 +46,17 @@ export type WelcomeEvent = {
     'uname': string
 };
 
+export type SuperChatEvent = {
+    "type": "superChat",
+    "filterd": boolean,
+    "uid": number,
+    "uname": string,
+    "price": number,
+    "msg": string
+};
+
 export type WebsocketBroadcastMessage = {
-    "events": (DanmuEvent | GiftEvent | GuardBuyEvent | LikeEvent | SubscribeEvent | WelcomeEvent)[],
+    "events": (DanmuEvent | GiftEvent | GuardBuyEvent | LikeEvent | SubscribeEvent | WelcomeEvent | SuperChatEvent)[],
     "stats": {
         'filteredDanmu': number,
         'rawDanmu': number,
@@ -61,6 +70,8 @@ export type WebsocketBroadcastMessage = {
         'rawGuardBuy': number,
         'filteredSubscribe': number,
         'rawSubscribe': number,
+        'filteredSuperChat': number,
+        'rawSuperChat': number,
         'cpuUsage': number,
         'messagesQueueLength': number,
         'delay': number

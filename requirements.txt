@@ -1,7 +1,6 @@
 quart==0.18.4
 quart-cors==0.6.0
 python-dotenv==1.0.0
-pyttsx3==2.90
 bilibili-api-python==15.5.1b0
 websockets==11.0.3
 emoji==2.7.0
