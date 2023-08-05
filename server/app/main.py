@@ -7,6 +7,10 @@ staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), './st
 app = Quart(__name__, static_folder=staticFilesPath, static_url_path='/')
 danmuji = {}
 
+@app.route('/robots.txt', methods=['GET'])
+async def noRobots():
+    return 'User-agent: *\nDisallow: /', 200, { 'Content-Type': 'text/plain' }
+
 @app.route('/', methods=['GET'])
 async def index():
     global staticFilesPath
@@ -88,7 +92,7 @@ async def wsServer():
         raise
 
 def main():
-    app.run(host='0.0.0.0', port=7070)
+    app.run(host='0.0.0.0', port=80)
 
 if __name__ == '__main__':
     main()

@@ -10,3 +10,4 @@ venv
 .idea
 dist
 static
+.DS_Store

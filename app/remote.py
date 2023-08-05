@@ -17,7 +17,7 @@ async def initRemote():
         return
     while True:
         try:
-            async with websockets.connect(f"ws://{REMOTE_SERVER}/ws/server?password={REMOTE_PASSWORD}&token={HTTP_TOKEN}") as websocket:
+            async with websockets.connect(f"{REMOTE_SERVER}/ws/server?password={REMOTE_PASSWORD}&token={HTTP_TOKEN}") as websocket:
                 timeLog('[Remote] Connected')
                 global websocketClient
                 websocketClient = websocket

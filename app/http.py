@@ -1,11 +1,12 @@
-from quart import Quart, request, websocket
+from quart import Quart, request, websocket, send_from_directory
 from quart_cors import cors
 from .config import updateDynamicConfig, getDynamicConfig, HTTP_TOKEN
-import asyncio, json
+import asyncio, json, os
 from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
 
-app = Quart(__name__, static_folder='static', static_url_path='/')
+staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), './static')
+app = Quart(__name__, static_folder=staticFilesPath, static_url_path='/')
 app = cors(app, allow_origin='*')
 tasks = []
 allWSClients = []
@@ -20,6 +21,11 @@ def checkToken(func):
         return await func(*args, **kwargs)
     wrappedFunc.__name__ = func.__name__
     return wrappedFunc
+
+@app.route('/', methods=['GET'])
+async def index():
+    global staticFilesPath
+    return await send_from_directory(staticFilesPath, 'index.html')
 
 @app.route('/api/flush', methods=['POST'])
 @checkToken
