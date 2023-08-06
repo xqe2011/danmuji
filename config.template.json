@@ -21,10 +21,11 @@
     "dynamic": {
         "tts": {
             "volume": 100,
-            "voice": "Huihui",
+            "voice": "Microsoft Huihui",
             "rate": 100,
             "japanese": {
                 "enable": true,
+                "voice": "Microsoft Haruka",
                 "rate": 100,
                 "volume": 100
             }

@@ -42,10 +42,11 @@
             <v-switch v-model="config.filter.superChat.enable" inset color="blue" label="启用醒目留言朗读" tabindex="2" aria-label="启用醒目留言朗读"></v-switch>
             <v-divider></v-divider>
 
-            <v-select v-model="config.tts.voice" :items="ttsVoices" label="TTS发音引擎" tabindex="2" aria-label="TTS发音引擎"></v-select>
+            <v-select v-model="config.tts.voice" :items="ttsCNVoices" label="中英文TTS发音引擎" tabindex="2" aria-label="中英文TTS发音引擎"></v-select>
             <v-slider v-model="config.tts.rate" label="语速" tabindex="2" aria-label="TTS语速" min="0" max="100"></v-slider>
             <v-slider v-model="config.tts.volume" label="音量" tabindex="2" aria-label="TTS音量" min="0" max="100"></v-slider>
             <v-switch v-model="config.tts.japanese.enable" inset color="blue" label="启用日语朗读" tabindex="2" aria-label="启用日语朗读"></v-switch>
+            <v-select v-model="config.tts.japanese.voice" :items="ttsJPVoices" label="日语TTS发音引擎" tabindex="2" aria-label="日语TTS发音引擎"></v-select>
             <v-slider v-model="config.tts.japanese.rate" label="日语语速" tabindex="2" aria-label="TTS日语语速" min="0" max="100"></v-slider>
             <v-slider v-model="config.tts.japanese.volume" label="日语音量" tabindex="2" aria-label="TTS日语音量" min="0" max="100"></v-slider>
         </v-form>
@@ -78,7 +79,8 @@ import { ref } from 'vue';
 import { DynamicConfig } from "../types/DynamicConfig";
 import { getDynamicConfig, setDynamicConfig, onWSState, flushQueue, getAllVoices } from '@/services/Database';
 
-const ttsVoices = ref([] as { title: string, value: string }[]);
+const ttsCNVoices = ref([] as { title: string, value: string }[]);
+const ttsJPVoices = ref([] as { title: string, value: string }[]);
 const config = ref(undefined as unknown as DynamicConfig);
 config.value = {
     tts: {
@@ -87,6 +89,7 @@ config.value = {
         rate: 100,
         japanese: {
             enable: true,
+            voice: "",
             rate: 100,
             volume: 100
         }
@@ -136,12 +139,20 @@ function onRead() {
     reading.value = true;
     (async () => {
         config.value = await getDynamicConfig();
-        ttsVoices.value = [];
+        ttsCNVoices.value = [];
+        ttsJPVoices.value = [];
         (await getAllVoices()).forEach(voice => {
-            ttsVoices.value.push({
-                title: voice.name + ' (' + voice.language + ')',
-                value: voice.name
-            });
+            if (voice.language === 'zh-CN') {
+                ttsCNVoices.value.push({
+                    title: voice.name,
+                    value: voice.name
+                });
+            } else if(voice.language === 'ja-JP') {
+                ttsJPVoices.value.push({
+                    title: voice.name,
+                    value: voice.name
+                });
+            }
         });
     })().then(msg => {
         reading.value = false;
