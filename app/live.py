@@ -1,11 +1,16 @@
-from bilibili_api import live, Credential
+from bilibili_api import live, Credential, user
 from pyee import AsyncIOEventEmitter
-from .config import BILI_LIVE_ID, BILI_SESSDATA, BILI_JCT, BILI_UID
+from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
+from selenium import webdriver
+import os, asyncio
+import concurrent.futures
 
 liveEvent = AsyncIOEventEmitter()
-room = live.LiveDanmaku(BILI_LIVE_ID, credential=Credential(BILI_SESSDATA, BILI_JCT))
+userCredential=Credential(getJsonConfig()['bili']['sessdata'], getJsonConfig()['bili']['jct'])
+userID = None
+room = live.LiveDanmaku(getJsonConfig()['bili']['liveID'], credential=userCredential)
 
 # 0为普通用户，1为总督，2位提督，3为舰长
 guardLevelMap = {
@@ -21,7 +26,7 @@ async def onDanmuCallback(event):
     msg = event['data']['info'][1]
     uname = event["data"]["info"][2][1]
     if len(event["data"]["info"][3]) != 0:
-        isFansMedalBelongToLive = event["data"]["info"][3][3] == BILI_LIVE_ID
+        isFansMedalBelongToLive = event["data"]["info"][3][3] == getJsonConfig()['bili']['liveID']
         fansMedalLevel = event["data"]["info"][3][0]
         fansMedalGuardLevel = guardLevelMap[event["data"]["info"][3][10]]
     else:
@@ -29,7 +34,8 @@ async def onDanmuCallback(event):
         fansMedalLevel = 0
         fansMedalGuardLevel = 0
     isEmoji = event['data']['info'][0][12] == 1 or isAllCharactersEmoji(msg)
-    if uid == BILI_UID:
+    global userID
+    if uid == userID:
         return
     timeLog(f"[Danmu] {uname}: {msg}")
     liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji)
@@ -68,11 +74,11 @@ async def onGiftCallback(event):
 
 @room.on('INTERACT_WORD')
 async def onInteractWordCallback(event):
-    if event["data"]["data"]["roomid"] != BILI_LIVE_ID:
+    if event["data"]["data"]["roomid"] != getJsonConfig()['bili']['liveID']:
         return
     uid = event["data"]["data"]["uid"]
     uname = event["data"]["data"]["uname"]
-    isFansMedalBelongToLive = event["data"]["data"]["fans_medal"]["anchor_roomid"] == BILI_LIVE_ID
+    isFansMedalBelongToLive = event["data"]["data"]["fans_medal"]["anchor_roomid"] == getJsonConfig()['bili']['liveID']
     fansMedalLevel = event["data"]["data"]["fans_medal"]["medal_level"]
     fansMedalGuardLevel = guardLevelMap[event["data"]["data"]["fans_medal"]["guard_level"]]
     isSubscribe = event["data"]["data"]["msg_type"] == 2
@@ -94,3 +100,44 @@ async def connectLive():
 
 async def disconnectLive():
     await room.disconnect()
+
+async def getSelfInfo():
+    # 检查B站凭证是否有效
+    try:
+        return await user.get_self_info(userCredential)
+    except:
+        return None
+
+def openBroswer():
+    global userCredential
+    if os.name == "nt":
+        timeLog(f'[Live] B站凭证无效，使用Edge重新登录B站...')
+        driver = webdriver.Edge()
+    else:
+        timeLog(f'[Live] B站凭证无效，使用Chrome重新登录B站...')
+        driver = webdriver.Chrome()
+    driver.get("https://passport.bilibili.com/pc/passport/login?gourl=https%3A%2F%2Fspace.bilibili.com")
+    while not driver.current_url.startswith("https://space.bilibili.com"):
+        pass
+    sessdata = driver.get_cookie("SESSDATA")["value"]
+    jct = driver.get_cookie("bili_jct")["value"]
+    driver.quit()
+    userCredential = Credential(sessdata, jct)
+
+async def initalizeLive():
+    global userCredential, userID
+    # 检查B站凭证是否有效
+    data = await getSelfInfo()
+    if data == None:
+        loop = asyncio.get_running_loop()
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            await loop.run_in_executor(pool, openBroswer)
+        data = await getSelfInfo()
+        # 写入配置
+        nowJsonConfig = getJsonConfig()
+        nowJsonConfig['bili']['sessdata'] = userCredential.sessdata
+        nowJsonConfig['bili']['jct'] = userCredential.bili_jct
+        await updateJsonConfig(nowJsonConfig)
+
+    userID = data['mid']
+    await connectLive()

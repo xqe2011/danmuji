@@ -1,0 +1,63 @@
+{
+    "bili": {
+        "liveID": 21654925,
+        "sessdata": "",
+        "jct": ""
+    },
+    "http": {
+        "token": "nuozimeownuozimeownuozimeow"
+    },
+    "tts": {
+        "volume": 100,
+        "voice": "Huihui",
+        "rate": 100,
+        "japanese": {
+            "enable": true,
+            "rate": 100,
+            "volume": 100
+        }
+    },
+    "remote": {
+        "enable": false,
+        "server": "wss://nuozi.club",
+        "password": "nuozimeow"
+    },
+    "dynamic": {
+        "filter": {
+            "danmu": {
+                "enable": true,
+                "emojiEnable": true,
+                "fansMedalGuardLevelBigger": 0,
+                "fansMedalLevelBigger": 0,
+                "lengthShorter": 0,
+                "blacklistKeywords": [],
+                "blacklistUsers": [],
+                "whitelistUsers": []
+            },
+            "gift": {
+                "enable": true,
+                "freeGiftEnable": true,
+                "freeGiftCountBigger": 0,
+                "moneyGiftPriceBigger": 0
+            },
+            "guardBuy": {
+                "enable": true
+            },
+            "like": {
+                "enable": true,
+                "deduplicate": true
+            },
+            "welcome": {
+                "enable": true,
+                "fansMedalGuardLevelBigger": 0,
+                "fansMedalLevelBigger": 0
+            },
+            "subscribe": {
+                "enable": true
+            },
+            "superChat": {
+                "enable": true
+            }
+        }
+    }
+}

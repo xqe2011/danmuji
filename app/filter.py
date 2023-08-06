@@ -1,7 +1,7 @@
-from .config import getDynamicConfig
+from .config import getJsonConfig
 
 def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
-    dynamicConfig = getDynamicConfig()
+    dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["danmu"]["enable"]:
         return False
     if uid in dynamicConfig["filter"]["danmu"]["whitelistUsers"]:
@@ -22,7 +22,7 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
     return True
 
 def filterGift(uid, uname, price, giftName, num):
-    dynamicConfig = getDynamicConfig()
+    dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["gift"]["enable"]:
         return False
     if price == 0:
@@ -37,7 +37,7 @@ def filterGift(uid, uname, price, giftName, num):
         return True
 
 def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
-    dynamicConfig = getDynamicConfig()
+    dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["welcome"]["enable"]:
         return False
     if dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"]:
@@ -47,14 +47,14 @@ def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedal
     return True
 
 def filterGuardBuy(uid, uname, newGuard, giftName, num):
-    dynamicConfig = getDynamicConfig()
+    dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["guardBuy"]["enable"]:
         return False
     return True
 
 likedUids = {}
 def filterLike(uid, uname):
-    dynamicConfig = getDynamicConfig()
+    dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["like"]["enable"]:
         return False
     if dynamicConfig["filter"]["like"]["deduplicate"]:
@@ -64,13 +64,13 @@ def filterLike(uid, uname):
     return True
 
 def filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
-    dynamicConfig = getDynamicConfig()
+    dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["subscribe"]["enable"]:
         return False
     return True
 
 def filterSuperChat(uid, uname, price, msg):
-    dynamicConfig = getDynamicConfig()
+    dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["superChat"]["enable"]:
         return False
     return True

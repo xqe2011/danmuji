@@ -1,15 +1,18 @@
 import asyncio, time, re
 from .messages_handler import popMessagesQueue
 from .stats import appendDelay
-from .config import TTS_VOLUME, TTS_VOICE, TTS_RATE, TTS_ENABLE_JAPANESE
+from .config import getJsonConfig
 from .logger import timeLog
 import concurrent.futures
 import win32com.client as wincl
 
 ttsEngine = None
+lastRate = None
+lastVolume = None
 
 def init():
     global ttsEngine
+    dynamicConfig = getJsonConfig()['tts']
     ttsEngine = wincl.Dispatch("SAPI.SpVoice")
     vcs = ttsEngine.GetVoices()
     targetVoice = None
@@ -17,19 +20,24 @@ def init():
         item = vcs.Item(i)
         name = item.GetAttribute("Name")
         timeLog(f'[TTS] Found tts voices: {name}')
-        if TTS_VOICE in name:
+        if dynamicConfig['voice'] in name:
             targetVoice = item
     timeLog(f'[TTS] Use voice: {targetVoice.GetAttribute("Name")} as target voice')
     ttsEngine.Voice = targetVoice
-    ttsEngine.Rate = int((TTS_RATE - 50) / 5)
-    ttsEngine.Volume = TTS_VOLUME
     tts("TTS模块初始化成功")
 
 
 def tts(text):
-    global ttsEngine
+    global ttsEngine, lastRate, lastVolume
+    ttsConfig = getJsonConfig()['tts']
+    if lastVolume != ttsConfig['volume']:
+        ttsEngine.Volume = ttsConfig['volume']
+        lastVolume = ttsConfig['volume']
+    if lastRate != ttsConfig['rate']:
+        ttsEngine.Rate = ttsConfig['rate']
+        lastRate = ttsConfig['rate']
     # 支持日语
-    if TTS_ENABLE_JAPANESE:
+    if ttsConfig['japanese']['enable']:
         text = re.sub(r'[\u3040-\u309F\u30A0-\u30FF]+', r'<lang langid="411">\g<0></lang>', text)
     ttsEngine.Speak('<lang langid="804">' + text + '</lang>')
 

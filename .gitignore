@@ -11,3 +11,4 @@ venv
 dist
 static
 .DS_Store
+config.json

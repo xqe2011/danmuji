@@ -1,5 +1,5 @@
 import websockets, json, asyncio
-from .config import REMOTE_SERVER, REMOTE_ENABLE, REMOTE_PASSWORD, HTTP_TOKEN
+from .config import getJsonConfig
 from .http import fakeRequest
 from .logger import timeLog
 
@@ -13,11 +13,12 @@ async def remoteWSBroadcast(msg):
         }, ensure_ascii=False))
 
 async def initRemote():
-    if REMOTE_ENABLE != 1:
+    config = getJsonConfig()['remote']
+    if config['enable'] != 1:
         return
     while True:
         try:
-            async with websockets.connect(f"{REMOTE_SERVER}/ws/server?password={REMOTE_PASSWORD}&token={HTTP_TOKEN}") as websocket:
+            async with websockets.connect(f"{config['server']}/ws/server?password={config['password']}&token={config['token']}") as websocket:
                 timeLog('[Remote] Connected')
                 global websocketClient
                 websocketClient = websocket

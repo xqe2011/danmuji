@@ -1,5 +1,5 @@
 import asyncio, os
-from .live import connectLive
+from .live import initalizeLive
 from .logger import timeLog
 from .messages_handler import *
 from .http import startHttpServer, broadcastWSMessage
@@ -14,18 +14,16 @@ async def statsHandler(stats):
     await broadcastWSMessage(stats)
     await remoteWSBroadcast(stats)
 
-async def main():
+def main():
     timeLog('[Main] Started')
-    await connectLive()
-
-try:
-    tasks = [statsTask, initRemote, main]
-    if os.name == 'nt':
-        tasks.append(ttsTask)
-    startHttpServer(tasks)
-except KeyboardInterrupt:
-    pass
-except asyncio.CancelledError:
-    pass
-except SystemExit:
-    pass
+    try:
+        tasks = [statsTask, initRemote, initalizeLive]
+        if os.name == 'nt':
+            tasks.append(ttsTask)
+        startHttpServer(tasks)
+    except KeyboardInterrupt:
+        pass
+    except asyncio.CancelledError:
+        pass
+    except SystemExit:
+        pass
