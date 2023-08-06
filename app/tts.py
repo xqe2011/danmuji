@@ -4,8 +4,8 @@ from .messages_handler import popMessagesQueue
 from .stats import appendDelay
 from .config import getJsonConfig
 from .logger import timeLog
-import winrt.windows.media.speechsynthesis as speechsynthesis
-import winrt.windows.media.playback as playback
+import winsdk.windows.media.speechsynthesis as speechsynthesis
+import winsdk.windows.media.playback as playback
 
 lastRate = None
 lastVolume = None
@@ -30,7 +30,7 @@ async def init():
     synthesizer = speechsynthesis.SpeechSynthesizer()
     media_player = playback.MediaPlayer()
 
-    voices = synthesizer.get_all_voices()
+    voices = speechsynthesis.SpeechSynthesizer.all_voices
     dynamicConfig = getJsonConfig()['tts']
     targetVoice = None
     for index, voice in enumerate(voices):
