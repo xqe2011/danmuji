@@ -1,7 +1,7 @@
 <template>
     <v-card class="mx-auto" elevation="4">
         <v-card-title tabindex="2">
-            <div><p>综合配置</p></div>
+            <div><p>实时配置</p></div>
             <v-btn :loading="flushing" color="red" @click="onFlush" tabindex="2">清空缓存</v-btn>
             <v-btn :loading="reading" color="green" @click="onRead" tabindex="2">读取</v-btn>
             <v-btn :loading="saving" color="blue" @click="onSave" tabindex="2">保存</v-btn>

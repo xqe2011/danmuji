@@ -15,7 +15,7 @@ media_player = None
 
 def syncWithConfig():
     global ttsEngine, lastRate, lastVolume
-    ttsConfig = getJsonConfig()['tts']
+    ttsConfig = getJsonConfig()['dynamic']['tts']
     if lastVolume != ttsConfig['volume']:
         lastVolume = ttsConfig['volume']
         synthesizer.options.audio_volume = lastVolume / 100.0
@@ -31,7 +31,7 @@ async def init():
     media_player = playback.MediaPlayer()
 
     voices = speechsynthesis.SpeechSynthesizer.all_voices
-    dynamicConfig = getJsonConfig()['tts']
+    dynamicConfig = getJsonConfig()['dynamic']['tts']
     targetVoice = None
     for index, voice in enumerate(voices):
         if dynamicConfig['voice'] in voice.display_name:
@@ -52,7 +52,7 @@ async def init():
 async def tts(text):
     syncWithConfig()
     global synthesizer, media_player
-    ttsConfig = getJsonConfig()['tts']
+    ttsConfig = getJsonConfig()['dynamic']['tts']
 
     # 支持日语
     if ttsConfig['japanese']['enable']:

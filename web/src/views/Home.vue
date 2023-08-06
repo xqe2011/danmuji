@@ -2,8 +2,11 @@
     <v-container fluid class="pa-0">
         <v-row no-gutters>
             <v-col cols="12" md="3">
-                <v-sheet class="pa-2 bg-transparent" style="height: 90vh;">
+                <v-sheet class="pa-2 bg-transparent" style="height: 60vh;">
                     <ConfigPanel style="height: 100%;"/>
+                </v-sheet>
+                <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
+                    <EngineConfigPanel style="height: 100%;"/>
                 </v-sheet>
             </v-col>
             <v-col cols="12" md="4">
@@ -44,6 +47,7 @@ import GraphPanel from '@/components/GraphPanel.vue';
 import { onWSMessages } from '@/services/Database';
 import { ref, Ref } from 'vue';
 import { WebsocketBroadcastMessage } from '@/types/WebsocketBroadcastMessage';
+import EngineConfigPanel from '@/components/EngineConfigPanel.vue';
 
 const rawGraphData: Ref<number[][]> = ref([[], [], [], []]);
 const filteredGraphData: Ref<number[][]> = ref([[], [], [], []]);

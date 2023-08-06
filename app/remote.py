@@ -13,12 +13,12 @@ async def remoteWSBroadcast(msg):
         }, ensure_ascii=False))
 
 async def initRemote():
-    config = getJsonConfig()['remote']
-    if config['enable'] != 1:
+    config = getJsonConfig()['engine']
+    if config['remote']['enable'] != 1:
         return
     while True:
         try:
-            async with websockets.connect(f"{config['server']}/ws/server?password={config['password']}&token={config['token']}") as websocket:
+            async with websockets.connect(f"{config['remote']['server']}/ws/server?password={config['remote']['password']}&token={config['http']['token']}") as websocket:
                 timeLog('[Remote] Connected')
                 global websocketClient
                 websocketClient = websocket

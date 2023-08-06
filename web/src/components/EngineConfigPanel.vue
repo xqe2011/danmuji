@@ -1,0 +1,95 @@
+<template>
+    <v-card class="mx-auto" elevation="4">
+        <v-card-title tabindex="2">
+            <div><p>引擎配置 - 重启生效</p></div>
+            <v-btn :loading="reading" color="green" @click="onRead" tabindex="2">读取</v-btn>
+            <v-btn :loading="saving" color="blue" @click="onSave" tabindex="2">保存</v-btn>
+        </v-card-title>
+
+        <v-form class="overflow-auto">
+            <v-text-field v-model="config.bili.liveID" label="直播间号" tabindex="2" aria-label="直播间号"></v-text-field>
+
+            <v-text-field v-model="config.http.token" label="HTTP令牌" tabindex="2" aria-label="直播间号"></v-text-field>
+            <v-divider></v-divider>
+
+            <v-switch v-model="config.remote.enable" inset color="blue" label="启用远程控制" tabindex="2" aria-label="启用远程控制"></v-switch>
+            <v-text-field v-model="config.remote.server" label="服务器地址" tabindex="2" aria-label="远程控制的服务器地址"></v-text-field>
+            <v-text-field v-model="config.remote.password" label="服务器密码" tabindex="2" aria-label="远程控制的服务器密码"></v-text-field>
+        </v-form>
+    </v-card>
+</template>
+
+<style scoped>
+.v-card {
+    display: flex;
+    flex-direction: column;
+}
+.v-form {
+    padding: 0 16px 16px 16px;
+}
+.v-card-title {
+    display: flex;
+}
+.v-card-title > div {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+.v-card-title > .v-btn {
+    margin-left: 8px;
+}
+</style>
+
+<script lang="ts" setup>
+import { ref } from 'vue';
+import { EngineConfig } from "../types/EngineConfig";
+import { getEngineConfig, setEngineConfig, onWSState } from '@/services/Database';
+
+const config = ref(undefined as unknown as EngineConfig);
+config.value = {
+    bili: {
+        liveID: 0,
+    },
+    http: {
+        token: ""
+    },
+    remote: {
+        enable: false,
+        server: "",
+        password: ""
+    },
+};
+const reading = ref(true);
+const saving = ref(false);
+
+function onRead() {
+    reading.value = true;
+    getEngineConfig().then(msg => {
+        config.value = msg;
+        reading.value = false;
+    }).catch(err => {
+        console.error(err);
+        reading.value = false;
+        alert('读取失败');
+    })
+}
+
+function onSave() {
+    saving.value = true;
+
+    setEngineConfig(config.value).then(val => {
+        saving.value = false;
+        alert('保存成功');
+    }).catch(err => {
+        console.error(err);
+        saving.value = false;
+        alert('保存失败');
+    });
+}
+
+onWSState.subscribe(data => {
+    if (data == 'connected') {
+        onRead();
+    }
+});
+</script>

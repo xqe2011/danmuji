@@ -1,17 +1,16 @@
 from quart import Quart, request, websocket, send_from_directory
 from quart_cors import cors
 from .config import updateJsonConfig, getJsonConfig
-import asyncio, json, os
+import asyncio, json, os, webbrowser
 from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
-import webbrowser
 
 staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static')
 app = Quart(__name__, static_folder=staticFilesPath, static_url_path='/')
 app = cors(app, allow_origin='*')
 tasks = []
 allWSClients = []
-token = getJsonConfig()['http']['token']
+token = getJsonConfig()['engine']['http']['token']
 
 async def fakeRequest(url, query, method, data):
     return await (await app.test_client().open(path=url, query_string=query, method=method, json=data)).json
@@ -36,16 +35,30 @@ async def flush():
     await markAllMessagesInvalid()
     return { 'status': 0, 'msg': 'ok' }
 
-@app.route('/api/config', methods=['GET'])
+@app.route('/api/config/dynamic', methods=['GET'])
 @checkToken
 async def getConfig():
     return { 'status': 0, 'msg': getJsonConfig()['dynamic'] }
 
-@app.route('/api/config', methods=['POST'])
+@app.route('/api/config/dynamic', methods=['POST'])
 @checkToken
 async def updateConfig():
     nowJsonConfig = getJsonConfig()
     nowJsonConfig['dynamic'] = await request.json
+    await updateJsonConfig(nowJsonConfig)
+    return { 'status': 0, 'msg': 'ok' }
+
+@app.route('/api/config/engine', methods=['GET'])
+@checkToken
+async def getEngineConfig():
+    data = getJsonConfig()['engine']
+    return { 'status': 0, 'msg': data }
+
+@app.route('/api/config/engine', methods=['POST'])
+@checkToken
+async def updateEngineConfig():
+    nowJsonConfig = getJsonConfig()
+    nowJsonConfig['engine'] = await request.json
     await updateJsonConfig(nowJsonConfig)
     return { 'status': 0, 'msg': 'ok' }
 

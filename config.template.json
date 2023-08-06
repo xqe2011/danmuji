@@ -1,28 +1,34 @@
 {
-    "bili": {
-        "liveID": 21654925,
-        "sessdata": "",
-        "jct": ""
-    },
-    "http": {
-        "token": "nuozimeownuozimeownuozimeow"
-    },
-    "tts": {
-        "volume": 100,
-        "voice": "Huihui",
-        "rate": 100,
-        "japanese": {
-            "enable": true,
-            "rate": 100,
-            "volume": 100
+    "kvdb": {
+        "bili": {
+            "sessdata": "",
+            "jct": ""
         }
     },
-    "remote": {
-        "enable": false,
-        "server": "wss://nuozi.club",
-        "password": "nuozimeow"
+    "engine": {
+        "bili": {
+            "liveID": 21654925
+        },
+        "http": {
+            "token": "nuozimeownuozimeownuozimeow"
+        },
+        "remote": {
+            "enable": false,
+            "server": "wss://nuozi.club",
+            "password": "nuozimeow"
+        }
     },
     "dynamic": {
+        "tts": {
+            "volume": 100,
+            "voice": "Huihui",
+            "rate": 100,
+            "japanese": {
+                "enable": true,
+                "rate": 100,
+                "volume": 100
+            }
+        },
         "filter": {
             "danmu": {
                 "enable": true,
