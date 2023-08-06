@@ -1,20 +1,20 @@
 <template>
     <v-card class="mx-auto" elevation="4">
-        <v-card-title tabindex="2">
-            <div><p>引擎配置 - 重启生效</p></div>
-            <v-btn :loading="reading" color="green" @click="onRead" tabindex="2">读取</v-btn>
-            <v-btn :loading="saving" color="blue" @click="onSave" tabindex="2">保存</v-btn>
+        <v-card-title>
+            <div><p tabindex="0">引擎配置 - 重启生效</p></div>
+            <v-btn :loading="reading" color="green" @click="onRead">读取</v-btn>
+            <v-btn :loading="saving" color="blue" @click="onSave">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
-            <v-text-field v-model="config.bili.liveID" label="直播间号" tabindex="2" aria-label="直播间号"></v-text-field>
+            <v-text-field v-model="config.bili.liveID" label="直播间号" aria-label="直播间号"></v-text-field>
 
-            <v-text-field v-model="config.http.token" label="HTTP令牌" tabindex="2" aria-label="直播间号"></v-text-field>
+            <v-text-field v-model="config.http.token" label="HTTP令牌" aria-label="直播间号"></v-text-field>
             <v-divider></v-divider>
 
-            <v-switch v-model="config.remote.enable" inset color="blue" label="启用远程控制" tabindex="2" aria-label="启用远程控制"></v-switch>
-            <v-text-field v-model="config.remote.server" label="服务器地址" tabindex="2" aria-label="远程控制的服务器地址"></v-text-field>
-            <v-text-field v-model="config.remote.password" label="服务器密码" tabindex="2" aria-label="远程控制的服务器密码"></v-text-field>
+            <v-switch v-model="config.remote.enable" inset color="blue" label="启用远程控制" aria-label="启用远程控制"></v-switch>
+            <v-text-field v-model="config.remote.server" label="服务器地址" aria-label="远程控制的服务器地址"></v-text-field>
+            <v-text-field v-model="config.remote.password" label="服务器密码" aria-label="远程控制的服务器密码"></v-text-field>
         </v-form>
     </v-card>
 </template>

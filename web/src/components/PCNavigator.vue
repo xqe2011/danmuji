@@ -1,10 +1,10 @@
 <template>
     <v-toolbar>
         <template v-for="(route, index) in router.options.routes" :key="index">
-            <a class="text-white link" :href="route.path" :class="{ selected: router.currentRoute.value.path == route.path }" tabindex="1"><p>{{ route.meta?.name }}</p></a>
+            <a class="text-white link" :href="route.path" :class="{ selected: router.currentRoute.value.path == route.path }" tabindex="0"><p>{{ route.meta?.name }}</p></a>
         </template>
         <v-spacer></v-spacer>
-        <div class="text-white link"><p tabindex="1">{{ websocketStatus }}</p></div>
+        <div class="text-white link"><p tabindex="0">{{ websocketStatus }}</p></div>
     </v-toolbar>
 </template>
 
