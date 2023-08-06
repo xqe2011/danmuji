@@ -4,6 +4,8 @@ from .config import updateJsonConfig, getJsonConfig
 import asyncio, json, os, webbrowser
 from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
+if os.name == 'nt':
+    from .tts import getAllVoices
 
 staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static')
 app = Quart(__name__, static_folder=staticFilesPath, static_url_path='/')
@@ -28,6 +30,13 @@ def checkToken(func):
 async def index():
     global staticFilesPath
     return await send_from_directory(staticFilesPath, 'index.html')
+
+@app.route('/api/tts/voices', methods=['GET'])
+@checkToken
+async def getVoices():
+    if os.name != 'nt':
+        return { 'status': -1, 'msg': 'not support' }, 400
+    return { 'status': 0, 'msg': getAllVoices() }
 
 @app.route('/api/flush', methods=['POST'])
 @checkToken

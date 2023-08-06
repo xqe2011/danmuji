@@ -40,6 +40,14 @@
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.superChat.enable" inset color="blue" label="启用醒目留言朗读" tabindex="2" aria-label="启用醒目留言朗读"></v-switch>
+            <v-divider></v-divider>
+
+            <v-select v-model="config.tts.voice" :items="ttsVoices" label="TTS发音引擎" tabindex="2" aria-label="TTS发音引擎"></v-select>
+            <v-slider v-model="config.tts.rate" label="语速" tabindex="2" aria-label="TTS语速" min="0" max="100"></v-slider>
+            <v-slider v-model="config.tts.volume" label="音量" tabindex="2" aria-label="TTS音量" min="0" max="100"></v-slider>
+            <v-switch v-model="config.tts.japanese.enable" inset color="blue" label="启用日语朗读" tabindex="2" aria-label="启用日语朗读"></v-switch>
+            <v-slider v-model="config.tts.japanese.rate" label="日语语速" tabindex="2" aria-label="TTS日语语速" min="0" max="100"></v-slider>
+            <v-slider v-model="config.tts.japanese.volume" label="日语音量" tabindex="2" aria-label="TTS日语音量" min="0" max="100"></v-slider>
         </v-form>
     </v-card>
 </template>
@@ -68,10 +76,21 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { DynamicConfig } from "../types/DynamicConfig";
-import { getDynamicConfig, setDynamicConfig, onWSState, flushQueue } from '@/services/Database';
+import { getDynamicConfig, setDynamicConfig, onWSState, flushQueue, getAllVoices } from '@/services/Database';
 
+const ttsVoices = ref([] as { title: string, value: string }[]);
 const config = ref(undefined as unknown as DynamicConfig);
 config.value = {
+    tts: {
+        volume: 100,
+        voice: "",
+        rate: 100,
+        japanese: {
+            enable: true,
+            rate: 100,
+            volume: 100
+        }
+    },
     filter: {
         danmu: {
             enable: true,
@@ -115,14 +134,22 @@ const flushing = ref(false);
 
 function onRead() {
     reading.value = true;
-    getDynamicConfig().then(msg => {
-        config.value = msg;
+    (async () => {
+        config.value = await getDynamicConfig();
+        ttsVoices.value = [];
+        (await getAllVoices()).forEach(voice => {
+            ttsVoices.value.push({
+                title: voice.name + ' (' + voice.language + ')',
+                value: voice.name
+            });
+        });
+    })().then(msg => {
         reading.value = false;
     }).catch(err => {
         console.error(err);
         reading.value = false;
         alert('读取失败');
-    })
+    });
 }
 
 function onSave() {

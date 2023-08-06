@@ -26,6 +26,11 @@ async function httpExecute(url: string, method: 'GET' | 'POST', data?: any) {
     return result['msg'];
 }
 
+export async function getAllVoices() {
+    const data = await httpExecute('tts/voices', 'GET');
+    return data as { name: string, language: string }[];
+}
+
 export async function getDynamicConfig() {
     const data = await httpExecute('config/dynamic', 'GET');
     return data as DynamicConfig;

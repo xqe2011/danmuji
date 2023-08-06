@@ -1,4 +1,14 @@
 export type DynamicConfig = {
+    "tts": {
+        "volume": number,
+        "voice": string,
+        "rate": number,
+        "japanese": {
+            "enable": boolean,
+            "rate": number,
+            "volume": number
+        }
+    },
     "filter": {
         "danmu": {
             "enable": boolean,
