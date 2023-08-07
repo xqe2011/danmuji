@@ -9,6 +9,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 
 COPY run.sh ./
 COPY app ./app
+COPY static ./static
 
 RUN mkdir logs
 

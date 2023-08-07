@@ -2,6 +2,7 @@
     <v-card class="mx-auto" elevation="4">
         <v-card-title>
             <div><p tabindex="0">引擎配置 - 重启生效</p></div>
+            <v-btn :loading="logouting" color="red" @click="onLogout">退出登录</v-btn>
             <v-btn :loading="reading" color="green" @click="onRead">读取</v-btn>
             <v-btn :loading="saving" color="blue" @click="onSave">保存</v-btn>
         </v-card-title>
@@ -43,7 +44,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { EngineConfig } from "../types/EngineConfig";
-import { getEngineConfig, setEngineConfig, onWSState } from '@/services/Database';
+import { getEngineConfig, setEngineConfig, onWSState, logout } from '@/services/Database';
 
 const config = ref(undefined as unknown as EngineConfig);
 config.value = {
@@ -61,6 +62,7 @@ config.value = {
 };
 const reading = ref(true);
 const saving = ref(false);
+const logouting = ref(false);
 
 function onRead() {
     reading.value = true;
@@ -84,6 +86,19 @@ function onSave() {
         console.error(err);
         saving.value = false;
         alert('保存失败');
+    });
+}
+
+function onLogout() {
+    logouting.value = true;
+
+    logout().then(() => {
+        logouting.value = false;
+        alert('退出成功');
+    }).catch(err => {
+        console.error(err);
+        logouting.value = false;
+        alert('退出成功');
     });
 }
 

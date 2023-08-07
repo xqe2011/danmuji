@@ -54,6 +54,14 @@ export async function flushQueue() {
     await httpExecute('flush', 'POST');
 }
 
+export async function logout() {
+    await httpExecute('logout', 'POST');
+}
+
+export async function getRunningMode() {
+    return (await httpExecute('running_mode', 'GET')) as { 'remote': boolean };
+}
+
 export async function init(loginToken: string) {
     token = loginToken;
     if (token == null || token == '' || token == undefined) {

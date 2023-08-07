@@ -3,7 +3,7 @@ import asyncio, random, os
 from .logger import timeLog
 from .config import HTTP_SERVER_PASSWORD
 
-staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), './static')
+staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static')
 app = Quart(__name__, static_folder=staticFilesPath, static_url_path='/')
 danmuji = {}
 
@@ -15,6 +15,10 @@ async def noRobots():
 async def index():
     global staticFilesPath
     return await send_from_directory(staticFilesPath, 'index.html')
+
+@app.route('/api/running_mode', methods=['GET'])
+async def getRunningMode():
+    return { 'status': 0, 'msg': { 'remote': True } }
 
 @app.route('/api/<path:path>', methods=['GET', 'POST'])
 async def proxyRequest(path):
@@ -51,7 +55,8 @@ async def wsClient():
             await websocket.receive()
     except asyncio.CancelledError:
         timeLog(f'[Client] Disconnected from token: {token}, ip: {websocket.remote_addr}')
-        danmuji[token]['client'].remove(websocket._get_current_object())
+        if token in danmuji:
+            danmuji[token]['client'].remove(websocket._get_current_object())
         raise
 
 @app.websocket('/ws/server')

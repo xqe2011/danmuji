@@ -26,10 +26,32 @@ def checkToken(func):
     wrappedFunc.__name__ = func.__name__
     return wrappedFunc
 
+def onlyLocal(func):
+    async def wrappedFunc(*args, **kwargs):
+        if request.args.get('remote') == '1':
+            return { 'status': -1, 'msg': 'not support this method in remote mode' }, 403
+        return await func(*args, **kwargs)
+    wrappedFunc.__name__ = func.__name__
+    return wrappedFunc
+
 @app.route('/', methods=['GET'])
 async def index():
     global staticFilesPath
     return await send_from_directory(staticFilesPath, 'index.html')
+
+@app.route('/api/running_mode', methods=['GET'])
+async def getRunningMode():
+    return { 'status': 0, 'msg': { 'remote': False } }
+
+@app.route('/api/logout', methods=['POST'])
+@checkToken
+@onlyLocal
+async def logout():
+    nowJsonConfig = getJsonConfig()
+    nowJsonConfig['kvdb']['bili']['sessdata'] = ""
+    nowJsonConfig['kvdb']['bili']['jct'] = ""
+    await updateJsonConfig(nowJsonConfig)
+    return { 'status': 0, 'msg': 'ok' }
 
 @app.route('/api/tts/voices', methods=['GET'])
 @checkToken
@@ -59,12 +81,14 @@ async def updateConfig():
 
 @app.route('/api/config/engine', methods=['GET'])
 @checkToken
+@onlyLocal
 async def getEngineConfig():
     data = getJsonConfig()['engine']
     return { 'status': 0, 'msg': data }
 
 @app.route('/api/config/engine', methods=['POST'])
 @checkToken
+@onlyLocal
 async def updateEngineConfig():
     nowJsonConfig = getJsonConfig()
     nowJsonConfig['engine'] = await request.json

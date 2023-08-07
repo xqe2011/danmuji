@@ -25,6 +25,7 @@ async def initRemote():
                 while True:
                     data = json.loads(await websocket.recv())
                     if data['type'] == 'request':
+                        data['query']['remote'] = '1'
                         await websocket.send(json.dumps({
                             "type": "response",
                             "id": data['id'],

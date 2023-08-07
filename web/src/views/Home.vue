@@ -2,10 +2,10 @@
     <v-container fluid class="pa-0">
         <v-row no-gutters>
             <v-col cols="12" md="3">
-                <v-sheet class="pa-2 bg-transparent" style="height: 60vh;">
+                <v-sheet class="pa-2 bg-transparent" :style="{ 'height': showEngineConfig ? '60vh' : '90vh' }">
                     <ConfigPanel style="height: 100%;"/>
                 </v-sheet>
-                <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
+                <v-sheet class="pa-2 bg-transparent" style="height: 30vh;" v-if="showEngineConfig">
                     <EngineConfigPanel style="height: 100%;"/>
                 </v-sheet>
             </v-col>
@@ -44,7 +44,7 @@
 import ConfigPanel from '@/components/ConfigPanel.vue'
 import LogPanel from '@/components/LogPanel.vue';
 import GraphPanel from '@/components/GraphPanel.vue';
-import { onWSMessages } from '@/services/Database';
+import { onWSMessages, getRunningMode } from '@/services/Database';
 import { ref, Ref } from 'vue';
 import { WebsocketBroadcastMessage } from '@/types/WebsocketBroadcastMessage';
 import EngineConfigPanel from '@/components/EngineConfigPanel.vue';
@@ -55,7 +55,11 @@ const messagesQueueLegnth: Ref<number[][]> = ref([[]]);
 const logEvent: Ref<WebsocketBroadcastMessage['events']> = ref([]);
 const cpuUsage: Ref<number[][]> = ref([[]]);
 const delay: Ref<number[][]> = ref([[]]);
+const showEngineConfig: Ref<boolean> = ref(false);
 
+getRunningMode().then(data => {
+    showEngineConfig.value = !data.remote;
+});
 
 onWSMessages.subscribe((data) => {
     logEvent.value = logEvent.value.concat(data.events);
