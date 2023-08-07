@@ -5,10 +5,11 @@ from .stats import appendDelay
 from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 import winsdk.windows.media.speechsynthesis as speechsynthesis
-import winsdk.windows.media.playback as playback
+import winsdk.windows.storage.streams as streams
+import pygame
+import io
 
 synthesizer = None
-media_player = None
 allVoices = []
 
 def getAllVoices():
@@ -16,10 +17,10 @@ def getAllVoices():
     return [ { 'name': voice.display_name, 'language': voice.language } for voice in list(allVoices)]
 
 async def init():
-    global synthesizer, media_player, allVoices
-    synthesizer = speechsynthesis.SpeechSynthesizer()
-    media_player = playback.MediaPlayer()
+    global synthesizer, allVoices
+    pygame.mixer.init()
 
+    synthesizer = speechsynthesis.SpeechSynthesizer()
     allVoices = speechsynthesis.SpeechSynthesizer.all_voices
     for voice in list(allVoices):
         timeLog(f'[TTS] Found voice: {voice.display_name} ({voice.language})"')
@@ -32,7 +33,7 @@ def calculateTags(lang, config, text):
 
 
 async def tts(text):
-    global synthesizer, media_player
+    global synthesizer
     ttsConfig = getJsonConfig()['dynamic']['tts']
     
     # 支持日语
@@ -42,10 +43,20 @@ async def tts(text):
     # Synthesize text to a stream
     stream = await synthesizer.synthesize_ssml_to_stream_async(ssml)
 
-    media_player.set_stream_source(stream)
-    media_player.play()
-    sound_seconds = stream.size / (32.0 * 1024)  # 32 KB/s
-    await asyncio.sleep(sound_seconds)
+    temp_buffer = bytes(0)
+    data_reader = streams.DataReader(stream)
+    await data_reader.load_async(stream.size)
+    while data_reader.unconsumed_buffer_length > 0:
+        temp_buffer += bytes(data_reader.read_buffer(data_reader.unconsumed_buffer_length)) + b'\x00\x00\x00\x00\x00\x00\x00\x00'
+
+    byte_stream = io.BytesIO(temp_buffer)
+
+    pygame.mixer.music.load(byte_stream)
+    pygame.mixer.music.play()
+
+    while pygame.mixer.music.get_busy():
+        await asyncio.sleep(0.05)
+
 
 
 def messagesToText(msg):
