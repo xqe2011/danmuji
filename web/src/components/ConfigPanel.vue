@@ -44,13 +44,13 @@
             <v-switch v-model="config.filter.superChat.enable" inset color="blue" label="启用醒目留言朗读" aria-label="启用醒目留言朗读"></v-switch>
             <v-divider></v-divider>
 
-            <v-select v-model="config.tts.voice" :items="ttsCNVoices" label="中英文TTS发音引擎" aria-label="中英文TTS发音引擎"></v-select>
-            <v-slider v-model="config.tts.rate" label="语速" hint="TTS语速" min="0" max="100"></v-slider>
-            <v-slider v-model="config.tts.volume" label="音量" hint="TTS音量" min="0" max="100"></v-slider>
+            <v-select v-model="config.tts.voice" :items="ttsCNVoices" label="主TTS发音引擎" aria-label="主TTS发音引擎"></v-select>
+            <v-slider v-model="config.tts.rate" label="总语速" hint="TTS语速(包括其他语言)" min="1" max="100"></v-slider>
+            <v-slider v-model="config.tts.volume" label="总音量" hint="TTS音量(包括其他语言)" min="1" max="100"></v-slider>
             <v-switch v-model="config.tts.japanese.enable" inset color="blue" label="启用日语朗读" aria-label="启用日语朗读"></v-switch>
             <v-select v-model="config.tts.japanese.voice" :items="ttsJPVoices" label="日语TTS发音引擎" aria-label="日语TTS发音引擎"></v-select>
-            <v-slider v-model="config.tts.japanese.rate" label="日语语速" hint="TTS日语语速" min="0" max="100"></v-slider>
-            <v-slider v-model="config.tts.japanese.volume" label="日语音量" hint="TTS日语音量" min="0" max="100"></v-slider>
+            <v-slider v-model="config.tts.japanese.rate" label="日语相对语速" hint="TTS日语相对语速" min="1" max="100"></v-slider>
+            <v-slider v-model="config.tts.japanese.volume" label="日语相对音量" hint="TTS日语相对音量" min="1" max="100"></v-slider>
         </v-form>
     </v-card>
 </template>

@@ -116,8 +116,8 @@ def openBroswer():
     else:
         timeLog(f'[Live] B站凭证无效，使用Chrome重新登录B站...')
         driver = webdriver.Chrome()
-    driver.get("https://passport.bilibili.com/pc/passport/login?gourl=https%3A%2F%2Fspace.bilibili.com")
-    while not driver.current_url.startswith("https://space.bilibili.com"):
+    driver.get("https://passport.bilibili.com/pc/passport/login?gourl=https%3A%2F%2Fwww.bilibili.com")
+    while not driver.current_url.startswith("https://www.bilibili.com"):
         pass
     sessdata = driver.get_cookie("SESSDATA")["value"]
     jct = driver.get_cookie("bili_jct")["value"]

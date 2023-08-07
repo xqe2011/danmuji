@@ -9,6 +9,9 @@ import winsdk.windows.storage.streams as streams
 import pygame
 import io
 
+lastRate = None
+lastVolume = None
+lastVoice = None
 synthesizer = None
 allVoices = []
 
@@ -27,19 +30,45 @@ async def init():
 
     await tts("TTS模块初始化成功")
 
+def syncWithConfig():
+    global lastRate, lastVolume, lastVoice
+    ttsConfig = getJsonConfig()['dynamic']['tts']
+    if lastVolume != ttsConfig['volume']:
+        lastVolume = ttsConfig['volume']
+        synthesizer.options.audio_volume = lastVolume / 100.0
+    if lastRate != ttsConfig['rate']:
+        lastRate = ttsConfig['rate']
+        # This value can range from 0.5 (half the default rate) to 6.0 (6x the default rate), inclusive.
+        # The default value is 1.0 (the "normal" speaking rate for the current voice).
+        synthesizer.options.speaking_rate = 0.5 + (lastRate / 100.0) * 5.5
+    if lastVoice != ttsConfig['voice']:
+        lastVoice = ttsConfig['voice']
+        targetVoice = None
+        for voice in list(allVoices):
+            if ttsConfig['voice'] in voice.display_name:
+                targetVoice = voice
+                break
+        if targetVoice != None:
+            timeLog(f'[TTS] Use voice: {targetVoice.display_name} ({targetVoice.language})"')
+            synthesizer.voice = targetVoice
+        else:
+            voice = synthesizer.voice
+            timeLog(f'[TTS] Use default voice: {voice.display_name} ({voice.language})"')
+
 def calculateTags(lang, config, text):
     tagsXml = '<voice name="{}" xml:lang="{}"><prosody rate="{}" volume="{}">{}</prosody></voice>'
-    return tagsXml.format(config["voice"], lang,  0.2 + (config["rate"] / 100.0) * 1.8, config["volume"], text)
-
+    return tagsXml.format(config["voice"], lang, 0.5 + (config["rate"] / 100.0) * 2.5, config["volume"], text)
 
 async def tts(text):
-    global synthesizer
+    global synthesizer, media_player
+    syncWithConfig()
+
     ttsConfig = getJsonConfig()['dynamic']['tts']
-    
     # 支持日语
     if ttsConfig['japanese']['enable']:
         text = re.sub(r'[\u3040-\u309F\u30A0-\u30FF]+', calculateTags("ja-JP", ttsConfig['japanese'], '\g<0>'), text)
-    ssml = f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="zh-CN">{calculateTags("zh-CN", ttsConfig, text)}</speak>'
+    
+    ssml = f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="zh-CN"><voice xml:lang="zh-CN">{text}</voice></speak>'
     # Synthesize text to a stream
     stream = await synthesizer.synthesize_ssml_to_stream_async(ssml)
 
