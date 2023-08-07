@@ -16,6 +16,11 @@ async def index():
     global staticFilesPath
     return await send_from_directory(staticFilesPath, 'index.html')
 
+@app.after_request
+def addHeader(response):
+    response.cache_control.no_cache = True
+    return response
+
 @app.route('/api/running_mode', methods=['GET'])
 async def getRunningMode():
     return { 'status': 0, 'msg': { 'remote': True } }
@@ -39,6 +44,8 @@ async def proxyRequest(path):
     while target['response'] == None or target['response']['id'] != requestID:
         await target['event'].wait()
     timeLog(f"[Client] Got http response from server which token: {request.args.get('token')}, ip: {request.remote_addr}")
+    if target['response']['data'] == None:
+        return { 'status': -1, 'msg': 'error' }, 500
     return target['response']['data']
 
 @app.websocket('/ws/client')

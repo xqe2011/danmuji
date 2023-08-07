@@ -2,12 +2,14 @@
     <v-card class="mx-auto" elevation="4">
         <v-card-title>
             <div><p tabindex="0">实时配置</p></div>
-            <v-btn :loading="flushing" color="red" @click="onFlush">清空缓存</v-btn>
             <v-btn :loading="reading" color="green" @click="onRead">读取</v-btn>
             <v-btn :loading="saving" color="blue" @click="onSave">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
+            <v-btn class="block-button" block :loading="flushing" color="red" @click="onFlush">清空待读语音队列</v-btn>
+            <v-divider></v-divider>
+
             <v-switch v-model="config.filter.danmu.enable" inset color="blue" label="启用弹幕朗读" aria-label="启用弹幕朗读"></v-switch>
             <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用弹幕表情朗读" aria-label="启用弹幕表情朗读"></v-switch>
             <v-select v-model="config.filter.danmu.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" aria-label="弹幕大航海大于等于"></v-select>
@@ -71,6 +73,9 @@
 }
 .v-card-title > .v-btn {
     margin-left: 8px;
+}
+.block-button {
+    margin-bottom: 16px;
 }
 </style>
 
@@ -188,11 +193,11 @@ function onFlush() {
     flushing.value = true;
     flushQueue().then(val => {
         flushing.value = false;
-        alert('刷新成功');
+        alert('清空成功');
     }).catch(err => {
         console.error(err);
         flushing.value = false;
-        alert('刷新失败');
+        alert('清空失败');
     });
 }
 

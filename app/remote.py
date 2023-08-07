@@ -1,4 +1,4 @@
-import websockets, json, asyncio
+import websockets, json, asyncio, traceback
 from .config import getJsonConfig
 from .http import fakeRequest
 from .logger import timeLog
@@ -40,6 +40,10 @@ async def initRemote():
         except asyncio.CancelledError:
             websocketClient = None
             break
+        except:
+            websocketClient = None
+            timeLog(f'[Remote] Error: Unknown')
+            traceback.print_exc()
         await asyncio.sleep(1)
     timeLog('[Remote] Disconnected')
             

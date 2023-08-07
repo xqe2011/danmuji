@@ -39,6 +39,11 @@ async def index():
     global staticFilesPath
     return await send_from_directory(staticFilesPath, 'index.html')
 
+@app.after_request
+def addHeader(response):
+    response.cache_control.no_cache = True
+    return response
+
 @app.route('/api/running_mode', methods=['GET'])
 async def getRunningMode():
     return { 'status': 0, 'msg': { 'remote': False } }

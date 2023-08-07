@@ -2,12 +2,14 @@
     <v-card class="mx-auto" elevation="4">
         <v-card-title>
             <div><p tabindex="0">引擎配置 - 重启生效</p></div>
-            <v-btn :loading="logouting" color="red" @click="onLogout">退出登录</v-btn>
             <v-btn :loading="reading" color="green" @click="onRead">读取</v-btn>
             <v-btn :loading="saving" color="blue" @click="onSave">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
+            <v-btn class="block-button" block :loading="logouting" color="red" @click="onLogout">退出B站用户登录</v-btn>
+            <v-divider class="block-divider"></v-divider>
+
             <v-text-field v-model="config.bili.liveID" label="直播间号" aria-label="直播间号"></v-text-field>
 
             <v-text-field v-model="config.http.token" label="HTTP令牌" aria-label="直播间号"></v-text-field>
@@ -38,6 +40,12 @@
 }
 .v-card-title > .v-btn {
     margin-left: 8px;
+}
+.block-button {
+    margin-bottom: 16px;
+}
+.block-divider {
+    margin-bottom: 22px;
 }
 </style>
 
@@ -81,6 +89,9 @@ function onSave() {
 
     setEngineConfig(config.value).then(val => {
         saving.value = false;
+        /* 强制转换number类型 */
+        config.value.bili.liveID = Number(config.value.bili.liveID);
+
         alert('保存成功');
     }).catch(err => {
         console.error(err);
