@@ -100,6 +100,11 @@ async def wsServer():
                     await client.send_json(message['data'])
     except asyncio.CancelledError:
         timeLog(f'[Server] Disconnected from token: {token}')
+        for client in danmuji[token]['client']:
+            try:
+                await client.close()
+            except:
+                pass
         del danmuji[token]
         raise
 
