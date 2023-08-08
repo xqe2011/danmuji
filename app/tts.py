@@ -5,14 +5,14 @@ from .stats import appendDelay
 from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 import winsdk.windows.media.speechsynthesis as speechsynthesis
-import winsdk.windows.media.playback as playback
-import winsdk.windows.media.core as media_core
+import winsdk.windows.storage.streams as streams
+import pygame
+import io
 
 lastRate = None
 lastVolume = None
 lastVoice = None
 synthesizer = None
-media_player = None
 allVoices = []
 
 def getAllVoices():
@@ -20,8 +20,8 @@ def getAllVoices():
     return [ { 'name': voice.display_name, 'language': voice.language } for voice in list(allVoices)]
 
 async def init():
-    global synthesizer, allVoices, media_player
-    media_player = playback.MediaPlayer()
+    global synthesizer, allVoices
+    pygame.mixer.init()
 
     synthesizer = speechsynthesis.SpeechSynthesizer()
     allVoices = speechsynthesis.SpeechSynthesizer.all_voices
@@ -71,10 +71,21 @@ async def tts(text):
     ssml = f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="zh-CN"><voice xml:lang="zh-CN">{text}</voice></speak>'
     # Synthesize text to a stream
     stream = await synthesizer.synthesize_ssml_to_stream_async(ssml)
-    media_player.source = media_core.MediaSource.create_from_stream(stream, "audio/x-wav")
-    media_player.play()
-    while media_player.current_state != playback.MediaPlayerState.PAUSED:
+
+    temp_buffer = bytes(0)
+    data_reader = streams.DataReader(stream)
+    await data_reader.load_async(stream.size)
+    while data_reader.unconsumed_buffer_length > 0:
+        temp_buffer += bytes(data_reader.read_buffer(data_reader.unconsumed_buffer_length)) + b'\x00\x00\x00\x00\x00\x00\x00\x00'
+
+    byte_stream = io.BytesIO(temp_buffer)
+
+    pygame.mixer.music.load(byte_stream)
+    pygame.mixer.music.play()
+
+    while pygame.mixer.music.get_busy():
         await asyncio.sleep(0.05)
+
 
 
 def messagesToText(msg):
