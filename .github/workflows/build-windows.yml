@@ -1,0 +1,54 @@
+name: "release"
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: "Release"
+    permissions: write-all
+    runs-on: "windows-latest"
+
+    steps:
+      - uses: "actions/checkout@v2"
+
+      - name: "Set up Python"
+        uses: "actions/setup-python@v2"
+        with:
+          python-version: "3.11"
+      
+      - name: "Set up node"
+        uses: "actions/setup-node@v2"
+        with:
+          node-version: "20.3.1"
+        
+      - name: "Install Python dependencies"
+        run: |
+          pip install -r requirements.txt
+      
+      - name: "Install Node dependencies"
+        run: |
+          cd web
+          npm install
+      
+      - name: "Build Web Static"
+        run: |
+          cd web
+          npm run build
+          cp -r dist ../static
+      
+      - name: "Build executable"
+        run: |
+          pyinstaller launcher.spec
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: ${{  github.ref_name }}
+          files: |
+            LICENSE.txt
+            README.md
+            dist/launcher.exe
