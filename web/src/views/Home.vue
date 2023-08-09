@@ -46,13 +46,13 @@ import LogPanel from '@/components/LogPanel.vue';
 import GraphPanel from '@/components/GraphPanel.vue';
 import { onWSMessages, getRunningMode } from '@/services/Database';
 import { ref, Ref } from 'vue';
-import { WebsocketBroadcastMessage } from '@/types/WebsocketBroadcastMessage';
+import { WebsocketBroadcastMessage, StatsEvent } from '@/types/WebsocketBroadcastMessage';
 import EngineConfigPanel from '@/components/EngineConfigPanel.vue';
 
 const rawGraphData: Ref<number[][]> = ref([[], [], [], []]);
 const filteredGraphData: Ref<number[][]> = ref([[], [], [], []]);
 const messagesQueueLegnth: Ref<number[][]> = ref([[]]);
-const logEvent: Ref<WebsocketBroadcastMessage['events']> = ref([]);
+const logEvent: Ref<StatsEvent['events']> = ref([]);
 const cpuUsage: Ref<number[][]> = ref([[]]);
 const delay: Ref<number[][]> = ref([[]]);
 const showEngineConfig: Ref<boolean> = ref(false);
@@ -61,7 +61,11 @@ getRunningMode().then(data => {
     showEngineConfig.value = !data.remote;
 });
 
-onWSMessages.subscribe((data) => {
+onWSMessages.subscribe((rawData) => {
+    if (rawData.type !== "stats") {
+        return;
+    }
+    const data = rawData.data;
     logEvent.value = logEvent.value.concat(data.events);
     rawGraphData.value[0].push(data.stats.rawDanmu);
     rawGraphData.value[1].push(data.stats.rawGift);

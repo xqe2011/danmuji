@@ -1,9 +1,8 @@
 <template>
-    <v-card class="mx-auto" elevation="4">
+    <v-card class="mx-auto" elevation="4" @keydown="onKeydown">
         <v-card-title>
             <div><p tabindex="0">实时配置</p></div>
-            <v-btn :loading="reading" color="green" @click="onRead" aria-label="实时配置读取">读取</v-btn>
-            <v-btn :loading="saving" color="blue" @click="onSave" aria-label="实时配置保存">保存</v-btn>
+            <v-btn :loading="saving" color="blue" @click="onSave" aria-label="实时配置保存(可以使用键盘Ctrl+S保存)">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
@@ -14,17 +13,17 @@
             <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用弹幕表情朗读" aria-label="启用弹幕表情朗读"></v-switch>
             <v-switch v-model="config.filter.danmu.isFansMedalBelongToLive" inset color="blue" label="粉丝牌必须为本直播间" aria-label="粉丝牌必须为本直播间"></v-switch>
             <v-select v-model="config.filter.danmu.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" aria-label="弹幕大航海大于等于"></v-select>
-            <v-text-field v-model="config.filter.danmu.fansMedalLevelBigger" label="粉丝牌等级大于等于" aria-label="弹幕粉丝牌等级大于等于"></v-text-field>
-            <v-text-field v-model="config.filter.danmu.lengthShorter" label="文本长度小于等于" aria-label="弹幕文本长度小于等于"></v-text-field>
-            <v-combobox v-model="config.filter.danmu.blacklistKeywords" label="黑名单关键词" chips multiple aria-label="弹幕黑名单关键词"></v-combobox>
-            <v-combobox v-model="config.filter.danmu.blacklistUsers" label="黑名单用户UID" chips multiple aria-label="弹幕黑名单用户UID"></v-combobox>
-            <v-combobox v-model="config.filter.danmu.whitelistUsers" label="白名单用户UID" chips multiple aria-label="弹幕白名单用户UID"></v-combobox>
+            <v-text-field type="number" v-model="config.filter.danmu.fansMedalLevelBigger" label="粉丝牌等级大于等于" aria-label="弹幕粉丝牌等级大于等于"></v-text-field>
+            <v-text-field type="number" v-model="config.filter.danmu.lengthShorter" label="文本长度小于等于" aria-label="弹幕文本长度小于等于"></v-text-field>
+            <v-text-field v-model="blacklistKeywords" label="黑名单关键词(逗号分隔)" aria-label="弹幕黑名单关键词(逗号分隔)"></v-text-field>
+            <v-text-field v-model="blacklistUsers" label="黑名单用户UID(逗号分隔)" aria-label="弹幕黑名单用户UID(逗号分隔)"></v-text-field>
+            <v-text-field v-model="whitelistUsers" label="白名单用户UID(逗号分隔)" aria-label="弹幕白名单用户UID(逗号分隔)"></v-text-field>
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.gift.enable" inset color="blue" label="启用礼物朗读" aria-label="启用礼物朗读"></v-switch>
             <v-switch v-model="config.filter.gift.freeGiftEnable" inset color="blue" label="启用免费礼物朗读" aria-label="启用免费礼物朗读"></v-switch>
-            <v-text-field v-model="config.filter.gift.freeGiftCountBigger" label="免费礼物数量大于等于" aria-label="免费礼物数量大于等于"></v-text-field>
-            <v-text-field v-model="config.filter.gift.moneyGiftPriceBigger" label="付费礼物金额大于等于" aria-label="付费礼物金额大于等于"></v-text-field>
+            <v-text-field type="number" v-model="config.filter.gift.freeGiftCountBigger" label="免费礼物数量大于等于" aria-label="免费礼物数量大于等于"></v-text-field>
+            <v-text-field type="number" v-model="config.filter.gift.moneyGiftPriceBigger" label="付费礼物金额大于等于" aria-label="付费礼物金额大于等于"></v-text-field>
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.guardBuy.enable" inset color="blue" label="启用舰长朗读" aria-label="启用舰长朗读"></v-switch>
@@ -37,7 +36,7 @@
             <v-switch v-model="config.filter.welcome.enable" inset color="blue" label="启用进入直播间朗读" aria-label="启用进入直播间朗读"></v-switch>
             <v-switch v-model="config.filter.welcome.isFansMedalBelongToLive" inset color="blue" label="粉丝牌必须为本直播间" aria-label="粉丝牌必须为本直播间"></v-switch>
             <v-select v-model="config.filter.welcome.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" aria-label="直播间朗读大航海大于等于"></v-select>
-            <v-text-field v-model="config.filter.welcome.fansMedalLevelBigger" label="粉丝牌等级大于等于" aria-label="直播间朗读粉丝牌等级大于等于"></v-text-field>
+            <v-text-field type="number" v-model="config.filter.welcome.fansMedalLevelBigger" label="粉丝牌等级大于等于" aria-label="直播间朗读粉丝牌等级大于等于"></v-text-field>
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.subscribe.enable" inset color="blue" label="启用关注朗读" aria-label="启用关注朗读"></v-switch>
@@ -88,11 +87,14 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { DynamicConfig } from "../types/DynamicConfig";
-import { getDynamicConfig, setDynamicConfig, onWSState, flushQueue, getAllVoices, getAllSpeakers } from '@/services/Database';
+import { getDynamicConfig, setDynamicConfig, onWSState, flushQueue, getAllVoices, getAllSpeakers, onWSMessages } from '@/services/Database';
 
 const ttsCNVoices = ref([] as { title: string, value: string }[]);
 const ttsJPVoices = ref([] as { title: string, value: string }[]);
 const ttsSpeakers = ref([] as { title: string, value: string }[]);
+const blacklistKeywords = ref("");
+const blacklistUsers = ref("");
+const whitelistUsers = ref("");
 const config = ref(undefined as unknown as DynamicConfig);
 config.value = {
     tts: {
@@ -150,10 +152,13 @@ const reading = ref(true);
 const saving = ref(false);
 const flushing = ref(false);
 
-function onRead() {
+function parseConfig(data: DynamicConfig) {
     reading.value = true;
     (async () => {
-        config.value = await getDynamicConfig();
+        config.value = data;
+        blacklistKeywords.value = config.value.filter.danmu.blacklistKeywords.join('，');
+        blacklistUsers.value = config.value.filter.danmu.blacklistUsers.join('，');
+        whitelistUsers.value = config.value.filter.danmu.whitelistUsers.join('，');
         ttsCNVoices.value = [];
         ttsJPVoices.value = [];
         (await getAllVoices()).forEach(voice => {
@@ -185,6 +190,13 @@ function onRead() {
     });
 }
 
+onWSMessages.subscribe((event) => {
+    if (event.type !== 'config') {
+        return;
+    }
+    parseConfig(event.data);
+});
+
 function onSave() {
     saving.value = true;
     /* 强制转换number类型 */
@@ -195,6 +207,11 @@ function onSave() {
     config.value.filter.gift.moneyGiftPriceBigger = Number(config.value.filter.gift.moneyGiftPriceBigger);
     config.value.filter.welcome.fansMedalGuardLevelBigger = Number(config.value.filter.welcome.fansMedalGuardLevelBigger);
     config.value.filter.welcome.fansMedalLevelBigger = Number(config.value.filter.welcome.fansMedalLevelBigger);
+
+    /* 切割字符串 */
+    config.value.filter.danmu.blacklistKeywords = blacklistKeywords.value.split(/[,，]+/);   
+    config.value.filter.danmu.blacklistUsers = blacklistUsers.value.split(/[,，]+/);
+    config.value.filter.danmu.whitelistUsers = whitelistUsers.value.split(/[,，]+/);
 
     setDynamicConfig(config.value).then(val => {
         saving.value = false;
@@ -220,7 +237,20 @@ function onFlush() {
 
 onWSState.subscribe(data => {
     if (data == 'connected') {
-        onRead();
+        getDynamicConfig().then(msg => {
+            parseConfig(msg);
+        }).catch(err => {
+            console.error(err);
+            reading.value = false;
+            alert('读取失败');
+        });
     }
 });
+
+function onKeydown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' || event.metaKey && event.key === 's') {
+        event.preventDefault();
+        onSave();
+    }
+}
 </script>

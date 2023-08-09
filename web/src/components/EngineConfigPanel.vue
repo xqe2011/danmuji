@@ -1,9 +1,8 @@
 <template>
-    <v-card class="mx-auto" elevation="4">
+    <v-card class="mx-auto" elevation="4" @keydown="onKeydown">
         <v-card-title>
             <div><p tabindex="0">引擎配置 - 重启生效</p></div>
-            <v-btn :loading="reading" color="green" @click="onRead" aria-label="引擎配置读取">读取</v-btn>
-            <v-btn :loading="saving" color="blue" @click="onSave" aria-label="引擎配置保存">保存</v-btn>
+            <v-btn :loading="saving" color="blue" @click="onSave" aria-label="引擎配置保存(可以使用键盘Ctrl+S保存)">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
@@ -118,4 +117,11 @@ onWSState.subscribe(data => {
         onRead();
     }
 });
+
+function onKeydown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' || event.metaKey && event.key === 's') {
+        event.preventDefault();
+        onSave();
+    }
+}
 </script>

@@ -14,7 +14,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template v-for="(item, index) in props.data as WebsocketBroadcastMessage['events']" :key="index">
+                        <template v-for="(item, index) in props.data as StatsEvent['events']" :key="index">
                             <tr :class="{ filterd: item.filterd }">
                                 <td>{{ item.uname }}</td>
                                 <td v-if="item.type == 'danmu'">弹幕</td>
@@ -75,7 +75,7 @@
 </style>
 
 <script setup lang="ts">
-import { WebsocketBroadcastMessage } from "@/types/WebsocketBroadcastMessage";
+import { StatsEvent } from "@/types/WebsocketBroadcastMessage";
 import { onUpdated } from "vue";
 import { ref } from "vue";
 

@@ -6,14 +6,20 @@ from .http import startHttpServer, broadcastWSMessage
 from .stats import statsTask, statsEvent
 from .remote import initRemote, remoteWSBroadcast
 from .keyboard import initalizeKeyboard
+from .config import configEvent
 # only load tts in windows
 if os.name == 'nt':
     from .tts import ttsTask
 
 @statsEvent.on('stats')
 async def statsHandler(stats):
-    await broadcastWSMessage(stats)
-    await remoteWSBroadcast(stats)
+    await broadcastWSMessage({ 'type': 'stats', 'data': stats })
+    await remoteWSBroadcast({ 'type': 'stats', 'data': stats })
+
+@configEvent.on('update')
+async def configHandler(oldConfig, newConfig):
+    await broadcastWSMessage({ 'type': 'config', 'data': newConfig['dynamic'] })
+    await remoteWSBroadcast({ 'type': 'config', 'data': newConfig['dynamic'] })
 
 def main():
     timeLog('[Main] Started')

@@ -1,3 +1,5 @@
+import { DynamicConfig } from "./DynamicConfig";
+
 export type DanmuEvent = {
     'type': 'danmu',
     'filterd': boolean,
@@ -55,7 +57,9 @@ export type SuperChatEvent = {
     "msg": string
 };
 
-export type WebsocketBroadcastMessage = {
+export type ConfigEvent = DynamicConfig;
+
+export type StatsEvent = {
     "events": (DanmuEvent | GiftEvent | GuardBuyEvent | LikeEvent | SubscribeEvent | WelcomeEvent | SuperChatEvent)[],
     "stats": {
         'filteredDanmu': number,
@@ -76,4 +80,12 @@ export type WebsocketBroadcastMessage = {
         'messagesQueueLength': number,
         'delay': number
     }
+};
+
+export type WebsocketBroadcastMessage = {
+    "type": "stats",
+    "data": StatsEvent
+} | {
+    "type": "config",
+    "data": ConfigEvent
 };

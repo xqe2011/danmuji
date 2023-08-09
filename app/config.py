@@ -1,6 +1,8 @@
 from .logger import timeLog
 import json, sys, os
+from pyee import AsyncIOEventEmitter
 
+configEvent = AsyncIOEventEmitter()
 configPath = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.getcwd()
 
 def mergeConfigRecursively(template, raw):
@@ -20,10 +22,12 @@ timeLog(f'[Config] Loaded json config: {json.dumps(jsonConfig, ensure_ascii=Fals
 
 async def updateJsonConfig(config):
     global jsonConfig
+    oldConfig = jsonConfig
     jsonConfig = config
     with open(os.path.join(configPath, './config.json'), encoding='utf-8', mode='w') as f:
         json.dump(jsonConfig, f, ensure_ascii=False, indent=4)
     timeLog(f'[Config] Updated json config: {json.dumps(jsonConfig, ensure_ascii=False)}')
+    configEvent.emit('update', oldConfig, jsonConfig)
 
 def getJsonConfig():
     global jsonConfig
