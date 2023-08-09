@@ -2,8 +2,8 @@
     <v-card class="mx-auto" elevation="4">
         <v-card-title>
             <div><p tabindex="0">实时配置</p></div>
-            <v-btn :loading="reading" color="green" @click="onRead">读取</v-btn>
-            <v-btn :loading="saving" color="blue" @click="onSave">保存</v-btn>
+            <v-btn :loading="reading" color="green" @click="onRead" aria-label="实时配置读取">读取</v-btn>
+            <v-btn :loading="saving" color="blue" @click="onSave" aria-label="实时配置保存">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
@@ -12,6 +12,7 @@
 
             <v-switch v-model="config.filter.danmu.enable" inset color="blue" label="启用弹幕朗读" aria-label="启用弹幕朗读"></v-switch>
             <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用弹幕表情朗读" aria-label="启用弹幕表情朗读"></v-switch>
+            <v-switch v-model="config.filter.danmu.isFansMedalBelongToLive" inset color="blue" label="粉丝牌必须为本直播间" aria-label="粉丝牌必须为本直播间"></v-switch>
             <v-select v-model="config.filter.danmu.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" aria-label="弹幕大航海大于等于"></v-select>
             <v-text-field v-model="config.filter.danmu.fansMedalLevelBigger" label="粉丝牌等级大于等于" aria-label="弹幕粉丝牌等级大于等于"></v-text-field>
             <v-text-field v-model="config.filter.danmu.lengthShorter" label="文本长度小于等于" aria-label="弹幕文本长度小于等于"></v-text-field>
@@ -34,6 +35,7 @@
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.welcome.enable" inset color="blue" label="启用进入直播间朗读" aria-label="启用进入直播间朗读"></v-switch>
+            <v-switch v-model="config.filter.welcome.isFansMedalBelongToLive" inset color="blue" label="粉丝牌必须为本直播间" aria-label="粉丝牌必须为本直播间"></v-switch>
             <v-select v-model="config.filter.welcome.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" aria-label="直播间朗读大航海大于等于"></v-select>
             <v-text-field v-model="config.filter.welcome.fansMedalLevelBigger" label="粉丝牌等级大于等于" aria-label="直播间朗读粉丝牌等级大于等于"></v-text-field>
             <v-divider></v-divider>
@@ -44,13 +46,14 @@
             <v-switch v-model="config.filter.superChat.enable" inset color="blue" label="启用醒目留言朗读" aria-label="启用醒目留言朗读"></v-switch>
             <v-divider></v-divider>
 
+            <v-select class="block-select" v-model="config.tts.speaker" :items="ttsSpeakers" label="TTS音频通道" aria-label="TTS音频通道"></v-select>
             <v-select v-model="config.tts.voice" :items="ttsCNVoices" label="主TTS发音引擎" aria-label="主TTS发音引擎"></v-select>
-            <v-slider v-model="config.tts.rate" label="总语速" hint="TTS语速(包括其他语言)" min="1" max="100"></v-slider>
-            <v-slider v-model="config.tts.volume" label="总音量" hint="TTS音量(包括其他语言)" min="1" max="100"></v-slider>
+            <v-slider v-model="config.tts.rate" label="总语速" hint="TTS语速(包括其他语言)" min="1" max="100" step="1"></v-slider>
+            <v-slider v-model="config.tts.volume" label="总音量" hint="TTS音量(包括其他语言)" min="1" max="100" step="1"></v-slider>
             <v-switch v-model="config.tts.japanese.enable" inset color="blue" label="启用日语朗读" aria-label="启用日语朗读"></v-switch>
             <v-select v-model="config.tts.japanese.voice" :items="ttsJPVoices" label="日语TTS发音引擎" aria-label="日语TTS发音引擎"></v-select>
-            <v-slider v-model="config.tts.japanese.rate" label="日语相对语速" hint="TTS日语相对语速" min="1" max="100"></v-slider>
-            <v-slider v-model="config.tts.japanese.volume" label="日语相对音量" hint="TTS日语相对音量" min="1" max="100"></v-slider>
+            <v-slider v-model="config.tts.japanese.rate" label="日语相对语速" hint="TTS日语相对语速" min="1" max="100" step="1"></v-slider>
+            <v-slider v-model="config.tts.japanese.volume" label="日语相对音量" hint="TTS日语相对音量" min="1" max="100" step="1"></v-slider>
         </v-form>
     </v-card>
 </template>
@@ -77,18 +80,23 @@
 .block-button {
     margin-bottom: 16px;
 }
+.block-select {
+    margin-top: 16px;
+}
 </style>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { DynamicConfig } from "../types/DynamicConfig";
-import { getDynamicConfig, setDynamicConfig, onWSState, flushQueue, getAllVoices } from '@/services/Database';
+import { getDynamicConfig, setDynamicConfig, onWSState, flushQueue, getAllVoices, getAllSpeakers } from '@/services/Database';
 
 const ttsCNVoices = ref([] as { title: string, value: string }[]);
 const ttsJPVoices = ref([] as { title: string, value: string }[]);
+const ttsSpeakers = ref([] as { title: string, value: string }[]);
 const config = ref(undefined as unknown as DynamicConfig);
 config.value = {
     tts: {
+        speaker: "",
         volume: 100,
         voice: "",
         rate: 100,
@@ -103,6 +111,7 @@ config.value = {
         danmu: {
             enable: true,
             emojiEnable: true,
+            isFansMedalBelongToLive: true,
             fansMedalGuardLevelBigger: 0,
             fansMedalLevelBigger: 0,
             lengthShorter: 0,
@@ -125,6 +134,7 @@ config.value = {
         },
         welcome: {
             enable: true,
+            isFansMedalBelongToLive: true,
             fansMedalGuardLevelBigger: 0,
             fansMedalLevelBigger: 0
         },
@@ -158,6 +168,13 @@ function onRead() {
                     value: voice.name
                 });
             }
+        });
+        ttsSpeakers.value = [];
+        (await getAllSpeakers()).forEach(speaker => {
+            ttsSpeakers.value.push({
+                title: speaker,
+                value: speaker
+            });
         });
     })().then(msg => {
         reading.value = false;

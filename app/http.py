@@ -5,7 +5,7 @@ import asyncio, json, os, webbrowser
 from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
 if os.name == 'nt':
-    from .tts import getAllVoices
+    from .tts import getAllVoices, getAllSpeakers
 
 staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static')
 app = Quart(__name__, static_folder=staticFilesPath, static_url_path='/')
@@ -57,6 +57,13 @@ async def logout():
     nowJsonConfig['kvdb']['bili']['jct'] = ""
     await updateJsonConfig(nowJsonConfig)
     return { 'status': 0, 'msg': 'ok' }
+
+@app.route('/api/tts/speakers', methods=['GET'])
+@checkToken
+async def getSpeakers():
+    if os.name != 'nt':
+        return { 'status': -1, 'msg': 'not support' }, 400
+    return { 'status': 0, 'msg': getAllSpeakers() }
 
 @app.route('/api/tts/voices', methods=['GET'])
 @checkToken

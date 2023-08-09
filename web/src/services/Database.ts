@@ -49,6 +49,10 @@ export async function setEngineConfig(config: EngineConfig) {
     await httpExecute('config/engine', 'POST', config);
 }
 
+export async function getAllSpeakers() {
+    const data = await httpExecute('tts/speakers', 'GET');
+    return data as string[];
+}
 
 export async function flushQueue() {
     await httpExecute('flush', 'POST');

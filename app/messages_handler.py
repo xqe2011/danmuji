@@ -120,5 +120,9 @@ async def onWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMed
 
 async def markAllMessagesInvalid():
     global messagesQueue
-    messagesQueue = []
+    messagesQueue = [{
+        'type': 'system',
+        'time': time.time(),
+        'msg': "已清空弹幕列表"
+    }]
     setOutputMessagesLength(len(messagesQueue))

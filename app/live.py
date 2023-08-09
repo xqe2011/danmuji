@@ -9,7 +9,6 @@ import concurrent.futures
 
 liveEvent = AsyncIOEventEmitter()
 userCredential=Credential(getJsonConfig()['kvdb']['bili']['sessdata'], getJsonConfig()['kvdb']['bili']['jct'])
-userID = None
 room = live.LiveDanmaku(getJsonConfig()['engine']['bili']['liveID'], credential=userCredential)
 
 # 0为普通用户，1为总督，2位提督，3为舰长
@@ -34,9 +33,6 @@ async def onDanmuCallback(event):
         fansMedalLevel = 0
         fansMedalGuardLevel = 0
     isEmoji = event['data']['info'][0][12] == 1 or isAllCharactersEmoji(msg)
-    global userID
-    if uid == userID:
-        return
     timeLog(f"[Danmu] {uname}: {msg}")
     liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji)
 
@@ -125,7 +121,7 @@ def openBroswer():
     userCredential = Credential(sessdata, jct)
 
 async def initalizeLive():
-    global userCredential, userID
+    global userCredential
     # 检查B站凭证是否有效
     data = await getSelfInfo()
     if data == None:
@@ -139,5 +135,4 @@ async def initalizeLive():
         nowJsonConfig['kvdb']['bili']['jct'] = userCredential.bili_jct
         await updateJsonConfig(nowJsonConfig)
 
-    userID = data['mid']
     await connectLive()

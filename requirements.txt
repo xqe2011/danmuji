@@ -10,3 +10,4 @@ selenium==4.11.2
 winsdk==1.0.0b9
 pygame==2.5.0
 pyinstaller==5.13.0
+keyboard==0.13.5

@@ -2,8 +2,8 @@
     <v-card class="mx-auto" elevation="4">
         <v-card-title>
             <div><p tabindex="0">引擎配置 - 重启生效</p></div>
-            <v-btn :loading="reading" color="green" @click="onRead">读取</v-btn>
-            <v-btn :loading="saving" color="blue" @click="onSave">保存</v-btn>
+            <v-btn :loading="reading" color="green" @click="onRead" aria-label="引擎配置读取">读取</v-btn>
+            <v-btn :loading="saving" color="blue" @click="onSave" aria-label="引擎配置保存">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
@@ -12,7 +12,7 @@
 
             <v-text-field v-model="config.bili.liveID" label="直播间号" aria-label="直播间号"></v-text-field>
 
-            <v-text-field v-model="config.http.token" label="HTTP令牌" aria-label="直播间号"></v-text-field>
+            <v-text-field v-model="config.http.token" label="HTTP令牌" aria-label="HTTP令牌"></v-text-field>
             <v-divider></v-divider>
 
             <v-switch v-model="config.remote.enable" inset color="blue" label="启用远程控制" aria-label="启用远程控制"></v-switch>

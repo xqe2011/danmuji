@@ -6,6 +6,8 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
         return False
     if uid in dynamicConfig["filter"]["danmu"]["whitelistUsers"]:
         return True
+    if dynamicConfig["filter"]["danmu"]["isFansMedalBelongToLive"] != 0 and not isFansMedalBelongToLive:
+        return False
     if dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"]:
         return False
     if dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"] != 0 and fansMedalGuardLevel < dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"]:
@@ -39,6 +41,8 @@ def filterGift(uid, uname, price, giftName, num):
 def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["welcome"]["enable"]:
+        return False
+    if dynamicConfig["filter"]["welcome"]["isFansMedalBelongToLive"] != 0 and not isFansMedalBelongToLive:
         return False
     if dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"]:
         return False

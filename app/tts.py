@@ -1,5 +1,5 @@
 import asyncio, time, re
-
+import pygame._sdl2.audio as sdl2_audio
 from .messages_handler import popMessagesQueue
 from .stats import appendDelay
 from .config import getJsonConfig, updateJsonConfig
@@ -12,16 +12,25 @@ import io
 lastRate = None
 lastVolume = None
 lastVoice = None
+lastSpeaker = None
 synthesizer = None
 allVoices = []
+allSpeakers = []
 
 def getAllVoices():
     global allVoices
     return [ { 'name': voice.display_name, 'language': voice.language } for voice in list(allVoices)]
 
+def getAllSpeakers():
+    global allSpeakers
+    return allSpeakers
+
 async def init():
-    global synthesizer, allVoices
+    global synthesizer, allVoices, allSpeakers
     pygame.mixer.init()
+    allSpeakers = sdl2_audio.get_audio_device_names(False)
+    for name in list(allSpeakers):
+        timeLog(f'[TTS] Found speaker: {name}')
 
     synthesizer = speechsynthesis.SpeechSynthesizer()
     allVoices = speechsynthesis.SpeechSynthesizer.all_voices
@@ -31,7 +40,7 @@ async def init():
     await tts("TTS模块初始化成功")
 
 def syncWithConfig():
-    global lastRate, lastVolume, lastVoice
+    global lastRate, lastVolume, lastVoice, lastSpeaker
     ttsConfig = getJsonConfig()['dynamic']['tts']
     if lastVolume != ttsConfig['volume']:
         lastVolume = ttsConfig['volume']
@@ -54,6 +63,20 @@ def syncWithConfig():
         else:
             voice = synthesizer.voice
             timeLog(f'[TTS] Use default voice: {voice.display_name} ({voice.language})"')
+    if lastSpeaker != ttsConfig['speaker']:
+        lastSpeaker = ttsConfig['speaker']
+        targetSpeaker = None
+        for speaker in list(allSpeakers):
+            if ttsConfig['speaker'] in speaker:
+                targetSpeaker = speaker
+                break
+        if targetSpeaker != None:
+            timeLog(f'[TTS] Use speaker: {targetSpeaker}"')
+        else:
+            targetSpeaker = allSpeakers[0]
+            timeLog(f'[TTS] Use default speaker: {targetSpeaker}"')
+        pygame.mixer.quit()
+        pygame.mixer.init(devicename=targetSpeaker)
 
 def calculateTags(lang, config, text):
     tagsXml = '<voice name="{}" xml:lang="{}"><prosody rate="{}" volume="{}">{}</prosody></voice>'
@@ -103,6 +126,8 @@ def messagesToText(msg):
         return f"感谢{msg['uname']}关注"
     elif msg['type'] == 'welcome':
         return f"欢迎{msg['uname']}进入直播间"
+    elif msg['type'] == 'system':
+        return f"系统提示{msg['msg']}"
 
 async def ttsTask():
     await init()

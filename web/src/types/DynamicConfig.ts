@@ -1,5 +1,6 @@
 export type DynamicConfig = {
     "tts": {
+        "speaker": string,
         "volume": number,
         "voice": string,
         "rate": number,
@@ -14,6 +15,7 @@ export type DynamicConfig = {
         "danmu": {
             "enable": boolean,
             "emojiEnable": boolean,
+            "isFansMedalBelongToLive": boolean,
             "fansMedalLevelBigger": number,
             "fansMedalGuardLevelBigger": number,
             "lengthShorter": number,
@@ -29,6 +31,7 @@ export type DynamicConfig = {
         },
         "welcome": {
             "enable": boolean,
+            "isFansMedalBelongToLive": boolean,
             "fansMedalLevelBigger": number,
             "fansMedalGuardLevelBigger": number,
         },
