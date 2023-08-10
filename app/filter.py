@@ -1,4 +1,5 @@
 from .config import getJsonConfig
+import time, asyncio
 
 def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
     dynamicConfig = getJsonConfig()['dynamic']
@@ -23,7 +24,9 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
             return False
     return True
 
-def filterGift(uid, uname, price, giftName, num):
+giftUids = {}
+def filterGift(uid, uname, price, giftName, num, deduplicateCallback):
+    global giftUids
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["gift"]["enable"]:
         return False
@@ -32,11 +35,28 @@ def filterGift(uid, uname, price, giftName, num):
             return False
         if dynamicConfig["filter"]["gift"]["freeGiftCountBigger"] != 0 and num < dynamicConfig["filter"]["gift"]["freeGiftCountBigger"]:
             return False
-        return True
     else:
         if dynamicConfig["filter"]["gift"]["moneyGiftPriceBigger"] != 0 and price < dynamicConfig["filter"]["gift"]["moneyGiftPriceBigger"]:
             return False
-        return True
+    # 开启了礼物聚合后，所有的礼物都不读除非超时和变化了礼物名称
+    if dynamicConfig["filter"]["gift"]["deduplicateTime"] != 0:
+        if uid not in giftUids:
+            giftUids[uid] = {
+                'uid': uid,
+                'uname': uname,
+                'gifts': {}
+            }
+        if giftName in giftUids[uid]['gifts']:
+            giftUids[uid]['gifts'][giftName]['task'].cancel()
+        def callback():
+            deduplicateCallback(giftUids[uid], giftName)
+            del giftUids[uid]['gifts'][giftName]
+        giftUids[uid]['gifts'][giftName] = {
+            'count': giftUids[uid]['gifts'][giftName]['count'] + num if giftName in giftUids[uid]['gifts']  else num,
+            'task': asyncio.get_running_loop().call_later(dynamicConfig["filter"]["gift"]["deduplicateTime"], callback)
+        }
+        return None
+    return True
 
 def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
     dynamicConfig = getJsonConfig()['dynamic']

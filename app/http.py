@@ -124,7 +124,8 @@ async def ws():
 @app.before_serving
 async def startup():
     global token
-    webbrowser.register('edge', None, webbrowser.GenericBrowser(os.environ['ProgramFiles(x86)'] + r'\Microsoft\Edge\Application\msedge_proxy.exe'), preferred=True)
+    if os.name == "nt":
+        webbrowser.register('edge', None, webbrowser.GenericBrowser(os.environ['ProgramFiles(x86)'] + r'\Microsoft\Edge\Application\msedge_proxy.exe'), preferred=True)
     webbrowser.open('http://127.0.0.1:8080/?token=' + token, new=1, autoraise=True)
     for task in tasks:
         app.add_background_task(task)

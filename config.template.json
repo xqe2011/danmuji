@@ -46,6 +46,7 @@
             "gift": {
                 "enable": true,
                 "freeGiftEnable": true,
+                "deduplicateTime": 10,
                 "freeGiftCountBigger": 0,
                 "moneyGiftPriceBigger": 0
             },

@@ -35,7 +35,18 @@ async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedal
 
 @liveEvent.on('gift')
 async def onGift(uid, uname, price, giftName, num):
-    if filterGift(uid, uname, price, giftName, num):
+    def deduplicateCallback(userInfo, giftName):
+        giftInfo = userInfo['gifts'][giftName]
+        messagesQueueAppend({
+            'type': 'gift',
+            'time': time.time(),
+            'uid': userInfo['uid'],
+            'uname': userInfo['uname'],
+            'giftName': giftName,
+            'num': giftInfo['count']
+        })
+    result = filterGift(uid, uname, price, giftName, num, deduplicateCallback)
+    if result == True:
         appendGiftFilteredStats(uid=uid, uname=uname, giftName=giftName, num=num, filterd=False)
         messagesQueueAppend({
             'type': 'gift',
@@ -46,7 +57,7 @@ async def onGift(uid, uname, price, giftName, num):
             'num': num
         })
     else:
-        appendGiftFilteredStats(uid=uid, uname=uname, giftName=giftName, num=num, filterd=True)
+        appendGiftFilteredStats(uid=uid, uname=uname, giftName=giftName, num=num, filterd=(result != None))
 
 @liveEvent.on('guardBuy')
 async def onGuardBuy(uid, uname, newGuard, giftName, num):
