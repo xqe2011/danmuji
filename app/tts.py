@@ -13,6 +13,7 @@ lastRate = None
 lastVolume = None
 lastVoice = None
 lastSpeaker = None
+nowSpeaker = None
 synthesizer = None
 allVoices = []
 allSpeakers = []
@@ -65,18 +66,22 @@ def syncWithConfig():
             timeLog(f'[TTS] Use default voice: {voice.display_name} ({voice.language})"')
     if lastSpeaker != ttsConfig['speaker']:
         lastSpeaker = ttsConfig['speaker']
-        targetSpeaker = None
+        global nowSpeaker
         for speaker in list(allSpeakers):
             if ttsConfig['speaker'] in speaker:
-                targetSpeaker = speaker
+                nowSpeaker = speaker
                 break
-        if targetSpeaker != None:
-            timeLog(f'[TTS] Use speaker: {targetSpeaker}"')
+        if nowSpeaker != None:
+            timeLog(f'[TTS] Use speaker: {nowSpeaker}"')
         else:
-            targetSpeaker = allSpeakers[0]
-            timeLog(f'[TTS] Use default speaker: {targetSpeaker}"')
+            nowSpeaker = allSpeakers[0]
+            timeLog(f'[TTS] Use default speaker: {nowSpeaker}"')
         pygame.mixer.quit()
-        pygame.mixer.init(devicename=targetSpeaker)
+        pygame.mixer.init(devicename=nowSpeaker)
+
+def getNowSpeaker():
+    global nowSpeaker
+    return nowSpeaker
 
 def calculateTags(lang, config, text):
     tagsXml = '<voice name="{}" xml:lang="{}"><prosody rate="{}" volume="{}">{}</prosody></voice>'

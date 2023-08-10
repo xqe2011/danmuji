@@ -45,6 +45,10 @@ appendGuardBuyFilteredStats = statsFunctionGenerator('guardBuy')
 appendSubscribeFilteredStats = statsFunctionGenerator('subscribe')
 appendSuperChatFilteredStats = statsFunctionGenerator('superChat')
 
+def getDelay():
+    global delaysQueue
+    return sum(delaysQueue) / len(delaysQueue) if len(delaysQueue) > 0 else 0
+
 def appendDelay(delay):
     global delaysQueue
     delaysQueue.append(delay)
@@ -61,7 +65,7 @@ async def statsTask():
     while True:
         await asyncio.sleep(5)
         lastDurationStats['cpuUsage'] = cpu_percent(interval=None)
-        lastDurationStats['delay'] = sum(delaysQueue) / len(delaysQueue) if len(delaysQueue) > 0 else 0
+        lastDurationStats['delay'] = getDelay()
         statsEvent.emit('stats', {
             'events': messagesQueue,
             'stats': lastDurationStats

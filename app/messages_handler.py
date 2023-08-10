@@ -6,6 +6,16 @@ import time
 
 messagesQueue = []
 
+def messagesQueueSystemAppend(text):
+    global messagesQueue
+    messagesQueue = [message for message in messagesQueue if message['type'] != 'system']
+    messagesQueue.insert(0, {
+        'type': 'system',
+        'time': time.time(),
+        'msg': text
+    })
+    setOutputMessagesLength(len(messagesQueue))
+
 def popMessagesQueue():
     global messagesQueue
     if len(messagesQueue) == 0:
