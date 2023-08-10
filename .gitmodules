@@ -1,0 +1,3 @@
+[submodule "blivedm"]
+	path = blivedm
+	url = git@github.com:xfgryujk/blivedm.git
