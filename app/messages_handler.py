@@ -5,6 +5,7 @@ from .stats import setOutputMessagesLength, appendDanmuFilteredStats, appendGift
 import time
 
 messagesQueue = []
+haveReadMessages = []
 
 def messagesQueueSystemAppend(text):
     global messagesQueue
@@ -17,12 +18,20 @@ def messagesQueueSystemAppend(text):
     setOutputMessagesLength(len(messagesQueue))
 
 def popMessagesQueue():
-    global messagesQueue
+    global messagesQueue, haveReadMessages
     if len(messagesQueue) == 0:
         return None
     data = messagesQueue.pop(0)
     setOutputMessagesLength(len(messagesQueue))
+    if data['type'] != 'system':
+        haveReadMessages.insert(0, data)
+        if len(haveReadMessages) > 10:
+            haveReadMessages.pop(0)
     return data
+
+def getHaveReadMessages():
+    global haveReadMessages
+    return haveReadMessages
 
 def messagesQueueAppend(data):
     global messagesQueue

@@ -7,11 +7,10 @@ staticFilesPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../s
 app = Quart(__name__, static_folder=staticFilesPath, static_url_path='/')
 danmuji = {}
 
-def getIpAndPort(ws = False):
+def getIp(ws = False):
     instance = websocket if ws else request
     ip = instance.headers['X-Forwarded-For'] if 'X-Forwarded-For' in instance.headers else instance.remote_addr
-    port = instance.headers['X-Forwarded-Port'] if 'X-Forwarded-Port' in instance.headers else instance.host.split(':')[1]
-    return ip, port
+    return ip
 
 @app.route('/robots.txt', methods=['GET'])
 async def noRobots():
@@ -38,8 +37,8 @@ async def proxyRequest(path):
         return { 'status': -1, 'msg': 'token error' }, 401
     target = danmuji[request.args.get('token')]
     requestID = random.randrange(100000000, 999999999)
-    ip, port = getIpAndPort()
-    timeLog(f"[Client] Forwarding http request {'/api/' +path} to server which token: {request.args.get('token')}, host: {ip}:{port}")
+    ip = getIp()
+    timeLog(f"[Client] Forwarding http request {'/api/' +path} to server which token: {request.args.get('token')}, host: {ip}")
     await target['server'].send_json({
         'type': 'request',
         'id': requestID,
@@ -50,7 +49,7 @@ async def proxyRequest(path):
     })
     while target['response'] == None or target['response']['id'] != requestID:
         await target['event'].wait()
-    timeLog(f"[Client] Got http response from server which token: {request.args.get('token')}, host: {ip}:{port}")
+    timeLog(f"[Client] Got http response from server which token: {request.args.get('token')}, host: {ip}")
     if target['response']['data'] == None:
         return { 'status': -1, 'msg': 'error' }, 500
     return target['response']['data']
@@ -62,27 +61,27 @@ async def wsClient():
         await websocket.close(code=-1, reason='token error')
         return
     token = websocket.args['token']
-    ip, port = getIpAndPort()
-    timeLog(f'[Client] New connection from token: {token}, host: {ip}:{port}')
+    ip = getIp(ws=True)
+    timeLog(f'[Client] New connection from token: {token}, host: {ip}')
     try:
         danmuji[token]['client'].append(websocket._get_current_object())
         while True:
             await websocket.receive()
     except asyncio.CancelledError:
-        timeLog(f'[Client] Disconnected from token: {token}, host: {ip}:{port}')
+        timeLog(f'[Client] Disconnected from token: {token}, host: {ip}')
         if token in danmuji:
             danmuji[token]['client'].remove(websocket._get_current_object())
         raise
 
 @app.websocket('/ws/server')
 async def wsServer():
-    ip, port = getIpAndPort(ws=True)
+    ip = getIp(ws=True)
     if 'password' not in websocket.args or 'token' not in websocket.args:
-        timeLog(f'[Server] Password or token not found from host: {ip}:{port}')
+        timeLog(f'[Server] Password or token not found from host: {ip}')
         await websocket.close(code=-1003, reason='password or token not found!')
         return
     if websocket.args['password'] != HTTP_SERVER_PASSWORD:
-        timeLog(f'[Server] Password incorrect from host: {ip}:{port}')
+        timeLog(f'[Server] Password incorrect from host: {ip}')
         await websocket.close(code=-1002, reason='server password is incorrect!')
         return
     global danmuji
@@ -96,7 +95,7 @@ async def wsServer():
         'event': asyncio.Event(),
         'response': None,
     }
-    timeLog(f'[Server] New connection from token: {token}')
+    timeLog(f'[Server] New connection from token: {token}, host: {ip}')
     try:
         while True:
             message = await websocket.receive_json()
@@ -108,7 +107,7 @@ async def wsServer():
                 for client in danmuji[token]['client']:
                     await client.send_json(message['data'])
     except asyncio.CancelledError:
-        timeLog(f'[Server] Disconnected from token: {token}')
+        timeLog(f'[Server] Disconnected from token: {token}, host: {ip}')
         for client in danmuji[token]['client']:
             try:
                 await client.close()

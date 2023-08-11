@@ -3,11 +3,12 @@ from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid, messagesQueueSystemAppend
 import os, time
 from .config import getJsonConfig, updateJsonConfig
-from .tts import getAllSpeakers, getNowSpeaker
+from .tts import getAllSpeakers, getNowSpeaker, setReadLastMessagesMode, readLastMessagesAndIncreaseIndex
 from .stats import getDelay
 
 async def handleFlush():
     timeLog('[Keyboard] Trigging flush')
+    await setReadLastMessagesMode(False)
     await markAllMessagesInvalid()
 
 async def handleTTSRatePlus():
@@ -61,6 +62,15 @@ async def handleGetDelay():
     timeLog('[Keyboard] Trigging get delay')
     messagesQueueSystemAppend('当前延迟为%.1f秒' % getDelay())
 
+async def handleEnableReadLastMessages():
+    timeLog('[Keyboard] Trigging enabe read last messages')
+    await setReadLastMessagesMode(True)
+    await readLastMessagesAndIncreaseIndex()
+
+async def handleDisableReadLastMessages():
+    timeLog('[Keyboard] Trigging disable read last messages')
+    await setReadLastMessagesMode(False)
+
 async def initalizeKeyboard():
     runningLoop = asyncio.get_running_loop()
     if os.name == "nt":
@@ -74,4 +84,7 @@ async def initalizeKeyboard():
         keyboard.add_hotkey('ctrl+alt+o', lambda: asyncio.run_coroutine_threadsafe(handleTTSVolumeMinus(), runningLoop))
 
         keyboard.add_hotkey('ctrl+alt+m', lambda: asyncio.run_coroutine_threadsafe(handleTTSVoicePlus(), runningLoop))
+
+        keyboard.add_hotkey('ctrl+alt+f11', lambda: asyncio.run_coroutine_threadsafe(handleDisableReadLastMessages(), runningLoop))
+        keyboard.add_hotkey('ctrl+alt+f12', lambda: asyncio.run_coroutine_threadsafe(handleEnableReadLastMessages(), runningLoop))
         
