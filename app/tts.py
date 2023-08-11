@@ -1,6 +1,6 @@
 import asyncio, time, re
 import pygame._sdl2.audio as sdl2_audio
-from .messages_handler import popMessagesQueue, getHaveReadMessages, messagesQueueSystemAppend
+from .messages_handler import popMessagesQueue, getHaveReadMessages
 from .stats import appendDelay
 from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
@@ -17,8 +17,8 @@ nowSpeaker = None
 synthesizer = None
 allVoices = []
 allSpeakers = []
-prepareReadLastMessagesMode = False
-readLastMessagesMode = False
+prepareDisableTTSTask = False
+disableTTSTask = False
 readLastMessagesIndex = 0
 
 def getAllVoices():
@@ -138,15 +138,15 @@ def messagesToText(msg):
         return f"系统提示{msg['msg']}"
 
 async def ttsTask():
-    global prepareReadLastMessagesMode, readLastMessagesMode
+    global prepareDisableTTSTask, disableTTSTask
     await init()
     while True:
-        if prepareReadLastMessagesMode:
-            readLastMessagesMode = True
+        if prepareDisableTTSTask:
+            disableTTSTask = True
             await asyncio.sleep(0.1)
             continue
         else:
-            readLastMessagesMode = False
+            disableTTSTask = False
         msg = popMessagesQueue()
         if msg == None:
             await asyncio.sleep(0.1)
@@ -155,19 +155,29 @@ async def ttsTask():
         text = messagesToText(msg)
         await tts(text)
 
+async def setDisableTTSTask(mode, waiting = True):
+    global prepareDisableTTSTask, disableTTSTask
+    if prepareDisableTTSTask == False and mode == True:
+        prepareDisableTTSTask = mode
+        while (not disableTTSTask) and waiting:
+            await asyncio.sleep(0.1)
+    elif prepareDisableTTSTask == True and mode == False:
+        prepareDisableTTSTask = mode
+        while (disableTTSTask) and waiting:
+            await asyncio.sleep(0.1)
+
+async def ttsSystem(msg):
+    await setDisableTTSTask(True, False)
+    await tts(messagesToText({'type': 'system', 'msg': msg}))
+    await setDisableTTSTask(False, False)
+
 async def setReadLastMessagesMode(mode):
-    global prepareReadLastMessagesMode, readLastMessagesIndex, readLastMessagesMode
-    if prepareReadLastMessagesMode == False and mode == True:
-        prepareReadLastMessagesMode = mode
-        while not readLastMessagesMode:
-            await asyncio.sleep(0.1)
-        readLastMessagesIndex = -1
+    if mode:
+        await setDisableTTSTask(mode)
         await tts(messagesToText({'type': 'system', 'msg': '已进入历史消息阅读模式'}))
-    elif prepareReadLastMessagesMode == True and mode == False:
-        messagesQueueSystemAppend('已退出历史消息阅读模式')
-        prepareReadLastMessagesMode = mode
-        while readLastMessagesMode:
-            await asyncio.sleep(0.1)
+    else:
+        await ttsSystem('已退出历史消息阅读模式')
+        await setDisableTTSTask(mode)
 
 async def readLastMessagesAndIncreaseIndex():
     global readLastMessagesIndex

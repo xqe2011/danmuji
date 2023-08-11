@@ -7,26 +7,15 @@ import time
 messagesQueue = []
 haveReadMessages = []
 
-def messagesQueueSystemAppend(text):
-    global messagesQueue
-    messagesQueue = [message for message in messagesQueue if message['type'] != 'system']
-    messagesQueue.insert(0, {
-        'type': 'system',
-        'time': time.time(),
-        'msg': text
-    })
-    setOutputMessagesLength(len(messagesQueue))
-
 def popMessagesQueue():
     global messagesQueue, haveReadMessages
     if len(messagesQueue) == 0:
         return None
     data = messagesQueue.pop(0)
     setOutputMessagesLength(len(messagesQueue))
-    if data['type'] != 'system':
-        haveReadMessages.insert(0, data)
-        if len(haveReadMessages) > 10:
-            haveReadMessages.pop(0)
+    haveReadMessages.insert(0, data)
+    if len(haveReadMessages) > 10:
+        haveReadMessages.pop(0)
     return data
 
 def getHaveReadMessages():

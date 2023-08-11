@@ -1,9 +1,9 @@
 import keyboard, asyncio
 from .logger import timeLog
-from .messages_handler import markAllMessagesInvalid, messagesQueueSystemAppend
+from .messages_handler import markAllMessagesInvalid
 import os, time
 from .config import getJsonConfig, updateJsonConfig
-from .tts import getAllSpeakers, getNowSpeaker, setReadLastMessagesMode, readLastMessagesAndIncreaseIndex
+from .tts import getAllSpeakers, getNowSpeaker, setReadLastMessagesMode, readLastMessagesAndIncreaseIndex, ttsSystem
 from .stats import getDelay
 
 async def handleFlush():
@@ -18,7 +18,7 @@ async def handleTTSRatePlus():
     nowJsonConfig['dynamic']['tts']['rate'] = max(nowJsonConfig['dynamic']['tts']['rate'], 1)
     nowJsonConfig['dynamic']['tts']['rate'] = min(nowJsonConfig['dynamic']['tts']['rate'], 100)
     await updateJsonConfig(nowJsonConfig)
-    messagesQueueSystemAppend('TTS语速增加到' + str(nowJsonConfig['dynamic']['tts']['rate']))
+    await ttsSystem('TTS语速增加到' + str(nowJsonConfig['dynamic']['tts']['rate']))
 
 async def handleTTSRateMinus():
     timeLog('[Keyboard] Trigging TTS rate minus')
@@ -27,7 +27,7 @@ async def handleTTSRateMinus():
     nowJsonConfig['dynamic']['tts']['rate'] = max(nowJsonConfig['dynamic']['tts']['rate'], 1)
     nowJsonConfig['dynamic']['tts']['rate'] = min(nowJsonConfig['dynamic']['tts']['rate'], 100)
     await updateJsonConfig(nowJsonConfig)
-    messagesQueueSystemAppend('TTS语速减少到' + str(nowJsonConfig['dynamic']['tts']['rate']))
+    await ttsSystem('TTS语速减少到' + str(nowJsonConfig['dynamic']['tts']['rate']))
 
 async def handleTTSVolumePlus():
     timeLog('[Keyboard] Trigging TTS volume plus')
@@ -36,7 +36,7 @@ async def handleTTSVolumePlus():
     nowJsonConfig['dynamic']['tts']['volume'] = max(nowJsonConfig['dynamic']['tts']['volume'], 1)
     nowJsonConfig['dynamic']['tts']['volume'] = min(nowJsonConfig['dynamic']['tts']['volume'], 100)
     await updateJsonConfig(nowJsonConfig)
-    messagesQueueSystemAppend('TTS音量增加到' + str(nowJsonConfig['dynamic']['tts']['volume']))
+    await ttsSystem('TTS音量增加到' + str(nowJsonConfig['dynamic']['tts']['volume']))
 
 async def handleTTSVolumeMinus():
     timeLog('[Keyboard] Trigging TTS volume minus')
@@ -45,7 +45,7 @@ async def handleTTSVolumeMinus():
     nowJsonConfig['dynamic']['tts']['volume'] = max(nowJsonConfig['dynamic']['tts']['volume'], 1)
     nowJsonConfig['dynamic']['tts']['volume'] = min(nowJsonConfig['dynamic']['tts']['volume'], 100)
     await updateJsonConfig(nowJsonConfig)
-    messagesQueueSystemAppend('TTS音量减少到' + str(nowJsonConfig['dynamic']['tts']['volume']))
+    await ttsSystem('TTS音量减少到' + str(nowJsonConfig['dynamic']['tts']['volume']))
 
 async def handleTTSVoicePlus():
     timeLog('[Keyboard] Trigging TTS voice plus')
@@ -56,11 +56,11 @@ async def handleTTSVoicePlus():
     nowIndex %= len(allSpeakers)
     nowJsonConfig['dynamic']['tts']['speaker'] = allSpeakers[nowIndex]
     await updateJsonConfig(nowJsonConfig)
-    messagesQueueSystemAppend('TTS音频通道切换为' + allSpeakers[nowIndex])
+    await ttsSystem('TTS音频通道切换为' + allSpeakers[nowIndex])
 
 async def handleGetDelay():
     timeLog('[Keyboard] Trigging get delay')
-    messagesQueueSystemAppend('当前延迟为%.1f秒' % getDelay())
+    await ttsSystem('当前延迟为%.1f秒' % getDelay())
 
 async def handleEnableReadLastMessages():
     timeLog('[Keyboard] Trigging enabe read last messages')
