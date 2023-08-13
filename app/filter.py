@@ -1,13 +1,15 @@
 from .config import getJsonConfig
-import time, asyncio
+import asyncio
 
+lastDanmuMessages = []
 def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
+    global lastDanmuMessages
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["danmu"]["enable"]:
         return False
     if uid in dynamicConfig["filter"]["danmu"]["whitelistUsers"]:
         return True
-    if dynamicConfig["filter"]["danmu"]["isFansMedalBelongToLive"] != 0 and not isFansMedalBelongToLive:
+    if dynamicConfig["filter"]["danmu"]["isFansMedalBelongToLive"] and not isFansMedalBelongToLive:
         return False
     if dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"]:
         return False
@@ -22,6 +24,12 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
     for keyword in dynamicConfig["filter"]["danmu"]["blacklistKeywords"]:
         if keyword in msg:
             return False
+    if dynamicConfig["filter"]["danmu"]["deduplicate"]:
+        if msg in lastDanmuMessages:
+            return False
+        lastDanmuMessages.insert(0, msg)
+        if len(lastDanmuMessages) > 10:
+            lastDanmuMessages.pop(0)
     return True
 
 giftUids = {}
@@ -62,7 +70,7 @@ def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedal
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["welcome"]["enable"]:
         return False
-    if dynamicConfig["filter"]["welcome"]["isFansMedalBelongToLive"] != 0 and not isFansMedalBelongToLive:
+    if dynamicConfig["filter"]["welcome"]["isFansMedalBelongToLive"] and not isFansMedalBelongToLive:
         return False
     if dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"]:
         return False

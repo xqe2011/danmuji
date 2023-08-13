@@ -35,6 +35,7 @@
             "danmu": {
                 "enable": true,
                 "emojiEnable": true,
+                "deduplicate": true,
                 "isFansMedalBelongToLive": false,
                 "fansMedalGuardLevelBigger": 0,
                 "fansMedalLevelBigger": 0,

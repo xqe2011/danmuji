@@ -11,6 +11,7 @@
 
             <v-switch v-model="config.filter.danmu.enable" inset color="blue" label="启用弹幕朗读" aria-label="启用弹幕朗读"></v-switch>
             <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用弹幕表情朗读" aria-label="启用弹幕表情朗读"></v-switch>
+            <v-switch v-model="config.filter.danmu.deduplicate" inset color="blue" label="去除短时间内重复弹幕" aria-label="去除短时间内重复弹幕"></v-switch>
             <v-switch v-model="config.filter.danmu.isFansMedalBelongToLive" inset color="blue" label="粉丝牌必须为本直播间" aria-label="粉丝牌必须为本直播间"></v-switch>
             <v-select v-model="config.filter.danmu.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" aria-label="弹幕大航海大于等于"></v-select>
             <v-text-field type="number" v-model="config.filter.danmu.fansMedalLevelBigger" label="粉丝牌等级大于等于" aria-label="弹幕粉丝牌等级大于等于"></v-text-field>
@@ -114,6 +115,7 @@ config.value = {
         danmu: {
             enable: true,
             emojiEnable: true,
+            deduplicate: true,
             isFansMedalBelongToLive: true,
             fansMedalGuardLevelBigger: 0,
             fansMedalLevelBigger: 0,

@@ -6,11 +6,7 @@
         </v-card-title>
 
         <v-form class="overflow-auto">
-            <v-btn class="block-button" block :loading="logouting" color="red" @click="onLogout">退出B站用户登录</v-btn>
-            <v-divider class="block-divider"></v-divider>
-
             <v-text-field v-model="config.bili.liveID" label="直播间号" aria-label="直播间号"></v-text-field>
-
             <v-text-field v-model="config.http.token" label="HTTP令牌" aria-label="HTTP令牌"></v-text-field>
             <v-divider></v-divider>
 

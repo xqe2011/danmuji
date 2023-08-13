@@ -15,6 +15,7 @@ export type DynamicConfig = {
         "danmu": {
             "enable": boolean,
             "emojiEnable": boolean,
+            "deduplicate": boolean,
             "isFansMedalBelongToLive": boolean,
             "fansMedalLevelBigger": number,
             "fansMedalGuardLevelBigger": number,
