@@ -7,6 +7,7 @@ from .stats import statsTask, statsEvent
 from .remote import initRemote, remoteWSBroadcast
 from .keyboard import initalizeKeyboard
 from .config import configEvent
+from .deep_learning import initalizeDeepLearning
 # only load tts in windows
 if os.name == 'nt':
     from .tts import ttsTask
@@ -24,7 +25,7 @@ async def configHandler(oldConfig, newConfig):
 def main():
     timeLog('[Main] Started')
     try:
-        tasks = [statsTask, initRemote, initalizeKeyboard, initalizeLive]
+        tasks = [statsTask, initRemote, initalizeKeyboard, initalizeDeepLearning, initalizeLive]
         if os.name == 'nt':
             tasks.append(ttsTask)
         startHttpServer(tasks)
