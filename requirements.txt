@@ -11,4 +11,5 @@ pygame==2.5.0
 pyinstaller==5.13.0
 keyboard==0.13.5
 optimum[onnxruntime]==1.11.1
+appdirs==1.4.4
 -r blivedm/requirements.txt
