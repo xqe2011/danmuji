@@ -77,7 +77,7 @@ async def initalizeKeyboard():
     runningLoop = asyncio.get_running_loop()
     if os.name == "nt":
         keyboard.add_hotkey('ctrl+alt+f5', lambda: asyncio.run_coroutine_threadsafe(handleFlush(), runningLoop))
-        keyboard.add_hotkey('shift+f1', lambda: asyncio.run_coroutine_threadsafe(handleGetDelay(), runningLoop))
+        keyboard.add_hotkey('alt+f6', lambda: asyncio.run_coroutine_threadsafe(handleGetDelay(), runningLoop))
 
         keyboard.add_hotkey('ctrl+alt+[', lambda: asyncio.run_coroutine_threadsafe(handleTTSRatePlus(), runningLoop))
         keyboard.add_hotkey('ctrl+alt+]', lambda: asyncio.run_coroutine_threadsafe(handleTTSRateMinus(), runningLoop))
@@ -87,8 +87,8 @@ async def initalizeKeyboard():
 
         keyboard.add_hotkey('ctrl+alt+\\', lambda: asyncio.run_coroutine_threadsafe(handleTTSVoicePlus(), runningLoop))
 
-        keyboard.add_hotkey('shift+f2', lambda: asyncio.run_coroutine_threadsafe(handleReadNextGiftMessages(), runningLoop))
-        keyboard.add_hotkey('shift+f3', lambda: asyncio.run_coroutine_threadsafe(handleReadNextHistoryDanmu(), runningLoop))
-        keyboard.add_hotkey('shift+f4', lambda: asyncio.run_coroutine_threadsafe(handleReadNewestMessages(), runningLoop))
+        keyboard.add_hotkey('alt+f7', lambda: asyncio.run_coroutine_threadsafe(handleReadNextGiftMessages(), runningLoop))
+        keyboard.add_hotkey('alt+f8', lambda: asyncio.run_coroutine_threadsafe(handleReadNextHistoryDanmu(), runningLoop))
+        keyboard.add_hotkey('alt+f9', lambda: asyncio.run_coroutine_threadsafe(handleReadNewestMessages(), runningLoop))
         
         
