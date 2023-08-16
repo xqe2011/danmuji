@@ -24,6 +24,11 @@
             "volume": 100,
             "voice": "Microsoft Huihui",
             "rate": 100,
+            "history": {
+                "voice": "Microsoft Huihui",
+                "rate": 100,
+                "volume": 80
+            },
             "japanese": {
                 "enable": true,
                 "voice": "Microsoft Haruka",

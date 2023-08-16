@@ -4,6 +4,11 @@ export type DynamicConfig = {
         "volume": number,
         "voice": string,
         "rate": number,
+        "history": {
+            "voice": string,
+            "rate": number,
+            "volume": number
+        },
         "japanese": {
             "enable": boolean,
             "voice": string,

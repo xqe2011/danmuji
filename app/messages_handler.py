@@ -13,9 +13,7 @@ def popMessagesQueue():
         return None
     data = messagesQueue.pop(0)
     setOutputMessagesLength(len(messagesQueue))
-    haveReadMessages.insert(0, data)
-    if len(haveReadMessages) > 10:
-        haveReadMessages.pop(0)
+    haveReadMessages.append(data)
     return data
 
 def getHaveReadMessages():

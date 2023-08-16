@@ -3,12 +3,11 @@ from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
 import os, time
 from .config import getJsonConfig, updateJsonConfig
-from .tts import getAllSpeakers, getNowSpeaker, setReadLastMessagesMode, readLastMessagesAndIncreaseIndex, ttsSystem
+from .tts import getAllSpeakers, getNowSpeaker, readHistoryByType, resetHistoryIndex, ttsSystem
 from .stats import getDelay
 
 async def handleFlush():
     timeLog('[Keyboard] Trigging flush')
-    await setReadLastMessagesMode(False)
     await markAllMessagesInvalid()
 
 async def handleTTSRatePlus():
@@ -62,29 +61,34 @@ async def handleGetDelay():
     timeLog('[Keyboard] Trigging get delay')
     await ttsSystem('当前延迟为%.1f秒' % getDelay())
 
-async def handleEnableReadLastMessages():
-    timeLog('[Keyboard] Trigging enabe read last messages')
-    await setReadLastMessagesMode(True)
-    await readLastMessagesAndIncreaseIndex()
+async def handleReadNewestMessages():
+    timeLog('[Keyboard] Trigging read newest messages')
+    await resetHistoryIndex()
 
-async def handleDisableReadLastMessages():
-    timeLog('[Keyboard] Trigging disable read last messages')
-    await setReadLastMessagesMode(False)
+async def handleReadNextHistoryDanmu():
+    timeLog('[Keyboard] Trigging read next history danmu')
+    await readHistoryByType(['danmu'])
+
+async def handleReadNextGiftMessages():
+    timeLog('[Keyboard] Trigging read next history gift')
+    await readHistoryByType(['gift', 'guardBuy', 'superChat'])
 
 async def initalizeKeyboard():
     runningLoop = asyncio.get_running_loop()
     if os.name == "nt":
-        keyboard.add_hotkey('ctrl+alt+f1', lambda: asyncio.run_coroutine_threadsafe(handleFlush(), runningLoop))
-        keyboard.add_hotkey('alt+f1', lambda: asyncio.run_coroutine_threadsafe(handleGetDelay(), runningLoop))
+        keyboard.add_hotkey('ctrl+alt+f5', lambda: asyncio.run_coroutine_threadsafe(handleFlush(), runningLoop))
+        keyboard.add_hotkey('shift+f1', lambda: asyncio.run_coroutine_threadsafe(handleGetDelay(), runningLoop))
 
-        keyboard.add_hotkey('ctrl+alt+l', lambda: asyncio.run_coroutine_threadsafe(handleTTSRatePlus(), runningLoop))
-        keyboard.add_hotkey('ctrl+alt+k', lambda: asyncio.run_coroutine_threadsafe(handleTTSRateMinus(), runningLoop))
+        keyboard.add_hotkey('ctrl+alt+[', lambda: asyncio.run_coroutine_threadsafe(handleTTSRatePlus(), runningLoop))
+        keyboard.add_hotkey('ctrl+alt+]', lambda: asyncio.run_coroutine_threadsafe(handleTTSRateMinus(), runningLoop))
 
-        keyboard.add_hotkey('ctrl+alt+p', lambda: asyncio.run_coroutine_threadsafe(handleTTSVolumePlus(), runningLoop))
-        keyboard.add_hotkey('ctrl+alt+o', lambda: asyncio.run_coroutine_threadsafe(handleTTSVolumeMinus(), runningLoop))
+        keyboard.add_hotkey('ctrl+alt+=', lambda: asyncio.run_coroutine_threadsafe(handleTTSVolumePlus(), runningLoop))
+        keyboard.add_hotkey('ctrl+alt+-', lambda: asyncio.run_coroutine_threadsafe(handleTTSVolumeMinus(), runningLoop))
 
-        keyboard.add_hotkey('ctrl+alt+m', lambda: asyncio.run_coroutine_threadsafe(handleTTSVoicePlus(), runningLoop))
+        keyboard.add_hotkey('ctrl+alt+\\', lambda: asyncio.run_coroutine_threadsafe(handleTTSVoicePlus(), runningLoop))
 
-        keyboard.add_hotkey('ctrl+alt+f11', lambda: asyncio.run_coroutine_threadsafe(handleDisableReadLastMessages(), runningLoop))
-        keyboard.add_hotkey('ctrl+alt+f12', lambda: asyncio.run_coroutine_threadsafe(handleEnableReadLastMessages(), runningLoop))
+        keyboard.add_hotkey('shift+f2', lambda: asyncio.run_coroutine_threadsafe(handleReadNextGiftMessages(), runningLoop))
+        keyboard.add_hotkey('shift+f3', lambda: asyncio.run_coroutine_threadsafe(handleReadNextHistoryDanmu(), runningLoop))
+        keyboard.add_hotkey('shift+f4', lambda: asyncio.run_coroutine_threadsafe(handleReadNewestMessages(), runningLoop))
+        
         

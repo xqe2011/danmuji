@@ -51,6 +51,11 @@
             <v-select v-model="config.tts.voice" :items="ttsCNVoices" label="主TTS发音引擎" aria-label="主TTS发音引擎"></v-select>
             <v-slider v-model="config.tts.rate" label="总语速" hint="TTS语速(包括其他语言)" min="1" max="100" step="1"></v-slider>
             <v-slider v-model="config.tts.volume" label="总音量" hint="TTS音量(包括其他语言)" min="1" max="100" step="1"></v-slider>
+
+            <v-select v-model="config.tts.history.voice" :items="ttsCNVoices" label="历史模块TTS发音引擎" aria-label="历史模块TTS发音引擎"></v-select>
+            <v-slider v-model="config.tts.history.rate" label="总语速" hint="历史模块TTS语速" min="1" max="100" step="1"></v-slider>
+            <v-slider v-model="config.tts.history.volume" label="总音量" hint="历史模块TTS音量" min="1" max="100" step="1"></v-slider>
+
             <v-switch v-model="config.tts.japanese.enable" inset color="blue" label="启用日语朗读" aria-label="启用日语朗读"></v-switch>
             <v-select v-model="config.tts.japanese.voice" :items="ttsJPVoices" label="日语TTS发音引擎" aria-label="日语TTS发音引擎"></v-select>
             <v-slider v-model="config.tts.japanese.rate" label="日语相对语速" hint="TTS日语相对语速" min="1" max="100" step="1"></v-slider>
@@ -104,6 +109,11 @@ config.value = {
         volume: 100,
         voice: "",
         rate: 100,
+        history: {
+            voice: "",
+            rate: 100,
+            volume: 100
+        },
         japanese: {
             enable: true,
             voice: "",
