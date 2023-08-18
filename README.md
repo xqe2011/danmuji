@@ -8,7 +8,8 @@
 - 支持远程控制功能，你可以连接远程服务器后通过分享链接让其他人控制弹幕机
 
 ## 使用方法
-- 点击[这里](https://github.com/xqe2011/danmuji/releases/download/latest/launcher.exe)下载最新版
+- 点击[这里](https://github.com/xqe2011/danmuji/releases/download/latest/installer.exe)下载最新版
+- 打开下载的文件并点击安装，安装完成后在桌面打开企鹅弹幕机图标
 - 在弹出的企鹅弹幕机配置页面处设置好直播间号，重启弹幕机
 - 如果需要使用日语功能，请在`系统-语言-添加语言`处选择日语，只勾选语音包其他无需勾选，安装完成重启弹幕机即可
 

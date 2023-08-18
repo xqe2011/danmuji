@@ -24,6 +24,12 @@ jobs:
         uses: "actions/setup-node@v2"
         with:
           node-version: "20.3.1"
+      
+      - name: Install NSIS
+        run: |
+          Invoke-WebRequest https://nav.dl.sourceforge.net/project/nsis/NSIS%203/3.09/nsis-3.09-setup.exe -OutFile C:\WINDOWS\Temp\nsis-setup.exe
+          Invoke-Expression "& C:\WINDOWS\Temp\nsis-setup.exe \S"
+        shell: pwsh
         
       - name: "Install Python dependencies"
         run: |
@@ -43,6 +49,13 @@ jobs:
       - name: "Build executable"
         run: |
           pyinstaller launcher.spec
+      
+      - name: "Create release"
+        run: |
+          $VERSION = "${{  github.ref_name }}"
+          $VERSION = $VERSION.Substring(1)
+          & "C:\Program Files (x86)\NSIS\makensis.exe" /DVERSION=$VERSION installer.nsi
+        shell: pwsh
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -53,4 +66,4 @@ jobs:
           files: |
             LICENSE.txt
             README.md
-            dist/launcher.exe
+            installer.exe
