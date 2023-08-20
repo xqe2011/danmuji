@@ -47,7 +47,8 @@
                 "lengthShorter": 0,
                 "blacklistKeywords": [],
                 "blacklistUsers": [],
-                "whitelistUsers": []
+                "whitelistUsers": [],
+                "whitelistKeywords": []
             },
             "gift": {
                 "enable": true,

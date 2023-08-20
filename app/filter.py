@@ -9,6 +9,10 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
         return False
     if uid in dynamicConfig["filter"]["danmu"]["whitelistUsers"]:
         return True
+    if dynamicConfig["filter"]["danmu"]["whitelistKeywords"] != []:
+        for keyword in dynamicConfig["filter"]["danmu"]["whitelistKeywords"]:
+            if keyword in msg:
+                return True
     if dynamicConfig["filter"]["danmu"]["isFansMedalBelongToLive"] and not isFansMedalBelongToLive:
         return False
     if dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"]:
@@ -26,8 +30,9 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
             return False
     if dynamicConfig["filter"]["danmu"]["deduplicate"]:
         if msg in lastDanmuMessages:
+            lastDanmuMessages.append(None)
             return False
-        lastDanmuMessages.insert(0, msg)
+        lastDanmuMessages.append(msg)
         if len(lastDanmuMessages) > 10:
             lastDanmuMessages.pop(0)
     return True

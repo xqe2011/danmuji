@@ -28,6 +28,7 @@ export type DynamicConfig = {
             "blacklistKeywords": string[],
             "blacklistUsers": string[],
             "whitelistUsers": string[],
+            "whitelistKeywords": string[]
         },
         "gift": {
             "enable": boolean,

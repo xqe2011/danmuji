@@ -19,6 +19,7 @@
             <v-text-field v-model="blacklistKeywords" label="黑名单关键词(逗号分隔)" aria-label="弹幕黑名单关键词(逗号分隔)"></v-text-field>
             <v-text-field v-model="blacklistUsers" label="黑名单用户UID(逗号分隔)" aria-label="弹幕黑名单用户UID(逗号分隔)"></v-text-field>
             <v-text-field v-model="whitelistUsers" label="白名单用户UID(逗号分隔)" aria-label="弹幕白名单用户UID(逗号分隔)"></v-text-field>
+            <v-text-field v-model="whitelistKeywords" label="白名单关键词(逗号分隔)" aria-label="弹幕白名单关键词(逗号分隔)"></v-text-field>
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.gift.enable" inset color="blue" label="启用礼物朗读" aria-label="启用礼物朗读"></v-switch>
@@ -102,6 +103,7 @@ const ttsSpeakers = ref([] as { title: string, value: string }[]);
 const blacklistKeywords = ref("");
 const blacklistUsers = ref("");
 const whitelistUsers = ref("");
+const whitelistKeywords = ref("");
 const config = ref(undefined as unknown as DynamicConfig);
 config.value = {
     tts: {
@@ -132,7 +134,8 @@ config.value = {
             lengthShorter: 0,
             blacklistKeywords: [],
             blacklistUsers: [],
-            whitelistUsers: []
+            whitelistUsers: [],
+            whitelistKeywords: []
         },
         gift: {
             enable: true,
@@ -173,6 +176,7 @@ function parseConfig(data: DynamicConfig) {
         blacklistKeywords.value = config.value.filter.danmu.blacklistKeywords.join('，');
         blacklistUsers.value = config.value.filter.danmu.blacklistUsers.join('，');
         whitelistUsers.value = config.value.filter.danmu.whitelistUsers.join('，');
+        whitelistKeywords.value = config.value.filter.danmu.whitelistKeywords.join('，');
         ttsCNVoices.value = [];
         ttsJPVoices.value = [];
         (await getAllVoices()).forEach(voice => {
@@ -227,6 +231,7 @@ function onSave() {
     config.value.filter.danmu.blacklistKeywords = blacklistKeywords.value != "" ? blacklistKeywords.value.split(/[,，]+/) : [];   
     config.value.filter.danmu.blacklistUsers = blacklistUsers.value != "" ? blacklistUsers.value.split(/[,，]+/) : [];
     config.value.filter.danmu.whitelistUsers = whitelistUsers.value != "" ? whitelistUsers.value.split(/[,，]+/) : [];
+    config.value.filter.danmu.whitelistKeywords = whitelistKeywords.value != "" ? whitelistKeywords.value.split(/[,，]+/) : [];
 
     setDynamicConfig(config.value).then(val => {
         saving.value = false;
