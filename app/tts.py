@@ -1,4 +1,4 @@
-import asyncio, time, re
+import asyncio, time, re, traceback
 import pygame._sdl2.audio as sdl2_audio
 from .messages_handler import popMessagesQueue, getHaveReadMessages
 from .stats import appendDelay
@@ -39,6 +39,26 @@ async def init():
 
     await tts("TTS模块初始化成功")
 
+def syncSpeakerWithConfig():
+    # 更新TTS音频通道
+    global nowSpeaker, lastSpeaker
+    ttsConfig = getJsonConfig()['dynamic']['tts']
+    if lastSpeaker != ttsConfig['speaker']:
+        lastSpeaker = ttsConfig['speaker']
+        for speaker in list(allSpeakers):
+            if ttsConfig['speaker'] in speaker:
+                nowSpeaker = speaker
+                break
+        if nowSpeaker != None:
+            timeLog(f'[TTS] Use speaker: {nowSpeaker}"')
+        else:
+            nowSpeaker = allSpeakers[0]
+            timeLog(f'[TTS] Use default speaker: {nowSpeaker}"')
+        for channel in range(len(channels)):
+            pygame.mixer.Channel(channel).stop()
+        pygame.mixer.quit()
+        pygame.mixer.init(devicename=nowSpeaker)
+
 def syncWithConfig(ttsConfig=None, channel=0):
     global channels, lastSpeaker
     if ttsConfig == None:
@@ -70,6 +90,9 @@ def getNowSpeaker():
     global nowSpeaker
     return nowSpeaker
 
+def xmlEscape(text):
+    return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+
 def calculateTags(lang, config, text):
     tagsXml = '<voice name="{}" xml:lang="{}"><prosody rate="{}" volume="{}">{}</prosody></voice>'
     return tagsXml.format(config["voice"], lang, 0.5 + (config["rate"] / 100.0) * 2.5, config["volume"], text)
@@ -77,6 +100,7 @@ def calculateTags(lang, config, text):
 async def tts(text, channel=0, config=None):
     global synthesizer, channels
     syncWithConfig(config, channel)
+    text = xmlEscape(text)
 
     ttsConfig = getJsonConfig()['dynamic']['tts']
     # 支持日语
@@ -95,10 +119,14 @@ async def tts(text, channel=0, config=None):
 
     byte_stream = io.BytesIO(temp_buffer)
 
+    pygame.mixer.Channel(channel).stop()
+    while pygame.mixer.Channel(channel).get_busy():
+        await asyncio.sleep(0.01)
+    
     pygame.mixer.Channel(channel).play(pygame.mixer.Sound(byte_stream))
 
     while pygame.mixer.Channel(channel).get_busy():
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.01)
 
 
 
@@ -124,51 +152,48 @@ async def ttsTask():
     global prepareDisableTTSTask, disableTTSTask
     await init()
     while True:
-        # 更新TTS音频通道
-        global nowSpeaker, lastSpeaker
-        ttsConfig = getJsonConfig()['dynamic']['tts']
-        if lastSpeaker != ttsConfig['speaker']:
-            lastSpeaker = ttsConfig['speaker']
-            for speaker in list(allSpeakers):
-                if ttsConfig['speaker'] in speaker:
-                    nowSpeaker = speaker
-                    break
-            if nowSpeaker != None:
-                timeLog(f'[TTS] Use speaker: {nowSpeaker}"')
+        try:
+            # 暂停TTS线程
+            if prepareDisableTTSTask:
+                disableTTSTask = True
+                await asyncio.sleep(0.01)
+                continue
             else:
-                nowSpeaker = allSpeakers[0]
-                timeLog(f'[TTS] Use default speaker: {nowSpeaker}"')
-            pygame.mixer.quit()
-            pygame.mixer.init(devicename=nowSpeaker)
-        # 暂停TTS线程
-        if prepareDisableTTSTask:
-            disableTTSTask = True
+                disableTTSTask = False
+            syncSpeakerWithConfig()
+            msg = popMessagesQueue()
+            if msg == None:
+                await asyncio.sleep(0.01)
+                continue
+            appendDelay(time.time() - msg['time'])
+            text = messagesToText(msg)
+            await tts(text)
+        except:
+            traceback.print_exc()
             await asyncio.sleep(0.1)
-            continue
-        else:
-            disableTTSTask = False
-        msg = popMessagesQueue()
-        if msg == None:
-            await asyncio.sleep(0.1)
-            continue
-        appendDelay(time.time() - msg['time'])
-        text = messagesToText(msg)
-        await tts(text)
 
 async def setDisableTTSTask(mode, waiting = True):
     global prepareDisableTTSTask, disableTTSTask
     if prepareDisableTTSTask == False and mode == True:
         prepareDisableTTSTask = mode
         while (not disableTTSTask) and waiting:
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.01)
     elif prepareDisableTTSTask == True and mode == False:
         prepareDisableTTSTask = mode
         while (disableTTSTask) and waiting:
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.01)
 
+ttsSystemCallerID = 0
 async def ttsSystem(msg):
+    global ttsSystemCallerID
+    ttsSystemCallerID += 1
+    myCallerID = ttsSystemCallerID
     await setDisableTTSTask(True, False)
+    syncSpeakerWithConfig()
     await tts(messagesToText({'type': 'system', 'msg': msg}))
+    # 打断逻辑处理
+    if ttsSystemCallerID != myCallerID:
+        return
     await setDisableTTSTask(False, False)
 
 async def readHistoryByType(types):
