@@ -1,7 +1,7 @@
 <template>
     <v-card class="mx-auto" elevation="4">
         <v-card-title>{{ props.name }}</v-card-title>
-        <v-chart class="chart" :option="option" />
+        <v-chart ref="chart" class="chart" :option="option" autoresize/>
     </v-card>
 </template>
 
@@ -23,6 +23,7 @@ import { LineChart } from "echarts/charts";
 import { TitleComponent, TooltipComponent, LegendComponent, DataZoomComponent, GridComponent } from "echarts/components";
 import VChart from "vue-echarts";
 import { ref, watch } from "vue";
+import { Ref } from "vue";
 
 const props = defineProps({
     name: {
@@ -36,10 +37,16 @@ const props = defineProps({
     columes: {
         type: Array,
         required: true
+    },
+    locked: {
+        type: Boolean,
+        required: true
     }
 });
 
 use([CanvasRenderer, LineChart, TitleComponent, TooltipComponent, LegendComponent, GridComponent, DataZoomComponent]);
+
+const chart = ref(undefined) as Ref<InstanceType<typeof VChart> | undefined>;
 
 const option = ref({
     tooltip: {
@@ -62,9 +69,7 @@ const option = ref({
     dataZoom: [{
         type: 'inside',
         show: true,
-        xAxisIndex: [0],
-        startValue: 0,
-        end: 100
+        xAxisIndex: [0]
     }],
     xAxis: [
         {
@@ -93,10 +98,24 @@ props.columes.forEach((item, index) => {
     if (props.data.length != 0)
         option.value.series[index].data = props.data[index];
 });
+
 watch(props, () => {
+    const series: {data: number[]}[] = [];
     props.data.forEach((item, index) => {
-        option.value.series[index].data = item;
+        series[index] = {
+            data: item as any as number[]
+        }
     });
-    option.value.dataZoom[0].startValue = (props.data[0] as number[]).length - 10;
+    chart?.value?.setOption({
+        series: series
+    });
+    if (props.locked) {
+        chart.value?.setOption({
+            dataZoom: [{
+                startValue: (props.data[0] as number[]).length - 10,
+                endValue: (props.data[0] as number[]).length - 1
+            }]
+        });
+    }
 });
 </script>

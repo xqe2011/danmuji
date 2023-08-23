@@ -11,26 +11,26 @@
             </v-col>
             <v-col cols="12" md="4">
                 <v-sheet class="pa-2 bg-transparent" style="height: 90vh;">
-                    <LogPanel style="height: 100%;" :data="logEvent"/>
+                    <LogPanel style="height: 100%;" :data="logEvent" @toggle="toggleLock" :locked="locked"/>
                 </v-sheet>
             </v-col>
             <v-col cols="12" md="3" class="graph-container">
                 <v-sheet class="pa-2 bg-transparent" style="height: 45vh;">
-                    <GraphPanel style="height: 100%;" name="原始数据" :columes="['弹幕', '礼物', '入场', '其他']" :data="rawGraphData"/>
+                    <GraphPanel style="height: 100%;" name="原始数据" :columes="['弹幕', '礼物', '入场', '其他']" :data="rawGraphData" :locked="locked"/>
                 </v-sheet>
                 <v-sheet class="pa-2 bg-transparent" style="height: 45vh;">
-                    <GraphPanel style="height: 100%;" name="过滤后数据" :columes="['弹幕', '礼物', '入场', '其他']" :data="filteredGraphData"/>
+                    <GraphPanel style="height: 100%;" name="过滤后数据" :columes="['弹幕', '礼物', '入场', '其他']" :data="filteredGraphData" :locked="locked"/>
                 </v-sheet>
             </v-col>
             <v-col cols="12" md="2">
                 <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;" name="CPU占用率" :columes="['百分比']" :data="cpuUsage"/>
+                    <GraphPanel style="height: 100%;" name="CPU占用率" :columes="['百分比']" :data="cpuUsage" :locked="locked"/>
                 </v-sheet>
                 <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;" name="输出队列高度" :columes="['高度']" :data="messagesQueueLegnth"/>
+                    <GraphPanel style="height: 100%;" name="输出队列高度" :columes="['高度']" :data="messagesQueueLegnth" :locked="locked"/>
                 </v-sheet>
                 <v-sheet class="pa-2 bg-transparent" style="height: 30vh;">
-                    <GraphPanel style="height: 100%;" name="平均延迟" :columes="['秒']" :data="delay"/>
+                    <GraphPanel style="height: 100%;" name="平均延迟" :columes="['秒']" :data="delay" :locked="locked"/>
                 </v-sheet>
             </v-col>
         </v-row>
@@ -46,7 +46,7 @@ import LogPanel from '@/components/LogPanel.vue';
 import GraphPanel from '@/components/GraphPanel.vue';
 import { onWSMessages, getRunningMode } from '@/services/Database';
 import { ref, Ref } from 'vue';
-import { WebsocketBroadcastMessage, StatsEvent } from '@/types/WebsocketBroadcastMessage';
+import { StatsEvent } from '@/types/WebsocketBroadcastMessage';
 import EngineConfigPanel from '@/components/EngineConfigPanel.vue';
 
 const rawGraphData: Ref<number[][]> = ref([[], [], [], []]);
@@ -56,6 +56,7 @@ const logEvent: Ref<StatsEvent['events']> = ref([]);
 const cpuUsage: Ref<number[][]> = ref([[]]);
 const delay: Ref<number[][]> = ref([[]]);
 const showEngineConfig: Ref<boolean> = ref(false);
+const locked: Ref<boolean> = ref(true);
 
 getRunningMode().then(data => {
     showEngineConfig.value = !data.remote;
@@ -83,5 +84,9 @@ onWSMessages.subscribe((rawData) => {
 
     delay.value[0].push(data.stats.delay);
 });
+
+function toggleLock() {
+    locked.value = !locked.value;
+}
 
 </script>
