@@ -58,7 +58,10 @@
     width: 60%;
 }
 .filterd {
-    background-color: rgba(255, 0, 0, 0.7);
+    background-color: rgba(255, 0, 0, 0.7) !important;
+}
+.filterd > td {
+    background: none !important;
 }
 .v-card-title {
     display: flex;
