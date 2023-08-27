@@ -168,9 +168,12 @@ async def ttsTask():
             appendDelay(time.time() - msg['time'])
             text = messagesToText(msg)
             await tts(text)
-        except:
-            traceback.print_exc()
-            await asyncio.sleep(0.1)
+        except Exception as e:
+            if not isinstance(e, asyncio.CancelledError):
+                traceback.print_exc()
+                await asyncio.sleep(0.1)
+            else:
+                break
 
 async def setDisableTTSTask(mode, waiting = True):
     global prepareDisableTTSTask, disableTTSTask
