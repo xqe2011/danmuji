@@ -81,12 +81,11 @@ function onRead() {
 
 function onSave() {
     saving.value = true;
+    /* 强制转换number类型 */
+    config.value.bili.liveID = Number(config.value.bili.liveID);
 
     setEngineConfig(config.value).then(val => {
         saving.value = false;
-        /* 强制转换number类型 */
-        config.value.bili.liveID = Number(config.value.bili.liveID);
-
         alert('保存成功');
     }).catch(err => {
         console.error(err);
