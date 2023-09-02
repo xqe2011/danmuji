@@ -53,6 +53,8 @@ async def getRunningMode():
 @onlyLocal
 async def logout():
     nowJsonConfig = getJsonConfig()
+    nowJsonConfig['kvdb']['bili']['uid'] = ""
+    nowJsonConfig['kvdb']['bili']['buvid3'] = ""
     nowJsonConfig['kvdb']['bili']['sessdata'] = ""
     nowJsonConfig['kvdb']['bili']['jct'] = ""
     await updateJsonConfig(nowJsonConfig)

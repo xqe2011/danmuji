@@ -1,8 +1,11 @@
 from pyee import AsyncIOEventEmitter
-from .config import getJsonConfig
+from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
 from blivedm.blivedm import BLiveClient, BaseHandler
+import aiohttp, os, concurrent.futures, asyncio
+from selenium import webdriver
+from bilibili_api import Credential, user, sync
 
 liveEvent = AsyncIOEventEmitter()
 room = None
@@ -92,6 +95,32 @@ class LiveMsgHandler(BaseHandler):
         'LIKE_INFO_V3_CLICK': onLikeCallback
     }
 
+async def getSelfInfo():
+    # 检查B站凭证是否有效
+    try:
+        config = getJsonConfig()
+        return await user.get_self_info(Credential(config["kvdb"]["bili"]["sessdata"], config["kvdb"]["bili"]["jct"], config["kvdb"]["bili"]["buvid3"]))
+    except:
+        return None
+
+def loginBili():
+    if os.name == "nt":
+        timeLog(f'[Live] B站凭证无效，使用Edge重新登录B站...')
+        driver = webdriver.Edge()
+    else:
+        timeLog(f'[Live] B站凭证无效，使用Chrome重新登录B站...')
+        driver = webdriver.Chrome()
+    driver.get("https://passport.bilibili.com/pc/passport/login?gourl=https%3A%2F%2Fwww.bilibili.com")
+    while not driver.current_url.startswith("https://www.bilibili.com"):
+        pass
+    config = getJsonConfig()
+    config["kvdb"]["bili"]["uid"] = int(driver.get_cookie("DedeUserID")["value"])
+    config["kvdb"]["bili"]["sessdata"] = driver.get_cookie("SESSDATA")["value"]
+    config["kvdb"]["bili"]["buvid3"] = driver.get_cookie("buvid3")["value"]
+    config["kvdb"]["bili"]["jct"] = driver.get_cookie("bili_jct")["value"]
+    sync(updateJsonConfig(config))
+    driver.quit()
+
 async def connectLive():
     room.start()
 
@@ -100,6 +129,16 @@ async def disconnectLive():
 
 async def initalizeLive():
     global room
-    room = BLiveClient(getJsonConfig()['engine']['bili']['liveID'], ssl=True)
+    # 检查B站凭证是否有效
+    data = await getSelfInfo()
+    if data == None:
+        loop = asyncio.get_running_loop()
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            await loop.run_in_executor(pool, loginBili)
+    config = getJsonConfig()
+    session = aiohttp.ClientSession(headers={
+        'Cookie': f'buvid3={config["kvdb"]["bili"]["buvid3"]}; SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
+    })
+    room = BLiveClient(config['engine']['bili']['liveID'], ssl=True, uid=config["kvdb"]["bili"]["uid"], session=session)
     room.add_handler(LiveMsgHandler())
     await connectLive()

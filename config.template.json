@@ -1,6 +1,8 @@
 {
     "kvdb": {
         "bili": {
+            "uid": 0,
+            "buvid3": "",
             "sessdata": "",
             "jct": ""
         }
