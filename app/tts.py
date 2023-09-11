@@ -17,6 +17,7 @@ allSpeakers = []
 prepareDisableTTSTask = False
 disableTTSTask = False
 readHistoryIndex = None
+initalized = False
 
 def getAllVoices():
     global allVoices
@@ -38,6 +39,8 @@ async def init():
         timeLog(f'[TTS] Found voice: {voice.display_name} ({voice.language})"')
 
     await tts("TTS模块初始化成功")
+    global initalized
+    initalized = True
 
 def syncSpeakerWithConfig():
     # 更新TTS音频通道
@@ -188,6 +191,9 @@ async def setDisableTTSTask(mode, waiting = True):
 
 ttsSystemCallerID = 0
 async def ttsSystem(msg):
+    global initalized
+    while not initalized:
+        await asyncio.sleep(0.01)
     global ttsSystemCallerID
     ttsSystemCallerID += 1
     myCallerID = ttsSystemCallerID

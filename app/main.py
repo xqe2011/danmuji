@@ -1,5 +1,5 @@
 import asyncio, os
-from .live import initalizeLive
+from .live import initalizeLive, liveEvent
 from .logger import timeLog
 from .messages_handler import *
 from .http import startHttpServer, broadcastWSMessage
@@ -9,7 +9,7 @@ from .keyboard import initalizeKeyboard
 from .config import configEvent
 # only load tts in windows
 if os.name == 'nt':
-    from .tts import ttsTask
+    from .tts import ttsTask, ttsSystem
 
 @statsEvent.on('stats')
 async def statsHandler(stats):
@@ -20,6 +20,10 @@ async def statsHandler(stats):
 async def configHandler(oldConfig, newConfig):
     await broadcastWSMessage({ 'type': 'config', 'data': newConfig['dynamic'] })
     await remoteWSBroadcast({ 'type': 'config', 'data': newConfig['dynamic'] })
+
+@liveEvent.on('connected')
+async def liveConnectedHandler():
+    await ttsSystem("B站直播间已连接")
 
 def main():
     timeLog('[Main] Started')

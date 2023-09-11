@@ -2,13 +2,14 @@ from pyee import AsyncIOEventEmitter
 from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
-from blivedm.blivedm import BLiveClient, BaseHandler
-import aiohttp, os, concurrent.futures, asyncio
-from selenium import webdriver
-from bilibili_api import Credential, user, sync
+from blivedm.blivedm import BLiveClient, BaseHandler, HeartbeatMessage
+import aiohttp, concurrent.futures, asyncio
+from bilibili_api import Credential, user, sync, login_func
+import tkinter as tk
 
 liveEvent = AsyncIOEventEmitter()
 room = None
+firstHeartBeat = True
 
 # 0为普通用户，1为总督，2位提督，3为舰长
 guardLevelMap = {
@@ -19,6 +20,12 @@ guardLevelMap = {
 }
 
 class LiveMsgHandler(BaseHandler):
+    async def _on_heartbeat(self, client: BLiveClient, message: HeartbeatMessage):
+        global firstHeartBeat
+        if firstHeartBeat:
+            liveEvent.emit('connected')
+            firstHeartBeat = False
+
     async def onDanmuCallback(self, client: BLiveClient, command: dict):
         uid = command["info"][2][0]
         msg = command['info'][1]
@@ -104,22 +111,34 @@ async def getSelfInfo():
         return None
 
 def loginBili():
-    if os.name == "nt":
-        timeLog(f'[Live] B站凭证无效，使用Edge重新登录B站...')
-        driver = webdriver.Edge()
-    else:
-        timeLog(f'[Live] B站凭证无效，使用Chrome重新登录B站...')
-        driver = webdriver.Chrome()
-    driver.get("https://passport.bilibili.com/pc/passport/login?gourl=https%3A%2F%2Fwww.bilibili.com")
-    while not driver.current_url.startswith("https://www.bilibili.com"):
-        pass
+    timeLog(f'[Live] B站凭证无效，使用扫码重新登录B站...')
+    img, token = login_func.get_qrcode()
+    window = tk.Tk()
+    window.resizable(0,0)
+    window.title("企鹅弹幕机 - 扫码登陆B站")
+    image = tk.PhotoImage(file=img.url.replace("file://", ""))
+    widget = tk.Label(window, compound='top', image=image)
+    widget.pack()
+    window.eval('tk::PlaceWindow . center')
+    outputCred = None
+    def update():
+        event, cred = login_func.check_qrcode_events(token)
+        nonlocal outputCred
+        outputCred = cred
+        if event != login_func.QrCodeLoginEvents.DONE:
+            timeLog(f"[Live] 等待二维码登录中...")
+            window.after(1000, update)
+        else:
+            window.destroy()
+    window.after(1000, update)
+    window.mainloop()
     config = getJsonConfig()
-    config["kvdb"]["bili"]["uid"] = int(driver.get_cookie("DedeUserID")["value"])
-    config["kvdb"]["bili"]["sessdata"] = driver.get_cookie("SESSDATA")["value"]
-    config["kvdb"]["bili"]["buvid3"] = driver.get_cookie("buvid3")["value"]
-    config["kvdb"]["bili"]["jct"] = driver.get_cookie("bili_jct")["value"]
+    config["kvdb"]["bili"]["uid"] = int(outputCred.dedeuserid)
+    config["kvdb"]["bili"]["sessdata"] = outputCred.sessdata
+    config["kvdb"]["bili"]["buvid3"] = outputCred.buvid3
+    config["kvdb"]["bili"]["jct"] = outputCred.bili_jct
     sync(updateJsonConfig(config))
-    driver.quit()
+    timeLog(f'[Live] 二维码登录完成，uid: {config["kvdb"]["bili"]["uid"]}，sessdata: {config["kvdb"]["bili"]["sessdata"]}，buvid3: {config["kvdb"]["bili"]["buvid3"]}, jct: {config["kvdb"]["bili"]["jct"]}')
 
 async def connectLive():
     room.start()
