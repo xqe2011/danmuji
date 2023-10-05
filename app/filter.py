@@ -111,3 +111,9 @@ def filterSuperChat(uid, uname, price, msg):
     if not dynamicConfig["filter"]["superChat"]["enable"]:
         return False
     return True
+
+def filterWarning(msg, isCutOff):
+    dynamicConfig = getJsonConfig()['dynamic']
+    if not dynamicConfig["filter"]["warning"]["enable"]:
+        return False
+    return True

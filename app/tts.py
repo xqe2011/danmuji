@@ -148,6 +148,8 @@ def messagesToText(msg):
         return f"感谢{msg['uname']}关注"
     elif msg['type'] == 'welcome':
         return f"欢迎{msg['uname']}进入直播间"
+    elif msg['type'] == 'warning':
+        return f"超管警告直播间{msg['msg']}，{'，直播间已切断' if msg['isCutOff'] else ''}"
     elif msg['type'] == 'system':
         return f"系统提示{msg['msg']}"
 

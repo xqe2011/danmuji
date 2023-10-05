@@ -92,6 +92,18 @@ class LiveMsgHandler(BaseHandler):
         timeLog(f"[Like] {uname} liked the stream.")
         liveEvent.emit('like', uid, uname)
     
+    async def onWarning(self, client: BLiveClient, command: dict):
+        print(msg)
+        msg = command['msg']
+        timeLog(f"[Warning] {msg}")
+        liveEvent.emit('warning', msg, False)
+
+    async def onCutOff(self, client: BLiveClient, command: dict):
+        print(msg)
+        msg = command['msg']
+        timeLog(f"[Warning] Cut Off, {msg}")
+        liveEvent.emit('warning', msg, True)
+    
     _CMD_CALLBACK_DICT = {
         **BaseHandler._CMD_CALLBACK_DICT,
         'DANMU_MSG': onDanmuCallback,
@@ -99,7 +111,9 @@ class LiveMsgHandler(BaseHandler):
         'USER_TOAST_MSG': onGuardBuyCallback,
         'SUPER_CHAT_MESSAGE': onSCCallback,
         'INTERACT_WORD': onInteractWordCallback,
-        'LIKE_INFO_V3_CLICK': onLikeCallback
+        'LIKE_INFO_V3_CLICK': onLikeCallback,
+        'WARNING': onWarning,
+        'CUT_OFF': onCutOff
     }
 
 async def getSelfInfo():

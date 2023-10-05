@@ -1,7 +1,7 @@
 from .live import liveEvent
 from .logger import timeLog
-from .filter import filterDanmu, filterGift, filterGuardBuy, filterLike, filterSubscribe, filterWelcome, filterSuperChat
-from .stats import setOutputMessagesLength, appendDanmuFilteredStats, appendGiftFilteredStats, appendWelcomeFilteredStats, appendLikeFilteredStats, appendGuardBuyFilteredStats, appendSubscribeFilteredStats, appendSuperChatFilteredStats
+from .filter import filterDanmu, filterGift, filterGuardBuy, filterLike, filterSubscribe, filterWelcome, filterSuperChat, filterWarning
+from .stats import setOutputMessagesLength, appendDanmuFilteredStats, appendGiftFilteredStats, appendWelcomeFilteredStats, appendLikeFilteredStats, appendGuardBuyFilteredStats, appendSubscribeFilteredStats, appendSuperChatFilteredStats, appendWarningFilteredStats
 import time
 
 messagesQueue = []
@@ -134,6 +134,19 @@ async def onWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMed
         })
     else:
         appendWelcomeFilteredStats(uid=uid, uname=uname, filterd=True)
+
+@liveEvent.on('warning')
+async def onWarning(msg, isCutOff):
+    if filterWarning(msg, isCutOff):
+        appendWarningFilteredStats(msg=msg, isCutOff=isCutOff, filterd=False)
+        messagesQueueAppend({
+            'type': 'warning',
+            'time': time.time(),
+            'msg': msg,
+            'isCutOff': isCutOff
+        })
+    else:
+        appendWarningFilteredStats(msg=msg, isCutOff=isCutOff, filterd=True)
 
 async def markAllMessagesInvalid():
     global messagesQueue

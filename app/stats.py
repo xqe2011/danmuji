@@ -44,6 +44,7 @@ appendLikeFilteredStats = statsFunctionGenerator('like')
 appendGuardBuyFilteredStats = statsFunctionGenerator('guardBuy')
 appendSubscribeFilteredStats = statsFunctionGenerator('subscribe')
 appendSuperChatFilteredStats = statsFunctionGenerator('superChat')
+appendWarningFilteredStats = statsFunctionGenerator('warning')
 
 def getDelay():
     global delaysQueue
