@@ -25,6 +25,10 @@ async def configHandler(oldConfig, newConfig):
 async def liveConnectedHandler():
     await ttsSystem("B站直播间已连接")
 
+@liveEvent.on('login')
+async def needLoginHandler():
+    await ttsSystem("B站登陆已失效，请在弹出的企鹅弹幕机扫码登陆B站窗口中使用小号重新登录B站")
+
 def main():
     timeLog('[Main] Started')
     try:

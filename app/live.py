@@ -125,7 +125,6 @@ async def getSelfInfo():
         return None
 
 def loginBili():
-    timeLog(f'[Live] B站凭证无效，使用扫码重新登录B站...')
     img, token = login_func.get_qrcode()
     window = tk.Tk()
     window.resizable(0,0)
@@ -174,6 +173,8 @@ async def initalizeLive():
     # 检查B站凭证是否有效
     data = await getSelfInfo()
     if data == None:
+        timeLog(f'[Live] B站凭证无效，使用扫码重新登录B站...')
+        liveEvent.emit('login')
         loop = asyncio.get_running_loop()
         with concurrent.futures.ThreadPoolExecutor() as pool:
             await loop.run_in_executor(pool, loginBili)
