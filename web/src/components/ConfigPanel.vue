@@ -48,6 +48,9 @@
             <v-switch v-model="config.filter.superChat.enable" inset color="blue" label="启用醒目留言朗读" aria-label="启用醒目留言朗读"></v-switch>
             <v-divider></v-divider>
 
+            <v-switch v-model="config.filter.warning.enable" inset color="blue" label="启用超管警告朗读" aria-label="启用超管警告朗读"></v-switch>
+            <v-divider></v-divider>
+
             <v-select class="block-select" v-model="config.tts.speaker" :items="ttsSpeakers" label="TTS音频通道" aria-label="TTS音频通道"></v-select>
             <v-select v-model="config.tts.voice" :items="ttsCNVoices" label="主TTS发音引擎" aria-label="主TTS发音引擎"></v-select>
             <v-slider v-model="config.tts.rate" label="总语速" hint="TTS语速(包括其他语言)" min="1" max="100" step="1"></v-slider>
@@ -161,6 +164,9 @@ config.value = {
             enable: true
         },
         superChat: {
+            enable: true
+        },
+        warning: {
             enable: true
         }
     }

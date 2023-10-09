@@ -55,6 +55,9 @@ export type DynamicConfig = {
         },
         "superChat": {
             "enable": boolean,
-        }
+        },
+        "warning": {
+            "enable": boolean,
+        },
     }
 };

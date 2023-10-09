@@ -3,7 +3,7 @@ from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
 from blivedm.blivedm import BLiveClient, BaseHandler, HeartbeatMessage
-import aiohttp, concurrent.futures, asyncio
+import aiohttp, concurrent.futures, asyncio, sys
 from bilibili_api import Credential, user, sync, login_func
 import tkinter as tk
 
@@ -135,7 +135,15 @@ def loginBili():
     widget.pack()
     window.eval('tk::PlaceWindow . center')
     outputCred = None
+    count = 0
     def update():
+        nonlocal img, token, count
+        if count == 60:
+            img, token = login_func.get_qrcode()
+            image.configure(file=img.url.replace("file://", ""))
+            count = 0
+            timeLog(f"[Live] 刷新二维码")
+        count += 1
         event, cred = login_func.check_qrcode_events(token)
         nonlocal outputCred
         outputCred = cred
@@ -145,6 +153,7 @@ def loginBili():
         else:
             window.destroy()
     window.after(1000, update)
+    window.protocol("WM_DELETE_WINDOW", lambda : sys.exit(0))
     window.mainloop()
     config = getJsonConfig()
     config["kvdb"]["bili"]["uid"] = int(outputCred.dedeuserid)
