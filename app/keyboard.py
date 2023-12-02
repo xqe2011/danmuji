@@ -73,6 +73,14 @@ async def handleReadNextGiftMessages():
     timeLog('[Keyboard] Trigging read next history gift')
     await readHistoryByType(['gift', 'guardBuy', 'superChat'])
 
+async def handleReadLastHistoryDanmu():
+    timeLog('[Keyboard] Trigging read last history danmu')
+    await readHistoryByType(['danmu'], True)
+
+async def handleReadLastGiftMessages():
+    timeLog('[Keyboard] Trigging read last history gift')
+    await readHistoryByType(['gift', 'guardBuy', 'superChat'], True)
+
 async def initalizeKeyboard():
     runningLoop = asyncio.get_running_loop()
     if os.name == "nt":
@@ -89,6 +97,8 @@ async def initalizeKeyboard():
 
         keyboard.add_hotkey('alt+f7', lambda: asyncio.run_coroutine_threadsafe(handleReadNextGiftMessages(), runningLoop))
         keyboard.add_hotkey('alt+f8', lambda: asyncio.run_coroutine_threadsafe(handleReadNextHistoryDanmu(), runningLoop))
+        keyboard.add_hotkey('alt+k', lambda: asyncio.run_coroutine_threadsafe(handleReadLastGiftMessages(), runningLoop))
+        keyboard.add_hotkey('alt+l', lambda: asyncio.run_coroutine_threadsafe(handleReadLastHistoryDanmu(), runningLoop))
         keyboard.add_hotkey('alt+f9', lambda: asyncio.run_coroutine_threadsafe(handleReadNewestMessages(), runningLoop))
         
         

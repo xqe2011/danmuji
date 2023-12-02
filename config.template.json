@@ -5,7 +5,8 @@
             "buvid3": "",
             "sessdata": "",
             "jct": ""
-        }
+        },
+        "isFirstTimeToLogin": true
     },
     "engine": {
         "bili": {
@@ -42,7 +43,7 @@
             "danmu": {
                 "enable": true,
                 "emojiEnable": true,
-                "deduplicate": true,
+                "deduplicate": false,
                 "isFansMedalBelongToLive": false,
                 "fansMedalGuardLevelBigger": 0,
                 "fansMedalLevelBigger": 0,

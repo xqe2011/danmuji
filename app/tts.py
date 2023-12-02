@@ -207,14 +207,14 @@ async def ttsSystem(msg):
         return
     await setDisableTTSTask(False, False)
 
-async def readHistoryByType(types):
+async def readHistoryByType(types, revert=False):
     global readHistoryIndex
     if readHistoryIndex == None:
         readHistoryIndex = len(getHaveReadMessages())
-    readHistoryIndex -= 1
+    readHistoryIndex = (readHistoryIndex - 1) if not revert else (readHistoryIndex + 1)
     messages = getHaveReadMessages()
     found = False
-    for i in range(readHistoryIndex, -1, -1):
+    for i in range(readHistoryIndex, -1 if not revert else len(getHaveReadMessages()), -1 if not revert else 1):
         for type in types:
             if messages[i]['type'] == type:
                 readHistoryIndex = i
@@ -222,8 +222,8 @@ async def readHistoryByType(types):
                 break
         if found:
             break
-    if readHistoryIndex == -1 or not found:
-        readHistoryIndex = len(getHaveReadMessages())
+    if (not revert and readHistoryIndex == -1) or (revert and readHistoryIndex > len(getHaveReadMessages())) or not found:
+        readHistoryIndex = len(getHaveReadMessages()) if not revert else 0
         await tts(messagesToText({'type': 'system', 'msg': '已到达最后一条,继续翻页将从第一条开始'}), 1, getJsonConfig()['dynamic']['tts']['history'])
         return
     await tts(messagesToText(messages[readHistoryIndex]), 1, getJsonConfig()['dynamic']['tts']['history'])

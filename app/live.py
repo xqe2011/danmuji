@@ -124,6 +124,14 @@ async def getSelfInfo():
     except:
         return None
 
+async def getSelfLiveID():
+    # 获取自己直播间ID
+    try:
+        config = getJsonConfig()
+        return (await user.User(config["kvdb"]["bili"]["uid"], Credential(config["kvdb"]["bili"]["sessdata"], config["kvdb"]["bili"]["jct"], config["kvdb"]["bili"]["buvid3"])).get_live_info())["live_room"]["roomid"]
+    except:
+        return None
+
 def loginBili():
     img, token = login_func.get_qrcode()
     window = tk.Tk()
@@ -151,6 +159,7 @@ def loginBili():
             window.after(1000, update)
         else:
             window.destroy()
+            del image, widget
     window.after(1000, update)
     window.protocol("WM_DELETE_WINDOW", lambda : sys.exit(0))
     window.mainloop()
@@ -179,6 +188,15 @@ async def initalizeLive():
         with concurrent.futures.ThreadPoolExecutor() as pool:
             await loop.run_in_executor(pool, loginBili)
     config = getJsonConfig()
+    if config['kvdb']['isFirstTimeToLogin']:
+        liveID = await getSelfLiveID()
+        if liveID != None:
+            timeLog(f'[Live] 第一次使用账号登陆，将默认直播间号修改为登陆的账号直播间号{liveID}')
+            config['engine']['bili']['liveID'] = liveID
+        else:
+            timeLog(f'[Live] 第一次使用账号登陆，但该账号未开通直播间，忽略直播间号自动设置')
+        config['kvdb']['isFirstTimeToLogin'] = False
+        await updateJsonConfig(config)
     session = aiohttp.ClientSession(headers={
         'Cookie': f'buvid3={config["kvdb"]["bili"]["buvid3"]}; SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
     })
