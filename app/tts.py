@@ -223,8 +223,12 @@ async def readHistoryByType(types, revert=False):
         if found:
             break
     if (not revert and readHistoryIndex == -1) or (revert and readHistoryIndex > len(getHaveReadMessages())) or not found:
-        readHistoryIndex = len(getHaveReadMessages()) if not revert else 0
-        await tts(messagesToText({'type': 'system', 'msg': '已到达最后一条,继续翻页将从第一条开始'}), 1, getJsonConfig()['dynamic']['tts']['history'])
+        if not revert:
+            readHistoryIndex = len(getHaveReadMessages())
+            await tts(messagesToText({'type': 'system', 'msg': '已到达最后一条,继续翻页将从第一条开始'}), 1, getJsonConfig()['dynamic']['tts']['history'])
+        else:
+            readHistoryIndex = 0
+            await tts(messagesToText({'type': 'system', 'msg': '已到达第一条,继续翻页将从最后一条开始'}), 1, getJsonConfig()['dynamic']['tts']['history'])
         return
     await tts(messagesToText(messages[readHistoryIndex]), 1, getJsonConfig()['dynamic']['tts']['history'])
 

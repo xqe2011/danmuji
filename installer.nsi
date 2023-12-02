@@ -39,6 +39,7 @@ Section "install"
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\企鹅弹幕机" "NoRepair" 1
 
     Exec '"$WINDIR\NOTEPAD.EXE" "$DESKTOP\企鹅弹幕机帮助文件.txt"'
+    Abort
 SectionEnd
 
 function un.onInit

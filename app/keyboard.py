@@ -97,8 +97,8 @@ async def initalizeKeyboard():
 
         keyboard.add_hotkey('alt+f7', lambda: asyncio.run_coroutine_threadsafe(handleReadNextGiftMessages(), runningLoop))
         keyboard.add_hotkey('alt+f8', lambda: asyncio.run_coroutine_threadsafe(handleReadNextHistoryDanmu(), runningLoop))
-        keyboard.add_hotkey('alt+k', lambda: asyncio.run_coroutine_threadsafe(handleReadLastGiftMessages(), runningLoop))
-        keyboard.add_hotkey('alt+l', lambda: asyncio.run_coroutine_threadsafe(handleReadLastHistoryDanmu(), runningLoop))
+        keyboard.add_hotkey('alt+t', lambda: asyncio.run_coroutine_threadsafe(handleReadLastGiftMessages(), runningLoop))
+        keyboard.add_hotkey('alt+y', lambda: asyncio.run_coroutine_threadsafe(handleReadLastHistoryDanmu(), runningLoop))
         keyboard.add_hotkey('alt+f9', lambda: asyncio.run_coroutine_threadsafe(handleReadNewestMessages(), runningLoop))
         
         
