@@ -27,7 +27,7 @@ jobs:
       
       - name: Install NSIS
         run: |
-          Invoke-WebRequest https://nav.dl.sourceforge.net/project/nsis/NSIS%203/3.09/nsis-3.09-setup.exe -OutFile C:\WINDOWS\Temp\nsis-setup.exe
+          Invoke-WebRequest https://netactuate.dl.sourceforge.net/project/nsis/NSIS%203/3.09/nsis-3.09-setup.exe -OutFile C:\WINDOWS\Temp\nsis-setup.exe
           Invoke-Expression "& C:\WINDOWS\Temp\nsis-setup.exe \S"
         shell: pwsh
         
