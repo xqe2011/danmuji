@@ -1,3 +1,4 @@
+werkzeug==2.3.7
 quart==0.18.4
 quart-cors==0.6.0
 python-dotenv==1.0.0
