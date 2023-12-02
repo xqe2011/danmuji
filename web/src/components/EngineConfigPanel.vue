@@ -2,11 +2,10 @@
     <v-card class="mx-auto" elevation="4" @keydown="onKeydown">
         <v-card-title>
             <div><p tabindex="0">引擎配置 - 重启生效</p></div>
-            <v-btn :loading="saving" color="blue" @click="onSave" aria-label="引擎配置保存(可以使用键盘Ctrl+S保存)">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
-            <v-btn class="block-button" block :loading="logouting" color="red" @click="onLogout">退出B站用户登录</v-btn>
+            <v-btn class="clean-button" block :loading="logouting" color="red" @click="onLogout">退出B站用户登录</v-btn>
             <v-divider class="block-divider"></v-divider>
 
             <v-text-field v-model="config.bili.liveID" label="直播间号" aria-label="直播间号"></v-text-field>
@@ -16,6 +15,9 @@
             <v-switch v-model="config.remote.enable" inset color="blue" label="启用远程控制" aria-label="启用远程控制"></v-switch>
             <v-text-field v-model="config.remote.server" label="服务器地址" aria-label="远程控制的服务器地址"></v-text-field>
             <v-text-field v-model="config.remote.password" label="服务器密码" aria-label="远程控制的服务器密码"></v-text-field>
+            
+            <v-divider></v-divider>
+            <v-btn class="save-button" :loading="saving" color="blue" @click="onSave" aria-label="引擎配置保存(可以使用键盘Ctrl+S保存)" block>保存</v-btn>
         </v-form>
     </v-card>
 </template>
@@ -39,8 +41,11 @@
 .v-card-title > .v-btn {
     margin-left: 8px;
 }
-.block-button {
+.clean-button {
     margin-bottom: 16px;
+}
+.save-button {
+    margin-top: 16px;
 }
 .block-divider {
     margin-bottom: 22px;

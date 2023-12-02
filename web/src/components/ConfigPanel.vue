@@ -2,11 +2,10 @@
     <v-card class="mx-auto" elevation="4" @keydown="onKeydown">
         <v-card-title>
             <div><p tabindex="0">实时配置</p></div>
-            <v-btn :loading="saving" color="blue" @click="onSave" aria-label="实时配置保存(可以使用键盘Ctrl+S保存)">保存</v-btn>
         </v-card-title>
 
         <v-form class="overflow-auto">
-            <v-btn class="block-button" block :loading="flushing" color="red" @click="onFlush">清空待读语音队列</v-btn>
+            <v-btn class="clean-button" block :loading="flushing" color="red" @click="onFlush">清空待读语音队列</v-btn>
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.danmu.enable" inset color="blue" label="启用弹幕朗读" aria-label="启用弹幕朗读"></v-switch>
@@ -64,6 +63,9 @@
             <v-select v-model="config.tts.japanese.voice" :items="ttsJPVoices" label="日语TTS发音引擎" aria-label="日语TTS发音引擎"></v-select>
             <v-slider v-model="config.tts.japanese.rate" label="日语相对语速" hint="TTS日语相对语速" min="1" max="100" step="1"></v-slider>
             <v-slider v-model="config.tts.japanese.volume" label="日语相对音量" hint="TTS日语相对音量" min="1" max="100" step="1"></v-slider>
+
+            <v-divider></v-divider>
+            <v-btn class="save-button" :loading="saving" color="blue" @click="onSave" aria-label="实时配置保存(可以使用键盘Ctrl+S保存)" block>保存</v-btn>
         </v-form>
     </v-card>
 </template>
@@ -87,8 +89,11 @@
 .v-card-title > .v-btn {
     margin-left: 8px;
 }
-.block-button {
+.clean-button {
     margin-bottom: 16px;
+}
+.save-button {
+    margin-top: 16px;
 }
 .block-select {
     margin-top: 16px;

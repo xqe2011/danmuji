@@ -20,6 +20,8 @@ Section "install"
 
     SetOutPath $INSTDIR
     File /r "dist\launcher\*.*"
+    SetOutPath $DESKTOP
+    File /oname=企鹅弹幕机帮助文件.txt "help.txt"
 
     writeUninstaller "$INSTDIR\uninstall.exe"
     createShortCut "$DESKTOP\企鹅弹幕机.lnk" "$INSTDIR\launcher.exe"
@@ -35,6 +37,8 @@ Section "install"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\企鹅弹幕机" "DisplayVersion" "${VERSION}"
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\企鹅弹幕机" "NoModify" 1
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\企鹅弹幕机" "NoRepair" 1
+
+    Exec '"$WINDIR\NOTEPAD.EXE" "$DESKTOP\企鹅弹幕机帮助文件.txt"'
 SectionEnd
 
 function un.onInit
