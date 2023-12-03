@@ -187,16 +187,18 @@ async def initalizeLive():
         loop = asyncio.get_running_loop()
         with concurrent.futures.ThreadPoolExecutor() as pool:
             await loop.run_in_executor(pool, loginBili)
+        config = getJsonConfig()
+        if config['kvdb']['isFirstTimeToLogin']:
+            liveID = await getSelfLiveID()
+            if liveID != None:
+                timeLog(f'[Live] 第一次使用账号登陆，将默认直播间号修改为登陆的账号直播间号{liveID}')
+                config['engine']['bili']['liveID'] = liveID
+                await updateJsonConfig(config)
+            else:
+                timeLog(f'[Live] 第一次使用账号登陆，但该账号未开通直播间，忽略直播间号自动设置')
     config = getJsonConfig()
-    if config['kvdb']['isFirstTimeToLogin']:
-        liveID = await getSelfLiveID()
-        if liveID != None:
-            timeLog(f'[Live] 第一次使用账号登陆，将默认直播间号修改为登陆的账号直播间号{liveID}')
-            config['engine']['bili']['liveID'] = liveID
-        else:
-            timeLog(f'[Live] 第一次使用账号登陆，但该账号未开通直播间，忽略直播间号自动设置')
-        config['kvdb']['isFirstTimeToLogin'] = False
-        await updateJsonConfig(config)
+    config['kvdb']['isFirstTimeToLogin'] = False
+    await updateJsonConfig(config)
     session = aiohttp.ClientSession(headers={
         'Cookie': f'buvid3={config["kvdb"]["bili"]["buvid3"]}; SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
     })
