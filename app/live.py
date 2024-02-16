@@ -2,9 +2,11 @@ from pyee import AsyncIOEventEmitter
 from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
-from blivedm.blivedm import BLiveClient, BaseHandler, HeartbeatMessage
+from blivedm.blivedm import BLiveClient, BaseHandler
+from blivedm.blivedm.models.web import HeartbeatMessage
 import aiohttp, concurrent.futures, asyncio, sys
 from bilibili_api import Credential, user, sync, login_func
+from .patch_bilibili_api_python import patch_check_qrcode_events
 import tkinter as tk
 
 liveEvent = AsyncIOEventEmitter()
@@ -20,13 +22,13 @@ guardLevelMap = {
 }
 
 class LiveMsgHandler(BaseHandler):
-    async def _on_heartbeat(self, client: BLiveClient, message: HeartbeatMessage):
+    def _on_heartbeat(self, client: BLiveClient, message: HeartbeatMessage):
         global firstHeartBeat
         if firstHeartBeat:
             liveEvent.emit('connected')
             firstHeartBeat = False
 
-    async def onDanmuCallback(self, client: BLiveClient, command: dict):
+    def onDanmuCallback(self, client: BLiveClient, command: dict):
         uid = command["info"][2][0]
         msg = command['info'][1]
         uname = command["info"][2][1]
@@ -42,7 +44,7 @@ class LiveMsgHandler(BaseHandler):
         timeLog(f"[Danmu] {uname}: {msg}")
         liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji)
 
-    async def onGuardBuyCallback(self, client: BLiveClient, command: dict):
+    def onGuardBuyCallback(self, client: BLiveClient, command: dict):
         if 'role_name' not in command['data'] or command['data']['role_name'] not in ['总督', '提督', '舰长']:
             return
         uid = command["data"]["uid"]
@@ -53,7 +55,7 @@ class LiveMsgHandler(BaseHandler):
         timeLog(f"[GuardBuy] {uname} bought {'New ' if newGuard else ''}{giftName} x {num}.")
         liveEvent.emit('guardBuy', uid, uname, newGuard, giftName, num)
 
-    async def onSCCallback(self, client: BLiveClient, command: dict):
+    def onSCCallback(self, client: BLiveClient, command: dict):
         uid = command["data"]["uid"]
         uname = command["data"]["user_info"]["uname"]
         price = command["data"]["price"]
@@ -61,7 +63,7 @@ class LiveMsgHandler(BaseHandler):
         timeLog(f"[SuperChat] {uname} bought {price}元的SC: {msg}")
         liveEvent.emit('superChat', uid, uname, price, msg)
 
-    async def onGiftCallback(self, client: BLiveClient, command: dict):
+    def onGiftCallback(self, client: BLiveClient, command: dict):
         uid = command["data"]["uid"]
         uname = command["data"]["uname"]
         giftName = command["data"]["giftName"]
@@ -71,7 +73,7 @@ class LiveMsgHandler(BaseHandler):
         timeLog(f"[Gift] {uname} bought {price:.1f}元的{giftName} x {num}.")
         liveEvent.emit('gift', uid, uname, price, giftName, num)
 
-    async def onInteractWordCallback(self, client: BLiveClient, command: dict):
+    def onInteractWordCallback(self, client: BLiveClient, command: dict):
         if command["data"]["roomid"] != getJsonConfig()['engine']['bili']['liveID']:
             return
         uid = command["data"]["uid"]
@@ -86,19 +88,19 @@ class LiveMsgHandler(BaseHandler):
         else:
             liveEvent.emit('welcome', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel)
 
-    async def onLikeCallback(self, client: BLiveClient, command: dict):
+    def onLikeCallback(self, client: BLiveClient, command: dict):
         uid = command["data"]["uid"]
         uname = command["data"]["uname"]
         timeLog(f"[Like] {uname} liked the stream.")
         liveEvent.emit('like', uid, uname)
     
-    async def onWarning(self, client: BLiveClient, command: dict):
+    def onWarning(self, client: BLiveClient, command: dict):
         print(msg)
         msg = command['msg']
         timeLog(f"[Warning] {msg}")
         liveEvent.emit('warning', msg, False)
 
-    async def onCutOff(self, client: BLiveClient, command: dict):
+    def onCutOff(self, client: BLiveClient, command: dict):
         print(msg)
         msg = command['msg']
         timeLog(f"[Warning] Cut Off, {msg}")
@@ -151,7 +153,7 @@ def loginBili():
             count = 0
             timeLog(f"[Live] 刷新二维码")
         count += 1
-        event, cred = login_func.check_qrcode_events(token)
+        event, cred = patch_check_qrcode_events(token)
         nonlocal outputCred
         outputCred = cred
         if event != login_func.QrCodeLoginEvents.DONE:
@@ -159,10 +161,10 @@ def loginBili():
             window.after(1000, update)
         else:
             window.destroy()
-            del image, widget
     window.after(1000, update)
     window.protocol("WM_DELETE_WINDOW", lambda : sys.exit(0))
     window.mainloop()
+    del image, widget
     config = getJsonConfig()
     config["kvdb"]["bili"]["uid"] = int(outputCred.dedeuserid)
     config["kvdb"]["bili"]["sessdata"] = outputCred.sessdata
@@ -202,6 +204,6 @@ async def initalizeLive():
     session = aiohttp.ClientSession(headers={
         'Cookie': f'buvid3={config["kvdb"]["bili"]["buvid3"]}; SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
     })
-    room = BLiveClient(config['engine']['bili']['liveID'], ssl=True, uid=config["kvdb"]["bili"]["uid"], session=session)
-    room.add_handler(LiveMsgHandler())
+    room = BLiveClient(config['engine']['bili']['liveID'], uid=config["kvdb"]["bili"]["uid"], session=session)
+    room.set_handler(LiveMsgHandler())
     await connectLive()

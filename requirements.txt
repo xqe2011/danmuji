@@ -12,5 +12,5 @@ pyinstaller==5.13.0
 keyboard==0.13.5
 optimum[onnxruntime]==1.11.1
 appdirs==1.4.4
-bilibili-api-python==16.1.0
+bilibili-api-python==16.2.0
 -r blivedm/requirements.txt
