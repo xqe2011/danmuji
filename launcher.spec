@@ -1,14 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 block_cipher = None
 
+from PyInstaller.utils.hooks import collect_data_files
+bilibili_api_datas = collect_data_files('bilibili_api')
 
 a = Analysis(
     ['launcher.py'],
     pathex=[],
     binaries=[],
-    datas=[('./static', './static'), ('./config.template.json', './')],
+    datas=[('./static', './static'), ('./config.template.json', './')] + bilibili_api_datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
