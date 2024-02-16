@@ -30,3 +30,25 @@
 | 任何时候 | Alt+T | 历史模式查看下一条礼物 |
 | 任何时候 | Alt+Y | 历史模式查看下一条弹幕 |
 | 任何时候 | Alt+F9 | 历史模式回到最新弹幕 |
+
+## 贡献本项目
+### 克隆并安装依赖
+```
+git clone https://github.com/xqe2011/danmuji
+pip install -r requirements.txt
+```
+### 编译配置页面
+```
+cd web
+npm run build
+cd ../
+cp -r ./web/dist ./static
+```
+### 启动主程序
+```
+python launcher.py
+```
+### 打包
+```
+pyinstaller launcher.spec
+```

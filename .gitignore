@@ -13,3 +13,4 @@ static
 .DS_Store
 config.json
 model
+build
