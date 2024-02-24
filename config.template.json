@@ -42,6 +42,7 @@
         "filter": {
             "danmu": {
                 "enable": true,
+                "symbolEnable": true,
                 "emojiEnable": true,
                 "deduplicate": false,
                 "isFansMedalBelongToLive": false,

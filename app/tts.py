@@ -7,9 +7,10 @@ from .logger import timeLog
 import winsdk.windows.media.speechsynthesis as speechsynthesis
 import winsdk.windows.storage.streams as streams
 import pygame
-import io
+import io, json, os
 
 channels = [{"lastRate": None, "lastVolume": None, "lastVoice": None, "synthesizer": speechsynthesis.SpeechSynthesizer()}] * 2
+symbolToText = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../symbol-to-text.json'), encoding='utf-8', mode='r'))
 lastSpeaker = None
 nowSpeaker = None
 allVoices = []
@@ -103,13 +104,14 @@ def calculateTags(lang, config, text):
 async def tts(text, channel=0, config=None):
     global synthesizer, channels
     syncWithConfig(config, channel)
+    # 标点符号处理
+    text = "".join([symbolToText[char] if char in symbolToText else char for char in text])
     text = xmlEscape(text)
 
     ttsConfig = getJsonConfig()['dynamic']['tts']
     # 支持日语
     if ttsConfig['japanese']['enable']:
         text = re.sub(r'[\u3040-\u309F\u30A0-\u30FF]+', calculateTags("ja-JP", ttsConfig['japanese'], '\g<0>'), text)
-    
     ssml = f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="zh-CN"><voice xml:lang="zh-CN">{text}</voice></speak>'
     # Synthesize text to a stream
     stream = await channels[channel]['synthesizer'].synthesize_ssml_to_stream_async(ssml)

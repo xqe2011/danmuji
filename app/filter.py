@@ -1,4 +1,5 @@
 from .config import getJsonConfig
+import regex
 import asyncio
 
 lastDanmuMessages = []
@@ -20,6 +21,8 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
     if dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"] != 0 and fansMedalGuardLevel < dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"]:
         return False
     if dynamicConfig["filter"]["danmu"]["lengthShorter"] != 0 and len(msg) > dynamicConfig["filter"]["danmu"]["lengthShorter"]:
+        return False
+    if not dynamicConfig["filter"]["danmu"]["symbolEnable"] and regex.search(r'^[^\p{L}\p{N}]+$', msg) is not None:
         return False
     if not dynamicConfig["filter"]["danmu"]["emojiEnable"] and isEmoji:
         return False

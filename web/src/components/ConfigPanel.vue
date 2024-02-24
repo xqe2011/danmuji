@@ -9,6 +9,7 @@
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.danmu.enable" inset color="blue" label="启用弹幕朗读" aria-label="启用弹幕朗读"></v-switch>
+            <v-switch v-model="config.filter.danmu.symbolEnable" inset color="blue" label="启用标点符号朗读" aria-label="启用标点符号朗读"></v-switch>
             <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用弹幕表情朗读" aria-label="启用弹幕表情朗读"></v-switch>
             <v-switch v-model="config.filter.danmu.deduplicate" inset color="blue" label="去除短时间内重复弹幕" aria-label="去除短时间内重复弹幕"></v-switch>
             <v-switch v-model="config.filter.danmu.isFansMedalBelongToLive" inset color="blue" label="粉丝牌必须为本直播间" aria-label="粉丝牌必须为本直播间"></v-switch>
@@ -134,6 +135,7 @@ config.value = {
     filter: {
         danmu: {
             enable: true,
+            symbolEnable: true,
             emojiEnable: true,
             deduplicate: true,
             isFansMedalBelongToLive: true,

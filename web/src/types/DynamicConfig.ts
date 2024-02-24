@@ -19,6 +19,7 @@ export type DynamicConfig = {
     "filter": {
         "danmu": {
             "enable": boolean,
+            "symbolEnable": boolean,
             "emojiEnable": boolean,
             "deduplicate": boolean,
             "isFansMedalBelongToLive": boolean,

@@ -9,7 +9,7 @@ a = Analysis(
     ['launcher.py'],
     pathex=[],
     binaries=[],
-    datas=[('./static', './static'), ('./config.template.json', './')] + bilibili_api_datas,
+    datas=[('./static', './static'), ('./config.template.json', './'), ('./symbol-to-text.json', './')] + bilibili_api_datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

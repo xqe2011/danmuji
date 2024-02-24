@@ -13,4 +13,5 @@ keyboard==0.13.5
 optimum[onnxruntime]==1.11.1
 appdirs==1.4.4
 bilibili-api-python==16.2.0
+regex==2023.8.8
 -r blivedm/requirements.txt
