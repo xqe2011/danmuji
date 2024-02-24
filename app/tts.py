@@ -133,6 +133,7 @@ async def tts(text, channel=0, config=None):
     while pygame.mixer.Channel(channel).get_busy():
         await asyncio.sleep(0.01)
 
+    stream.close()
 
 
 def messagesToText(msg):
