@@ -34,7 +34,7 @@
 ## 贡献本项目
 ### 克隆并安装依赖
 ```
-git clone https://github.com/xqe2011/danmuji
+git clone --recurse-submodules https://github.com/xqe2011/danmuji
 pip install -r requirements.txt
 ```
 ### 编译配置页面
