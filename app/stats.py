@@ -50,6 +50,10 @@ def getDelay():
     global delaysQueue
     return sum(delaysQueue) / len(delaysQueue) if len(delaysQueue) > 0 else 0
 
+def getMessagesLength():
+    global lastDurationStats
+    return lastDurationStats['messagesQueueLength']
+
 def appendDelay(delay):
     global delaysQueue
     delaysQueue.append(delay)

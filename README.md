@@ -42,7 +42,7 @@ pip install -r requirements.txt
 cd web
 npm run build
 cd ../
-cp -r ./web/dist ./static
+mv ./web/dist ./static
 ```
 ### 启动主程序
 ```

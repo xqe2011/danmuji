@@ -9,8 +9,8 @@
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.danmu.enable" inset color="blue" label="启用弹幕朗读" aria-label="启用弹幕朗读"></v-switch>
-            <v-switch v-model="config.filter.danmu.symbolEnable" inset color="blue" label="启用标点符号朗读" aria-label="启用标点符号朗读"></v-switch>
-            <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用弹幕表情朗读" aria-label="启用弹幕表情朗读"></v-switch>
+            <v-switch v-model="config.filter.danmu.symbolEnable" inset color="blue" label="启用纯标点符号弹幕朗读" aria-label="启用纯标点符号弹幕朗读"></v-switch>
+            <v-switch v-model="config.filter.danmu.emojiEnable" inset color="blue" label="启用纯弹幕表情弹幕朗读" aria-label="启用纯弹幕表情弹幕朗读"></v-switch>
             <v-switch v-model="config.filter.danmu.deduplicate" inset color="blue" label="去除短时间内重复弹幕" aria-label="去除短时间内重复弹幕"></v-switch>
             <v-switch v-model="config.filter.danmu.isFansMedalBelongToLive" inset color="blue" label="粉丝牌必须为本直播间" aria-label="粉丝牌必须为本直播间"></v-switch>
             <v-select v-model="config.filter.danmu.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" aria-label="弹幕大航海大于等于"></v-select>
@@ -51,6 +51,12 @@
             <v-switch v-model="config.filter.warning.enable" inset color="blue" label="启用超管警告朗读" aria-label="启用超管警告朗读"></v-switch>
             <v-divider></v-divider>
 
+            <v-switch v-model="config.system.alertWhenMessagesQueueLonger.enable" inset color="blue" label="启用弹幕延迟较高时自动播报" aria-label="启用弹幕延迟较高时自动播报"></v-switch>
+            <v-text-field type="number" v-model="config.system.alertWhenMessagesQueueLonger.threshold" label="积压弹幕数量大于" aria-label="积压弹幕数量大于"></v-text-field>
+            <v-text-field type="number" v-model="config.system.alertWhenMessagesQueueLonger.interval" label="播报间隔" aria-label="播报间隔"></v-text-field>
+            <v-divider></v-divider>
+
+            <v-switch v-model="config.tts.readSymbolEnable" inset color="blue" label="启用标点符号朗读" aria-label="启用标点符号朗读"></v-switch>
             <v-select class="block-select" v-model="config.tts.speaker" :items="ttsSpeakers" label="TTS音频通道" aria-label="TTS音频通道"></v-select>
             <v-select v-model="config.tts.voice" :items="ttsCNVoices" label="主TTS发音引擎" aria-label="主TTS发音引擎"></v-select>
             <v-slider v-model="config.tts.rate" label="总语速" hint="TTS语速(包括其他语言)" min="1" max="100" step="1"></v-slider>
@@ -115,7 +121,15 @@ const whitelistUsers = ref("");
 const whitelistKeywords = ref("");
 const config = ref(undefined as unknown as DynamicConfig);
 config.value = {
+    system: {
+        alertWhenMessagesQueueLonger: {
+            enable: true,
+            threshold: 100,
+            interval: 30
+        }
+    },
     tts: {
+        readSymbolEnable: true,
         speaker: "",
         volume: 100,
         voice: "",
@@ -239,6 +253,8 @@ function onSave() {
     config.value.filter.gift.moneyGiftPriceBigger = Number(config.value.filter.gift.moneyGiftPriceBigger);
     config.value.filter.welcome.fansMedalGuardLevelBigger = Number(config.value.filter.welcome.fansMedalGuardLevelBigger);
     config.value.filter.welcome.fansMedalLevelBigger = Number(config.value.filter.welcome.fansMedalLevelBigger);
+    config.value.system.alertWhenMessagesQueueLonger.interval = Number(config.value.system.alertWhenMessagesQueueLonger.interval);
+    config.value.system.alertWhenMessagesQueueLonger.threshold = Number(config.value.system.alertWhenMessagesQueueLonger.threshold);
 
     /* 切割字符串 */
     config.value.filter.danmu.blacklistKeywords = blacklistKeywords.value != "" ? blacklistKeywords.value.split(/[,，]+/) : [];   

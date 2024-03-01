@@ -78,9 +78,14 @@ class LiveMsgHandler(BaseHandler):
             return
         uid = command["data"]["uid"]
         uname = command["data"]["uname"]
-        isFansMedalBelongToLive = command["data"]["fans_medal"]["anchor_roomid"] == getJsonConfig()['engine']['bili']['liveID']
-        fansMedalLevel = command["data"]["fans_medal"]["medal_level"]
-        fansMedalGuardLevel = guardLevelMap[command["data"]["fans_medal"]["guard_level"]]
+        if command["data"]["fans_medal"] != None:
+            isFansMedalBelongToLive = command["data"]["fans_medal"]["anchor_roomid"] == getJsonConfig()['engine']['bili']['liveID']
+            fansMedalLevel = command["data"]["fans_medal"]["medal_level"]
+            fansMedalGuardLevel = guardLevelMap[command["data"]["fans_medal"]["guard_level"]]
+        else:
+            isFansMedalBelongToLive = False
+            fansMedalLevel = 0
+            fansMedalGuardLevel = 0
         isSubscribe = command["data"]["msg_type"] == 2
         timeLog(f"[Interact] {uname} {'subscribe' if isSubscribe else 'enter'} the stream.")
         if isSubscribe:

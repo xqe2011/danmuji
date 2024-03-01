@@ -1,5 +1,4 @@
 from .live import liveEvent
-from .logger import timeLog
 from .filter import filterDanmu, filterGift, filterGuardBuy, filterLike, filterSubscribe, filterWelcome, filterSuperChat, filterWarning
 from .stats import setOutputMessagesLength, appendDanmuFilteredStats, appendGiftFilteredStats, appendWelcomeFilteredStats, appendLikeFilteredStats, appendGuardBuyFilteredStats, appendSubscribeFilteredStats, appendSuperChatFilteredStats, appendWarningFilteredStats
 import time
@@ -23,6 +22,11 @@ def getHaveReadMessages():
 def messagesQueueAppend(data):
     global messagesQueue
     messagesQueue.append(data)
+    setOutputMessagesLength(len(messagesQueue))
+
+def messagesQueueAppendAtStart(data):
+    global messagesQueue
+    messagesQueue.insert(0, data)
     setOutputMessagesLength(len(messagesQueue))
 
 @liveEvent.on('danmu')

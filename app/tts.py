@@ -104,11 +104,12 @@ def calculateTags(lang, config, text):
 async def tts(text, channel=0, config=None):
     global synthesizer, channels
     syncWithConfig(config, channel)
+    ttsConfig = getJsonConfig()['dynamic']['tts']
     # 标点符号处理
-    text = "".join([symbolToText[char] if char in symbolToText else char for char in text])
+    if ttsConfig['readSymbolEnable']:
+        text = "".join([symbolToText[char] if char in symbolToText else char for char in text])
     text = xmlEscape(text)
 
-    ttsConfig = getJsonConfig()['dynamic']['tts']
     # 支持日语
     if ttsConfig['japanese']['enable']:
         text = re.sub(r'[\u3040-\u309F\u30A0-\u30FF]+', calculateTags("ja-JP", ttsConfig['japanese'], '\g<0>'), text)

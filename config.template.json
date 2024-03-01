@@ -22,7 +22,15 @@
         }
     },
     "dynamic": {
+        "system": {
+            "alertWhenMessagesQueueLonger": {
+                "enable": true,
+                "threshold": 50,
+                "interval": 30
+            }
+        },
         "tts": {
+            "readSymbolEnable": true,
             "speaker": "",
             "volume": 100,
             "voice": "Microsoft Huihui",

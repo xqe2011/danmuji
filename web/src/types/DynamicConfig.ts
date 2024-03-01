@@ -1,5 +1,13 @@
 export type DynamicConfig = {
+    "system": {
+        "alertWhenMessagesQueueLonger": {
+            "enable": boolean,
+            "threshold": number,
+            "interval": number
+        }
+    },
     "tts": {
+        "readSymbolEnable": boolean,
         "speaker": string,
         "volume": number,
         "voice": string,
