@@ -100,13 +100,12 @@ class LiveMsgHandler(BaseHandler):
         liveEvent.emit('like', uid, uname)
     
     def onWarning(self, client: BLiveClient, command: dict):
-        print(msg)
         msg = command['msg']
         timeLog(f"[Warning] {msg}")
         liveEvent.emit('warning', msg, False)
 
     def onCutOff(self, client: BLiveClient, command: dict):
-        print(msg)
+        print(command)
         msg = command['msg']
         timeLog(f"[Warning] Cut Off, {msg}")
         liveEvent.emit('warning', msg, True)
