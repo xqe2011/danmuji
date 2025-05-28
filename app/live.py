@@ -6,7 +6,6 @@ from blivedm.blivedm import BLiveClient, BaseHandler
 from blivedm.blivedm.models.web import HeartbeatMessage
 import aiohttp, concurrent.futures, asyncio, sys
 from bilibili_api import Credential, user, sync, login_func
-from .patch_bilibili_api_python import patch_check_qrcode_events
 import tkinter as tk
 
 liveEvent = AsyncIOEventEmitter()
@@ -157,7 +156,7 @@ def loginBili():
             count = 0
             timeLog(f"[Live] 刷新二维码")
         count += 1
-        event, cred = patch_check_qrcode_events(token)
+        event, cred = login_func.check_qrcode_events(token)
         nonlocal outputCred
         outputCred = cred
         if event != login_func.QrCodeLoginEvents.DONE:
@@ -206,7 +205,7 @@ async def initalizeLive():
     config['kvdb']['isFirstTimeToLogin'] = False
     await updateJsonConfig(config)
     session = aiohttp.ClientSession(headers={
-        'Cookie': f'buvid3={config["kvdb"]["bili"]["buvid3"]}; SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
+        'Cookie': f'SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
     })
     room = BLiveClient(config['engine']['bili']['liveID'], uid=config["kvdb"]["bili"]["uid"], session=session)
     room.set_handler(LiveMsgHandler())
