@@ -1,8 +1,0 @@
-version: "3"
-services:
-    server:
-        build: ./
-        environment:
-            HTTP_SERVER_PASSWORD: xqewebsystem
-        ports:
-          - 80:80
