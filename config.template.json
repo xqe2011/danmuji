@@ -10,7 +10,9 @@
     },
     "engine": {
         "bili": {
-            "liveID": 21654925
+            "liveID": 21654925,
+            "liveCode": "",
+            "openAPIURL": "https://open-live.danmuji.xqe2011.cn"
         },
         "http": {
             "token": "nuozimeownuozimeownuozimeow"

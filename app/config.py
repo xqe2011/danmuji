@@ -1,6 +1,6 @@
 from .logger import timeLog
 import json, os, appdirs
-from pyee import AsyncIOEventEmitter
+from pyee.asyncio import AsyncIOEventEmitter
 
 configEvent = AsyncIOEventEmitter()
 

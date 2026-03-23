@@ -9,14 +9,18 @@
             <v-divider class="block-divider"></v-divider>
 
             <v-text-field v-model="config.bili.liveID" label="直播间号" aria-label="直播间号"></v-text-field>
+            <v-text-field v-model="config.bili.liveCode" label="直播间身份码" aria-label="直播间身份码"></v-text-field>
             <v-text-field v-model="config.http.token" label="HTTP令牌" aria-label="HTTP令牌"></v-text-field>
             <v-divider></v-divider>
 
             <v-switch v-model="config.remote.enable" inset color="blue" label="启用远程控制" aria-label="启用远程控制"></v-switch>
             <v-text-field v-model="config.remote.server" label="服务器地址" aria-label="远程控制的服务器地址"></v-text-field>
             <v-text-field v-model="config.remote.password" label="服务器密码" aria-label="远程控制的服务器密码"></v-text-field>
-            
             <v-divider></v-divider>
+
+            <v-text-field v-model="config.bili.openAPIURL" label="开放平台地址" aria-label="开放平台的服务器地址"></v-text-field>
+            <v-divider></v-divider>
+
             <v-btn class="save-button" :loading="saving" color="blue" @click="onSave" aria-label="引擎配置保存(可以使用键盘Ctrl+S保存)" block>保存</v-btn>
         </v-form>
     </v-card>
@@ -61,6 +65,8 @@ const config = ref(undefined as unknown as EngineConfig);
 config.value = {
     bili: {
         liveID: 0,
+        liveCode: "",
+        openAPIURL: ""
     },
     http: {
         token: ""

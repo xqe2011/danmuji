@@ -1,15 +1,19 @@
-from pyee import AsyncIOEventEmitter
+from email import message
+from typing import Optional
+from pyee.asyncio import AsyncIOEventEmitter
+
+from blivedm.blivedm.clients import ws_base
 from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
-from blivedm.blivedm import BLiveClient, BaseHandler
-from blivedm.blivedm.models.web import HeartbeatMessage
+from blivedm.blivedm import OpenLiveClient, BLiveClient, BaseHandler
 import aiohttp, concurrent.futures, asyncio, sys
-from bilibili_api import Credential, user, sync, login_func
+from bilibili_api import Credential, user, sync, login_v2, sync
 import tkinter as tk
 
 liveEvent = AsyncIOEventEmitter()
-room = None
+roomWeb = None
+roomOpen = None
 firstHeartBeat = True
 
 # 0为普通用户，1为总督，2位提督，3为舰长
@@ -21,9 +25,16 @@ guardLevelMap = {
 }
 
 class LiveMsgHandler(BaseHandler):
-    def _on_heartbeat(self, client: BLiveClient, message: HeartbeatMessage):
+    def on_client_stopped(self, client: ws_base.WebSocketClientBase, exception: Optional[Exception]):
+        if roomOpen != None:
+            timeLog(f"[Live] Connecting OpenLive")
+            liveEvent.emit('connectingOpenLive')
+            roomOpen.start()
+
+    def _on_heartbeat(self, client: BLiveClient, command: dict):
         global firstHeartBeat
         if firstHeartBeat:
+            timeLog(f"[Live] Connected")
             liveEvent.emit('connected')
             firstHeartBeat = False
 
@@ -108,6 +119,60 @@ class LiveMsgHandler(BaseHandler):
         msg = command['msg']
         timeLog(f"[Warning] Cut Off, {msg}")
         liveEvent.emit('warning', msg, True)
+
+    def onOpenLiveDanmuCallback(self, client: OpenLiveClient, command: dict):
+        uid = command["data"]["uid"]
+        msg = command["data"]["msg"]
+        uname = command["data"]["uname"]
+        if command["data"]["fans_medal_wearing_status"]:
+            isFansMedalBelongToLive = True
+            fansMedalLevel = command["data"]["fans_medal_level"]
+            fansMedalGuardLevel = guardLevelMap[command["data"]["guard_level"]]
+        else:
+            isFansMedalBelongToLive = False
+            fansMedalLevel = 0
+            fansMedalGuardLevel = 0
+        isEmoji = command['data']["dm_type"] == 1 or isAllCharactersEmoji(msg)
+        timeLog(f"[Danmu] {uname}: {msg}")
+        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji)
+    
+    def onOpenLiveGiftCallback(self, client: OpenLiveClient, command: dict):
+        uid = command["data"]["uid"]
+        uname = command["data"]["uname"]
+        giftName = command["data"]["gift_name"]
+        num = command["data"]["gift_num"]
+        price = command["data"]["price"] / 1000
+        price = price if command["data"]["paid"] else 0
+        timeLog(f"[Gift] {uname} bought {price:.1f}元的{giftName} x {num}.")
+        liveEvent.emit('gift', uid, uname, price, giftName, num)
+
+    def onOpenLiveGuardBuyCallback(self, client: OpenLiveClient, command: dict):
+        uid = command["data"]["user_info"]["uid"]
+        uname = command["data"]["user_info"]["uname"]
+        num = command["data"]["guard_num"]
+        giftName = guardLevelMap[command["data"]["guard_level"]]
+        timeLog(f"[GuardBuy] {uname} bought {giftName} x {num}.")
+        liveEvent.emit('guardBuy', uid, uname, False, giftName, num)
+    
+    def onOpenLiveSuperChatCallback(self, client: OpenLiveClient, command: dict):
+        uid = command["data"]["uid"]
+        uname = command["data"]["uname"]
+        price = command["data"]["rmb"]
+        msg = command["data"]["message"]
+        timeLog(f"[SuperChat] {uname} bought {price}元的SC: {msg}")
+        liveEvent.emit('superChat', uid, uname, price, msg)
+    
+    def onOpenLiveLikeCallback(self, client: OpenLiveClient, command: dict):
+        uid = command["data"]["uid"]
+        uname = command["data"]["uname"]
+        timeLog(f"[Like] {uname} liked the stream.")
+        liveEvent.emit('like', uid, uname)
+    
+    def onOpenLiveEnterRoomCallback(self, client: OpenLiveClient, command: dict):
+        uid = command["data"]["uid"]
+        uname = command["data"]["uname"]
+        timeLog(f"[Interact] {uname} enter the stream.")
+        liveEvent.emit('welcome', uid, uname, False, 0, 0)
     
     _CMD_CALLBACK_DICT = {
         **BaseHandler._CMD_CALLBACK_DICT,
@@ -118,7 +183,13 @@ class LiveMsgHandler(BaseHandler):
         'INTERACT_WORD': onInteractWordCallback,
         'LIKE_INFO_V3_CLICK': onLikeCallback,
         'WARNING': onWarning,
-        'CUT_OFF': onCutOff
+        'CUT_OFF': onCutOff,
+        'LIVE_OPEN_PLATFORM_DM': onOpenLiveDanmuCallback,
+        'LIVE_OPEN_PLATFORM_SEND_GIFT': onOpenLiveGiftCallback,
+        'LIVE_OPEN_PLATFORM_GUARD': onOpenLiveGuardBuyCallback,
+        'LIVE_OPEN_PLATFORM_SUPER_CHAT': onOpenLiveSuperChatCallback,
+        'LIVE_OPEN_PLATFORM_LIKE': onOpenLiveLikeCallback,
+        'LIVE_OPEN_PLATFORM_LIVE_ROOM_ENTER': onOpenLiveEnterRoomCallback,
     }
 
 async def getSelfInfo():
@@ -138,7 +209,9 @@ async def getSelfLiveID():
         return None
 
 def loginBili():
-    img, token = login_func.get_qrcode()
+    qr = login_v2.QrCodeLogin(platform=login_v2.QrCodeLoginChannel.WEB) 
+    sync(qr.generate_qrcode())
+    img = qr.get_qrcode_picture()
     window = tk.Tk()
     window.resizable(0,0)
     window.title("企鹅弹幕机 - 扫码登陆B站")
@@ -149,20 +222,20 @@ def loginBili():
     outputCred = None
     count = 0
     def update():
-        nonlocal img, token, count
+        nonlocal img, qr, count
         if count == 60:
-            img, token = login_func.get_qrcode()
+            img = qr.get_qrcode_picture()
             image.configure(file=img.url.replace("file://", ""))
             count = 0
             timeLog(f"[Live] 刷新二维码")
         count += 1
-        event, cred = login_func.check_qrcode_events(token)
-        nonlocal outputCred
-        outputCred = cred
-        if event != login_func.QrCodeLoginEvents.DONE:
+        event = sync(qr.check_state())
+        if event != login_v2.QrCodeLoginEvents.DONE:
             timeLog(f"[Live] 等待二维码登录中...")
             window.after(1000, update)
         else:
+            nonlocal outputCred
+            outputCred = qr.get_credential()
             window.destroy()
     window.after(1000, update)
     window.protocol("WM_DELETE_WINDOW", lambda : sys.exit(0))
@@ -177,13 +250,13 @@ def loginBili():
     timeLog(f'[Live] 二维码登录完成，uid: {config["kvdb"]["bili"]["uid"]}，sessdata: {config["kvdb"]["bili"]["sessdata"]}，buvid3: {config["kvdb"]["bili"]["buvid3"]}, jct: {config["kvdb"]["bili"]["jct"]}')
 
 async def connectLive():
-    room.start()
+    roomWeb.start()
 
 async def disconnectLive():
-    await room.close()
+    await roomWeb.close()
 
 async def initalizeLive():
-    global room
+    global roomWeb, roomOpen
     # 检查B站凭证是否有效
     data = await getSelfInfo()
     if data == None:
@@ -207,6 +280,11 @@ async def initalizeLive():
     session = aiohttp.ClientSession(headers={
         'Cookie': f'SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
     })
-    room = BLiveClient(config['engine']['bili']['liveID'], uid=config["kvdb"]["bili"]["uid"], session=session)
-    room.set_handler(LiveMsgHandler())
+    roomWeb = BLiveClient(config['engine']['bili']['liveID'], uid=config["kvdb"]["bili"]["uid"], session=session)
+    roomWeb.set_handler(LiveMsgHandler())
+    if config['engine']['bili']['liveCode']:
+        roomOpen = OpenLiveClient(config['engine']['bili']['openAPIURL'], config['engine']['bili']['liveCode'])
+        roomOpen.set_handler(LiveMsgHandler())
+    else:
+        liveEvent.emit("liveCodeNotConfig")
     await connectLive()

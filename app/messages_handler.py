@@ -29,6 +29,38 @@ def messagesQueueAppendAtStart(data):
     messagesQueue.insert(0, data)
     setOutputMessagesLength(len(messagesQueue))
 
+@liveEvent.on('liveCodeNotConfig')
+async def onLiveCodeNotConfig():
+    await messagesQueueAppend({
+        'type': 'system',
+        'time': time.time(),
+        'msg': '检测到未配置身份码 建议尽快配置以增加稳定性 配置方法可查看帮助文档'
+    })
+
+@liveEvent.on('connectingOpenLive')
+async def onConnectingOpenLive():
+    await messagesQueueAppend({
+        'type': 'system',
+        'time': time.time(),
+        'msg': 'B站直播间已断开连接 但检测到已经配置身份码 正在通过开放平台重新连接直播间'
+    })
+
+@liveEvent.on('connected')
+async def liveConnectedHandler():
+    await messagesQueueAppend({
+        'type': 'system',
+        'time': time.time(),
+        'msg': 'B站直播间已连接'
+    })
+
+@liveEvent.on('login')
+async def needLoginHandler():
+    await messagesQueueAppend({
+        'type': 'system',
+        'time': time.time(),
+        'msg': 'B站登陆已失效 请在弹出的企鹅弹幕机扫码登陆B站窗口中使用小号重新登录B站'
+    })
+
 @liveEvent.on('danmu')
 async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
     if filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
