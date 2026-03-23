@@ -10,6 +10,12 @@ const GameIdSchema = z.object({
   game_id: z.string(),
 });
 
+const WebsocketUrlSchema = z.object({
+  game_id: z.string(),
+  url: z.string(),
+  signature: z.string(),
+});
+
 const StartSuccessDataSchema = z.object({
   game_info: z.object({
     game_id: z.string(),
@@ -41,11 +47,16 @@ const StartResponseSchema = DefaultResponseSchema.extend({
 const ConfigSchema = z.object({
   ACCESS_KEY_ID: z.string(),
   ACCESS_KEY_SECRET: z.string(),
-  APP_ID: z.coerce.number()
+  APP_ID: z.coerce.number(),
+  WEBSOCKET_URL: z.string(),
 });
 
 const config = ConfigSchema.parse(process.env);
 const logger = new Logger({ hideLogPositionForProduction: true });
+
+async function hmac(data: string) {
+  return crypto.createHmac("sha256", config.ACCESS_KEY_SECRET).update(data).digest("hex");
+}
 
 async function requestBiliAPI<T>(responseSchema: ZodSchema<T>, path: string, body: unknown) {
   const bodyStr = JSON.stringify(body);
@@ -62,15 +73,12 @@ async function requestBiliAPI<T>(responseSchema: ZodSchema<T>, path: string, bod
     "x-bili-timestamp": timestamp
   };
 
-  const authStr = Object.entries(authHeaders).map(([key, value]) => `${key}:${value}`).join("\n");
-  const signature = crypto.createHmac("sha256", config.ACCESS_KEY_SECRET).update(authStr).digest("hex");
-
   const response = await fetch("https://live-open.biliapi.com" + path, {
     method: "POST",
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
-      "Authorization": signature,
+      "Authorization": await hmac(Object.entries(authHeaders).map(([key, value]) => `${key}:${value}`).join("\n")),
       ...authHeaders,
     },
     body: bodyStr,
@@ -81,10 +89,16 @@ async function requestBiliAPI<T>(responseSchema: ZodSchema<T>, path: string, bod
   return responseSchema.parse(await response.json());
 }
 
-const routes: Record<string, (body: unknown) => Response | Promise<Response>> = {
-  "/v2/app/start": async (body) => {
+const routes: Record<string, (clientIP: string, body: unknown, query?: Record<string, unknown>, request?: Request, server?: Bun.Server<unknown>) => Promise<Response | undefined>> = {
+  "/v2/app/start": async (clientIP, body, query, request, server) => {
     const req = StartSchema.parse(body);
     const data = await requestBiliAPI(StartResponseSchema, "/v2/app/start", { code: req.code, app_id: config.APP_ID });
+    data.data.websocket_info.wss_link = await Promise.all(data.data.websocket_info.wss_link.map(async (url) => {
+      return config.WEBSOCKET_URL +
+        "?game_id=" + data.data.game_info.game_id +
+        "&url=" + encodeURIComponent(url) +
+        "&signature=" + await hmac(";,'\"[!]" + `${url}, ${data.data.game_info.game_id}, ${clientIP}`);
+    }));
     if (data.data.game_info !== undefined) {
       logger.info(`[/v2/app/start] ${req.code} -> code=${data.code} uid=${data.data.anchor_info.uid} rid=${data.data.anchor_info.room_id} gid=${data.data.game_info.game_id}`);
     } else {
@@ -93,44 +107,66 @@ const routes: Record<string, (body: unknown) => Response | Promise<Response>> = 
     return Response.json(data, { status: 200 });
   },
 
-  "/v2/app/end": async (body) => {
+  "/v2/app/end": async (clientIP, body, query, request, server) => {
     const req = GameIdSchema.parse(body);
     const data = await requestBiliAPI(DefaultResponseSchema, "/v2/app/end", { game_id: req.game_id, app_id: config.APP_ID });
     logger.info(`[/v2/app/end] ${req.game_id} -> code=${data.code} msg=${data.message}`);
     return Response.json(data, { status: 200 });
   },
 
-  "/v2/app/heartbeat": async (body) => {
+  "/v2/app/heartbeat": async (clientIP, body, query, request, server) => {
     const req = GameIdSchema.parse(body);
     const data = await requestBiliAPI(DefaultResponseSchema, "/v2/app/heartbeat", { game_id: req.game_id });
     logger.info(`[/v2/app/heartbeat] ${req.game_id} -> code=${data.code} msg=${data.message}`);
     return Response.json(data, { status: 200 });
   },
+  "/sub": async (clientIP, body, query, request, server) => {
+    const req = WebsocketUrlSchema.parse(query);
+    if (await hmac(";,'\"[!]" + `${req.url}, ${req.game_id}, ${clientIP}`) !== req.signature) {
+      logger.warn(`[/sub] ${clientIP} -> status=403, msg=Invalid URL Signature`);
+      return Response.json({ error: "Invalid URL Signature" }, { status: 403 });
+    }
+    
+    logger.info(`[/sub] ${req.game_id} -> Connecting to ${req.url}`);
+    /* 打开连接 */
+    const client = new WebSocket(req.url);
+    await new Promise((resolve) => {
+      client!.onopen = () => {
+        resolve(0);
+      };
+    });
+    if (server!.upgrade(request!, {data: { gameID: req.game_id, client }})) {
+      return;
+    }
+    return Response.json({ error: "Internal Server Error" }, { status: 500 });
+  },
 };
 
 Bun.serve({
   port: 3000,
-  async fetch(req) {
+  async fetch(req, server) {
     const clientIP = req.headers.get("X-Forwarded-For") ?? req.headers.get("X-Real-IP") ?? req.headers.get("CF-Connecting-IP") ?? req.headers.get("Remote-Addr") ?? req.headers.get("Host") ?? "unknown";
     const url = new URL(req.url);
     const handler = routes[url.pathname];
 
     if (!handler) return new Response("Not Found", { status: 404 });
-    if (req.method !== "POST") {
-      logger.warn(`[${url.pathname}] ${clientIP} -> status=405, msg=Method Not Allowed`);
-      return new Response("Method Not Allowed", { status: 405 });
-    }
-
     let body: unknown;
-    try {
-      body = await req.json();
-    } catch {
-      logger.warn(`[${url.pathname}] ${clientIP} -> status=400, msg=Invalid JSON`);
-      return Response.json({ error: "Invalid JSON" }, { status: 400 });
+    if (url.pathname !== "/sub") {
+      if (req.method !== "POST") {
+        logger.warn(`[${url.pathname}] ${clientIP} -> status=405, msg=Method Not Allowed`);
+        return new Response("Method Not Allowed", { status: 405 });
+      }
+  
+      try {
+        body = await req.json();
+      } catch {
+        logger.warn(`[${url.pathname}] ${clientIP} -> status=400, msg=Invalid JSON`);
+        return Response.json({ error: "Invalid JSON" }, { status: 400 });
+      }
     }
 
     try {
-      const response = await handler(body);
+      const response = await handler(clientIP, body, url.searchParams.toJSON(), req, server);
       return response;
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -138,9 +174,43 @@ Bun.serve({
         return Response.json({ error: z.treeifyError(err) }, { status: 400 });
       }
       logger.error(`[${url.pathname}] ${clientIP} -> status=500, msg=Internal Server Error`);
+      logger.trace(err);
       return Response.json({ error: "Internal Server Error" }, { status: 500 });
     }
   },
+  websocket: {
+    idleTimeout: 40,
+    data: {} as {client?: WebSocket, gameID?: string, url: string},
+    async open(ws) {
+      ws.data.client!.onmessage = (message) => {
+        if (ws.readyState !== WebSocket.OPEN) return;
+        ws.send(message.data);
+        logger.info(`[WebSocket] ${ws.data.gameID} -> Forwarded message to client`);
+      };
+      ws.data.client!.onclose = () => {
+        logger.info(`[WebSocket] ${ws.data.gameID} -> Upstream closed`);
+        ws.close(1000);
+      };
+      logger.info(`[WebSocket] ${ws.data.gameID} -> Opened`);
+    },
+    message(ws, message) {
+      /* 只允许透过AUTH包和心跳包 */
+      if (typeof message === "string" || message.length < 16 || (message.at(11) !== 0x02 && message.at(11) !== 0x07)) {
+        logger.warn(`[WebSocket] ${ws.data.gameID} -> Invalid message`);
+        return;
+      }
+      ws.data.client?.send(message);
+      logger.info(`[WebSocket] ${ws.data.gameID} -> Forwarded message to upstream`);
+    },
+    close(ws, code, reason) {
+      logger.info(`[WebSocket] ${ws.data.gameID} -> Connection lost`);
+      routes["/v2/app/end"]!("localhost", { game_id: ws.data.gameID! }).then(() => {
+        logger.info(`[WebSocket] ${ws.data.gameID} -> Game closed`);
+      }).catch((err) => {
+        logger.error(`[WebSocket] ${ws.data.gameID} -> Error closing game: ${err}`);
+      });
+    },
+  }
 });
 
 logger.info("Server running on http://localhost:3000");
