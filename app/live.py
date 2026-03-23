@@ -1,4 +1,3 @@
-from email import message
 from typing import Optional
 from pyee.asyncio import AsyncIOEventEmitter
 
@@ -7,7 +6,7 @@ from .config import getJsonConfig, updateJsonConfig
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
 from blivedm.blivedm import OpenLiveClient, BLiveClient, BaseHandler
-import aiohttp, concurrent.futures, asyncio, sys
+import aiohttp, concurrent.futures, asyncio, sys, time
 from bilibili_api import Credential, user, sync, login_v2, sync
 import tkinter as tk
 
@@ -26,10 +25,11 @@ guardLevelMap = {
 
 class LiveMsgHandler(BaseHandler):
     def on_client_stopped(self, client: ws_base.WebSocketClientBase, exception: Optional[Exception]):
+        liveEvent.emit('disconnected')
         if roomOpen != None:
             timeLog(f"[Live] Connecting OpenLive")
             liveEvent.emit('connectingOpenLive')
-            roomOpen.start()
+            asyncio.get_running_loop().call_later(3, lambda: roomOpen.start())
 
     def _on_heartbeat(self, client: BLiveClient, command: dict):
         global firstHeartBeat

@@ -5,6 +5,8 @@ import time
 
 messagesQueue = []
 haveReadMessages = []
+onlyReportOnceConnectingOpenLive = False
+onlyReportOnceDisconnected = False
 
 def popMessagesQueue():
     global messagesQueue, haveReadMessages
@@ -31,7 +33,7 @@ def messagesQueueAppendAtStart(data):
 
 @liveEvent.on('liveCodeNotConfig')
 async def onLiveCodeNotConfig():
-    await messagesQueueAppend({
+    messagesQueueAppend({
         'type': 'system',
         'time': time.time(),
         'msg': '检测到未配置身份码 建议尽快配置以增加稳定性 配置方法可查看帮助文档'
@@ -39,15 +41,33 @@ async def onLiveCodeNotConfig():
 
 @liveEvent.on('connectingOpenLive')
 async def onConnectingOpenLive():
-    await messagesQueueAppend({
+    global onlyReportOnceConnectingOpenLive
+    if onlyReportOnceConnectingOpenLive:
+        return
+    onlyReportOnceConnectingOpenLive = True
+    messagesQueueAppend({
         'type': 'system',
         'time': time.time(),
-        'msg': 'B站直播间已断开连接 但检测到已经配置身份码 正在通过开放平台重新连接直播间'
+        'msg': '检测到已经配置身份码 正在通过开放平台重新连接直播间'
+    })
+
+@liveEvent.on('disconnected')
+async def liveConnectedHandler():
+    global onlyReportOnceDisconnected
+    if onlyReportOnceDisconnected:
+        return
+    onlyReportOnceDisconnected = True
+    messagesQueueAppend({
+        'type': 'system',
+        'time': time.time(),
+        'msg': 'B站直播间已断开连接'
     })
 
 @liveEvent.on('connected')
 async def liveConnectedHandler():
-    await messagesQueueAppend({
+    global onlyReportOnceConnected
+    onlyReportOnceConnected = True
+    messagesQueueAppend({
         'type': 'system',
         'time': time.time(),
         'msg': 'B站直播间已连接'
@@ -55,7 +75,7 @@ async def liveConnectedHandler():
 
 @liveEvent.on('login')
 async def needLoginHandler():
-    await messagesQueueAppend({
+    messagesQueueAppend({
         'type': 'system',
         'time': time.time(),
         'msg': 'B站登陆已失效 请在弹出的企鹅弹幕机扫码登陆B站窗口中使用小号重新登录B站'
