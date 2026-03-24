@@ -82,7 +82,7 @@ async def needLoginHandler():
     })
 
 @liveEvent.on('danmu')
-async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
+async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji, replyUname):
     if filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
         appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, isEmoji=isEmoji, filterd=False)
         messagesQueueAppend({
@@ -90,6 +90,7 @@ async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedal
             'time': time.time(),
             'uid': uid,
             'uname': uname,
+            'replyUname': replyUname,
             'msg': msg
         })
     else:

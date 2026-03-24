@@ -10,6 +10,7 @@ import aiohttp, concurrent.futures, asyncio, sys, time
 from bilibili_api import Credential, user, sync, login_v2, sync
 from bilibili_api.utils.network import get_client
 import tkinter as tk
+import json
 
 liveEvent = AsyncIOEventEmitter()
 roomWeb = None
@@ -52,8 +53,9 @@ class LiveMsgHandler(BaseHandler):
             fansMedalLevel = 0
             fansMedalGuardLevel = 0
         isEmoji = command['info'][0][12] == 1 or isAllCharactersEmoji(msg)
-        timeLog(f"[Danmu] {uname}: {msg}")
-        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji)
+        replyUname = json.loads(command['info'][0][15]['extra'])['reply_uname']
+        timeLog(f"[Danmu] {uname}: {'@' + replyUname + ' ' if replyUname != '' else ''}{msg}")
+        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji, replyUname)
 
     def onGuardBuyCallback(self, client: BLiveClient, command: dict):
         if 'role_name' not in command['data'] or command['data']['role_name'] not in ['总督', '提督', '舰长']:
@@ -134,8 +136,9 @@ class LiveMsgHandler(BaseHandler):
             fansMedalLevel = 0
             fansMedalGuardLevel = 0
         isEmoji = command['data']["dm_type"] == 1 or isAllCharactersEmoji(msg)
-        timeLog(f"[Danmu] {uname}: {msg}")
-        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji)
+        replyUname = command["data"]["reply_uname"]
+        timeLog(f"[Danmu] {uname}: {'@' + replyUname + ' ' if replyUname != '' else ''}{msg}")
+        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji, replyUname)
     
     def onOpenLiveGiftCallback(self, client: OpenLiveClient, command: dict):
         uid = command["data"]["uid"]

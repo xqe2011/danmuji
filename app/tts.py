@@ -139,7 +139,10 @@ async def tts(text, channel=0, config=None):
 
 def messagesToText(msg):
     if msg['type'] == 'danmu':
-        return f"{msg['uname']}说{msg['msg']}"
+        if msg['replyUname'] != '':
+            return f"{msg['uname']}回复{msg['replyUname']}说{msg['msg']}"
+        else:
+            return f"{msg['uname']}说{msg['msg']}"
     elif msg['type'] == 'gift':
         return f"感谢{msg['uname']}送出的{msg['num']}个{msg['giftName']}"
     elif msg['type'] == 'guardBuy':
