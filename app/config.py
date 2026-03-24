@@ -2,6 +2,7 @@ from .logger import timeLog
 import json, os, appdirs
 from pyee.asyncio import AsyncIOEventEmitter
 
+disableWebProtocol = os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../disable_web_protocol.txt'))
 configEvent = AsyncIOEventEmitter()
 
 def mergeConfigRecursively(template, raw):

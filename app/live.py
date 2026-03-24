@@ -2,7 +2,7 @@ from typing import Optional
 from pyee.asyncio import AsyncIOEventEmitter
 
 from blivedm.blivedm.clients import ws_base
-from .config import getJsonConfig, updateJsonConfig
+from .config import getJsonConfig, updateJsonConfig, disableWebProtocol
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
 from blivedm.blivedm import OpenLiveClient, BLiveClient, BaseHandler
@@ -118,7 +118,6 @@ class LiveMsgHandler(BaseHandler):
         liveEvent.emit('warning', msg, False)
 
     def onCutOff(self, client: BLiveClient, command: dict):
-        print(command)
         msg = command['msg']
         timeLog(f"[Warning] Cut Off, {msg}")
         liveEvent.emit('warning', msg, True)
@@ -279,7 +278,11 @@ def loginBili():
     timeLog(f'[Live] 二维码登录完成，uid: {config["kvdb"]["bili"]["uid"]}，sessdata: {config["kvdb"]["bili"]["sessdata"]}，buvid3: {config["kvdb"]["bili"]["buvid3"]}, jct: {config["kvdb"]["bili"]["jct"]}')
 
 async def connectLive():
-    roomWeb.start()
+    if disableWebProtocol:
+        if roomOpen != None:
+            roomOpen.start()
+    else:
+        roomWeb.start()
 
 async def disconnectLive():
     await roomWeb.close()
@@ -287,33 +290,34 @@ async def disconnectLive():
 async def initalizeLive():
     global roomWeb, roomOpen
     # 检查B站凭证是否有效
-    data = await getSelfInfo()
-    if data == None:
-        timeLog(f'[Live] B站凭证无效，使用扫码重新登录B站...')
-        liveEvent.emit('login')
-        loop = asyncio.get_running_loop()
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            await loop.run_in_executor(pool, loginBili)
-        config = getJsonConfig()
-        if config['kvdb']['isFirstTimeToLogin']:
-            liveID = await getSelfLiveID()
-            liveCode = await getSelfLiveCode()
-            if liveID != None and liveCode != None:
-                timeLog(f'[Live] 第一次使用账号登陆，将默认直播间号修改为登陆的账号直播间号{liveID}并设置身份码{liveCode}')
-                config['engine']['bili']['liveID'] = liveID
-                config['engine']['bili']['liveCode'] = liveCode
-                await updateJsonConfig(config)
-            else:
-                timeLog(f'[Live] 第一次使用账号登陆，但该账号未开通直播间，忽略直播间号自动设置')
-    print(await getSelfLiveCode())
+    if not disableWebProtocol:
+        data = await getSelfInfo()
+        if data == None:
+            timeLog(f'[Live] B站凭证无效，使用扫码重新登录B站...')
+            liveEvent.emit('login')
+            loop = asyncio.get_running_loop()
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                await loop.run_in_executor(pool, loginBili)
+            config = getJsonConfig()
+            if config['kvdb']['isFirstTimeToLogin']:
+                liveID = await getSelfLiveID()
+                liveCode = await getSelfLiveCode()
+                if liveID != None and liveCode != None:
+                    timeLog(f'[Live] 第一次使用账号登陆，将默认直播间号修改为登陆的账号直播间号{liveID}并设置身份码{liveCode}')
+                    config['engine']['bili']['liveID'] = liveID
+                    config['engine']['bili']['liveCode'] = liveCode
+                    await updateJsonConfig(config)
+                else:
+                    timeLog(f'[Live] 第一次使用账号登陆，但该账号未开通直播间，忽略直播间号自动设置')
     config = getJsonConfig()
     config['kvdb']['isFirstTimeToLogin'] = False
     await updateJsonConfig(config)
-    session = aiohttp.ClientSession(headers={
-        'Cookie': f'SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
-    })
-    roomWeb = BLiveClient(config['engine']['bili']['liveID'], uid=config["kvdb"]["bili"]["uid"], session=session)
-    roomWeb.set_handler(LiveMsgHandler())
+    if not disableWebProtocol:
+        session = aiohttp.ClientSession(headers={
+            'Cookie': f'SESSDATA={config["kvdb"]["bili"]["sessdata"]}; bili_jct={config["kvdb"]["bili"]["jct"]};'
+        })
+        roomWeb = BLiveClient(config['engine']['bili']['liveID'], uid=config["kvdb"]["bili"]["uid"], session=session)
+        roomWeb.set_handler(LiveMsgHandler())
     if config['engine']['bili']['liveCode']:
         roomOpen = OpenLiveClient(config['engine']['bili']['openAPIURL'], config['engine']['bili']['liveCode'])
         roomOpen.set_handler(LiveMsgHandler())

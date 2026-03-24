@@ -39,6 +39,7 @@ async def init():
     for voice in list(allVoices):
         timeLog(f'[TTS] Found voice: {voice.display_name} ({voice.language})"')
 
+    syncSpeakerWithConfig()
     await tts("TTS模块初始化成功")
     global initalized
     initalized = True

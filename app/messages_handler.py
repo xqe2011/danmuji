@@ -65,8 +65,6 @@ async def liveConnectedHandler():
 
 @liveEvent.on('connected')
 async def liveConnectedHandler():
-    global onlyReportOnceConnected
-    onlyReportOnceConnected = True
     messagesQueueAppend({
         'type': 'system',
         'time': time.time(),
