@@ -1,6 +1,8 @@
 export type EngineConfig = {
     "bili": {
         "liveID": number,
+        "liveCode": string,
+        "openAPIURL": string,
     },
     "http": {
         "token": string,
