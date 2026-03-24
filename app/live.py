@@ -8,6 +8,7 @@ from .tool import isAllCharactersEmoji
 from blivedm.blivedm import OpenLiveClient, BLiveClient, BaseHandler
 import aiohttp, concurrent.futures, asyncio, sys, time
 from bilibili_api import Credential, user, sync, login_v2, sync
+from bilibili_api.utils.network import get_client
 import tkinter as tk
 
 liveEvent = AsyncIOEventEmitter()
@@ -208,6 +209,31 @@ async def getSelfLiveID():
     except:
         return None
 
+async def getSelfLiveCode():
+    # 获取自己直播间身份码
+    try:
+        config = getJsonConfig()
+        response = await get_client().request(
+            method='POST',
+            url='https://api.live.bilibili.com/xlive/open-platform/v1/common/operationOnBroadcastCode',
+            data={
+                'csrf': config["kvdb"]["bili"]["jct"],
+                'action': 1
+            },
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0',
+                'Referer': 'https://play-live.bilibili.com/',
+                'Origin': 'https://play-live.bilibili.com',
+            },
+            cookies={'SESSDATA': config["kvdb"]["bili"]["sessdata"]}
+        )
+        data = response.json()
+        if data["code"] != 0:
+            return None
+        return data["data"]["code"]
+    except:
+        return None
+
 def loginBili():
     qr = login_v2.QrCodeLogin(platform=login_v2.QrCodeLoginChannel.WEB) 
     sync(qr.generate_qrcode())
@@ -268,12 +294,15 @@ async def initalizeLive():
         config = getJsonConfig()
         if config['kvdb']['isFirstTimeToLogin']:
             liveID = await getSelfLiveID()
-            if liveID != None:
-                timeLog(f'[Live] 第一次使用账号登陆，将默认直播间号修改为登陆的账号直播间号{liveID}')
+            liveCode = await getSelfLiveCode()
+            if liveID != None and liveCode != None:
+                timeLog(f'[Live] 第一次使用账号登陆，将默认直播间号修改为登陆的账号直播间号{liveID}并设置身份码{liveCode}')
                 config['engine']['bili']['liveID'] = liveID
+                config['engine']['bili']['liveCode'] = liveCode
                 await updateJsonConfig(config)
             else:
                 timeLog(f'[Live] 第一次使用账号登陆，但该账号未开通直播间，忽略直播间号自动设置')
+    print(await getSelfLiveCode())
     config = getJsonConfig()
     config['kvdb']['isFirstTimeToLogin'] = False
     await updateJsonConfig(config)
