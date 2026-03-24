@@ -82,7 +82,7 @@ const saving = ref(false);
 const logouting = ref(false);
 const disableWebProtocol = ref(true);
 
-disableWebProtocol.value = getDisableWebProtocol().then(msg => {
+getDisableWebProtocol().then(msg => {
     disableWebProtocol.value = msg.disableWebProtocol;
 }).catch(err => {
     console.error(err);
