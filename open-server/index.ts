@@ -49,6 +49,7 @@ const ConfigSchema = z.object({
   ACCESS_KEY_SECRET: z.string(),
   APP_ID: z.coerce.number(),
   WEBSOCKET_URL: z.string(),
+  WEBSOCKET_ENABLE: z.transform((val) => val === "true" ? true : false).default(false),
 });
 
 const config = ConfigSchema.parse(process.env);
@@ -93,12 +94,14 @@ const routes: Record<string, (clientIP: string, body: unknown, query?: Record<st
   "/v2/app/start": async (clientIP, body, query, request, server) => {
     const req = StartSchema.parse(body);
     const data = await requestBiliAPI(StartResponseSchema, "/v2/app/start", { code: req.code, app_id: config.APP_ID });
-    data.data.websocket_info.wss_link = await Promise.all(data.data.websocket_info.wss_link.map(async (url) => {
-      return config.WEBSOCKET_URL +
-        "?game_id=" + data.data.game_info.game_id +
-        "&url=" + encodeURIComponent(url) +
-        "&signature=" + await hmac(";,'\"[!]" + `${url}, ${data.data.game_info.game_id}, ${clientIP}`);
-    }));
+    if (config.WEBSOCKET_ENABLE) {
+      data.data.websocket_info.wss_link = await Promise.all(data.data.websocket_info.wss_link.map(async (url) => {
+        return config.WEBSOCKET_URL +
+          "?game_id=" + data.data.game_info.game_id +
+          "&url=" + encodeURIComponent(url) +
+          "&signature=" + await hmac(";,'\"[!]" + `${url}, ${data.data.game_info.game_id}, ${clientIP}`);
+      }));
+    }
     if (data.data.game_info !== undefined) {
       logger.info(`[/v2/app/start] ${req.code} -> code=${data.code} uid=${data.data.anchor_info.uid} rid=${data.data.anchor_info.room_id} gid=${data.data.game_info.game_id}`);
     } else {
@@ -121,6 +124,9 @@ const routes: Record<string, (clientIP: string, body: unknown, query?: Record<st
     return Response.json(data, { status: 200 });
   },
   "/sub": async (clientIP, body, query, request, server) => {
+    if (!config.WEBSOCKET_ENABLE) {
+      return Response.json({ error: "WebSocket is not enabled" }, { status: 403 });
+    }
     const req = WebsocketUrlSchema.parse(query);
     if (await hmac(";,'\"[!]" + `${req.url}, ${req.game_id}, ${clientIP}`) !== req.signature) {
       logger.warn(`[/sub] ${clientIP} -> status=403, msg=Invalid URL Signature`);
