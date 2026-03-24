@@ -1,4 +1,6 @@
 # 企鹅弹幕机
+
+[![Hypercommit](https://img.shields.io/badge/Hypercommit-DB2475)](https://hypercommit.com/danmuji)
 为语音读弹幕而生的B站直播弹幕机。
 - 支持无障碍，对于视力障碍群体可以完全实现自己操作和控制
 - 支持高速语音，比常规弹幕机的语速更快，可以在大量弹幕时降低语音延迟
