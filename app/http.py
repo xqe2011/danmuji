@@ -1,6 +1,6 @@
 from quart import Quart, request, websocket, send_from_directory
 from quart_cors import cors
-from .config import updateJsonConfig, getJsonConfig
+from .config import updateJsonConfig, getJsonConfig, disableWebProtocol
 import asyncio, json, os, webbrowser
 from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
@@ -43,6 +43,10 @@ async def index():
 def addHeader(response):
     response.cache_control.no_cache = True
     return response
+
+@app.route('/api/disable_web_protocol', methods=['GET'])
+async def getDisableWebProtocol():
+    return { 'status': 0, 'msg': { 'disableWebProtocol': disableWebProtocol } }
 
 @app.route('/api/running_mode', methods=['GET'])
 async def getRunningMode():

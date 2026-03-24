@@ -66,6 +66,10 @@ export async function getRunningMode() {
     return (await httpExecute('running_mode', 'GET')) as { 'remote': boolean };
 }
 
+export async function getDisableWebProtocol() {
+    return (await httpExecute('disable_web_protocol', 'GET')) as { 'disableWebProtocol': boolean };
+}
+
 export async function init(loginToken: string) {
     token = loginToken;
     if (token == null || token == '' || token == undefined) {

@@ -5,10 +5,10 @@
         </v-card-title>
 
         <v-form class="overflow-auto">
-            <v-btn class="clean-button" block :loading="logouting" color="red" @click="onLogout">退出B站用户登录</v-btn>
+            <v-btn class="clean-button" block :loading="logouting" color="red" @click="onLogout" v-if="!disableWebProtocol">退出B站用户登录</v-btn>
             <v-divider class="block-divider"></v-divider>
 
-            <v-text-field v-model="config.bili.liveID" label="直播间号" aria-label="直播间号"></v-text-field>
+            <v-text-field v-model="config.bili.liveID" label="直播间号" aria-label="直播间号" v-if="!disableWebProtocol"></v-text-field>
             <v-text-field v-model="config.bili.liveCode" label="直播间身份码" aria-label="直播间身份码"></v-text-field>
             <v-text-field v-model="config.http.token" label="HTTP令牌" aria-label="HTTP令牌"></v-text-field>
             <v-divider></v-divider>
@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { EngineConfig } from "../types/EngineConfig";
-import { getEngineConfig, setEngineConfig, onWSState, logout } from '@/services/Database';
+import { getEngineConfig, setEngineConfig, onWSState, logout, getDisableWebProtocol } from '@/services/Database';
 
 const config = ref(undefined as unknown as EngineConfig);
 config.value = {
@@ -80,6 +80,14 @@ config.value = {
 const reading = ref(true);
 const saving = ref(false);
 const logouting = ref(false);
+const disableWebProtocol = ref(true);
+
+disableWebProtocol.value = getDisableWebProtocol().then(msg => {
+    disableWebProtocol.value = msg.disableWebProtocol;
+}).catch(err => {
+    console.error(err);
+    disableWebProtocol.value = true;
+});
 
 function onRead() {
     reading.value = true;
