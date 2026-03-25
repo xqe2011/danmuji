@@ -201,14 +201,6 @@ class LiveMsgHandler(BaseHandler):
         'LIVE_OPEN_PLATFORM_LIVE_ROOM_ENTER': onOpenLiveEnterRoomCallback,
     }
 
-async def getSelfInfo():
-    # 检查B站凭证是否有效
-    try:
-        config = getJsonConfig()
-        return await user.get_self_info(Credential(config["kvdb"]["bili"]["sessdata"], config["kvdb"]["bili"]["jct"], config["kvdb"]["bili"]["buvid3"]))
-    except:
-        return None
-
 async def getSelfLiveID():
     # 获取自己直播间ID
     try:
@@ -297,7 +289,7 @@ async def initalizeLive():
     global roomWeb, roomOpen
     # 检查B站凭证是否有效
     if not disableWebProtocol:
-        data = await getSelfInfo()
+        data = await getSelfLiveID()
         if data == None:
             timeLog(f'[Live] B站凭证无效，使用扫码重新登录B站...')
             liveEvent.emit('login')
@@ -315,6 +307,16 @@ async def initalizeLive():
                     await updateJsonConfig(config)
                 else:
                     timeLog(f'[Live] 第一次使用账号登陆，但该账号未开通直播间，忽略直播间号自动设置')
+        else:
+            config = getJsonConfig()
+            if data == config['engine']['bili']['liveID']:
+                timeLog(f'[Live] 登陆帐号的直播间号与配置文件中的直播间号一致，自动更新身份码')
+                liveCode = await getSelfLiveCode()
+                if liveCode != None:
+                    config['engine']['bili']['liveCode'] = liveCode
+                    await updateJsonConfig(config)
+                else:
+                    timeLog(f'[Live] 自动更新身份码失败，保持配置文件中的身份码不变')
     config = getJsonConfig()
     config['kvdb']['isFirstTimeToLogin'] = False
     await updateJsonConfig(config)
