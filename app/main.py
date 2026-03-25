@@ -1,5 +1,5 @@
 import asyncio, os, time
-from .live import initalizeLive, liveEvent
+from .live import initalizeLive
 from .logger import timeLog
 from .messages_handler import *
 from .http import startHttpServer, broadcastWSMessage

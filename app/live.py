@@ -2,7 +2,7 @@ from typing import Optional
 from pyee.asyncio import AsyncIOEventEmitter
 
 from blivedm.blivedm.clients import ws_base
-from .config import configEvent, getJsonConfig, updateJsonConfig, disableWebProtocol
+from .config import getJsonConfig, updateJsonConfig, disableWebProtocol
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
 from blivedm.blivedm import OpenLiveClient, BLiveClient, BaseHandler
