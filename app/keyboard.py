@@ -1,10 +1,11 @@
 import keyboard, asyncio
 from .logger import timeLog
 from .messages_handler import markAllMessagesInvalid
-import os, time
+import os
 from .config import getJsonConfig, updateJsonConfig
 from .tts import getAllSpeakers, getNowSpeaker, readHistoryByType, resetHistoryIndex, ttsSystem
 from .stats import getDelay
+from .live import setDisableWebProtocol
 
 async def handleFlush():
     timeLog('[Keyboard] Trigging flush')
@@ -81,6 +82,11 @@ async def handleReadLastGiftMessages():
     timeLog('[Keyboard] Trigging read last history gift')
     await readHistoryByType(['gift', 'guardBuy', 'superChat'], True)
 
+async def handleDisableWebProtocol():
+    timeLog('[Keyboard] Trigging disable web protocol')
+    await setDisableWebProtocol()
+    await ttsSystem('已强制使用开放平台建立连接')
+
 async def initalizeKeyboard():
     runningLoop = asyncio.get_running_loop()
     if os.name == "nt":
@@ -100,5 +106,5 @@ async def initalizeKeyboard():
         keyboard.add_hotkey('alt+t', lambda: asyncio.run_coroutine_threadsafe(handleReadLastGiftMessages(), runningLoop))
         keyboard.add_hotkey('alt+y', lambda: asyncio.run_coroutine_threadsafe(handleReadLastHistoryDanmu(), runningLoop))
         keyboard.add_hotkey('alt+f9', lambda: asyncio.run_coroutine_threadsafe(handleReadNewestMessages(), runningLoop))
-        
-        
+
+        keyboard.add_hotkey('alt+f8', lambda: asyncio.run_coroutine_threadsafe(handleDisableWebProtocol(), runningLoop))

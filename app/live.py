@@ -2,7 +2,7 @@ from typing import Optional
 from pyee.asyncio import AsyncIOEventEmitter
 
 from blivedm.blivedm.clients import ws_base
-from .config import getJsonConfig, updateJsonConfig, disableWebProtocol
+from .config import configEvent, getJsonConfig, updateJsonConfig, disableWebProtocol
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
 from blivedm.blivedm import OpenLiveClient, BLiveClient, BaseHandler
@@ -25,10 +25,16 @@ guardLevelMap = {
     3: 1
 }
 
+async def setDisableWebProtocol():
+    global roomWeb
+    roomWeb.stop()
+
 class LiveMsgHandler(BaseHandler):
     def on_client_stopped(self, client: ws_base.WebSocketClientBase, exception: Optional[Exception]):
         liveEvent.emit('disconnected')
         if roomOpen != None:
+            global firstHeartBeat
+            firstHeartBeat = True
             timeLog(f"[Live] Connecting OpenLive")
             liveEvent.emit('connectingOpenLive')
             asyncio.get_running_loop().call_later(3, lambda: roomOpen.start())

@@ -19,3 +19,4 @@ https://link.bilibili.com/p/center/index#/my-room/start-live
 在任何时候按下Alt+T可以历史模式查看下一条礼物
 在任何时候按下Alt+Y可以历史模式查看下一条弹幕
 在任何时候按下Alt+F9可以历史模式回到最新弹幕
+在任何时候按下Alt+F8可以强制切换开放平台连接
