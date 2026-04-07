@@ -80,8 +80,8 @@ async def needLoginHandler():
     })
 
 @liveEvent.on('danmu')
-async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji, replyUname):
-    if filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
+async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname):
+    if filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji):
         appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, isEmoji=isEmoji, filterd=False)
         messagesQueueAppend({
             'type': 'danmu',
@@ -165,8 +165,8 @@ async def onSuperChat(uid, uname, price, msg):
         appendSuperChatFilteredStats(uid=uid, uname=uname, price=price, msg=msg, filterd=True)
 
 @liveEvent.on('subscribe')
-async def onSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
-    if filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
+async def onSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
+    if filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
         appendSubscribeFilteredStats(uid=uid, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'subscribe',
@@ -178,8 +178,8 @@ async def onSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansM
         appendSubscribeFilteredStats(uid=uid, uname=uname, filterd=True)
 
 @liveEvent.on('welcome')
-async def onWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
-    if filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
+async def onWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
+    if filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
         appendWelcomeFilteredStats(uid=uid, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'welcome',

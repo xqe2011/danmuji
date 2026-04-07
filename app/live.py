@@ -1,7 +1,9 @@
+import base64
 from typing import Optional
 from pyee.asyncio import AsyncIOEventEmitter
 
 from blivedm.blivedm.clients import ws_base
+from blivedm.blivedm.models import pb
 from .config import getJsonConfig, updateJsonConfig, disableWebProtocol
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
@@ -53,15 +55,14 @@ class LiveMsgHandler(BaseHandler):
         if len(command["info"][3]) != 0:
             isFansMedalBelongToLive = command["info"][3][3] == getJsonConfig()['engine']['bili']['liveID']
             fansMedalLevel = command["info"][3][0]
-            fansMedalGuardLevel = guardLevelMap[command["info"][3][10]]
         else:
             isFansMedalBelongToLive = False
             fansMedalLevel = 0
-            fansMedalGuardLevel = 0
+        guardLevel = command["info"][7]
         isEmoji = command['info'][0][12] == 1 or isAllCharactersEmoji(msg)
         replyUname = json.loads(command['info'][0][15]['extra'])['reply_uname']
         timeLog(f"[Danmu] {uname}: {'@' + replyUname + ' ' if replyUname != '' else ''}{msg}")
-        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji, replyUname)
+        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname)
 
     def onGuardBuyCallback(self, client: BLiveClient, command: dict):
         if 'role_name' not in command['data'] or command['data']['role_name'] not in ['总督', '提督', '舰长']:
@@ -100,17 +101,30 @@ class LiveMsgHandler(BaseHandler):
         if command["data"]["fans_medal"] != None:
             isFansMedalBelongToLive = command["data"]["fans_medal"]["anchor_roomid"] == getJsonConfig()['engine']['bili']['liveID']
             fansMedalLevel = command["data"]["fans_medal"]["medal_level"]
-            fansMedalGuardLevel = guardLevelMap[command["data"]["fans_medal"]["guard_level"]]
         else:
             isFansMedalBelongToLive = False
             fansMedalLevel = 0
-            fansMedalGuardLevel = 0
+        # TODO 未验证，等待B站播发这个数据进行验证
+        guardLevel = guardLevelMap[command["data"]["guard_level"]]
         isSubscribe = command["data"]["msg_type"] == 2
         timeLog(f"[Interact] {uname} {'subscribe' if isSubscribe else 'enter'} the stream.")
         if isSubscribe:
-            liveEvent.emit('subscribe', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel)
+            liveEvent.emit('subscribe', uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel)
         else:
-            liveEvent.emit('welcome', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel)
+            liveEvent.emit('welcome', uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel)
+    
+    def onInteractWordV2Callback(self, client: BLiveClient, command: dict):
+        proto = pb.InteractWordV2.loads(base64.b64decode(command['data']['pb']))
+        if proto.msg_type != 2 and proto.msg_type != 1:
+            return
+        uid = proto.uid
+        uname = proto.uname
+        isSubscribe = proto.msg_type == 2
+        timeLog(f"[Interact] {uname} {'subscribe' if isSubscribe else 'enter'} the stream.")
+        if isSubscribe:
+            liveEvent.emit('subscribe', uid, uname, False, 0, 0)
+        else:
+            liveEvent.emit('welcome', uid, uname, False, 0, 0)
 
     def onLikeCallback(self, client: BLiveClient, command: dict):
         uid = command["data"]["uid"]
@@ -135,15 +149,14 @@ class LiveMsgHandler(BaseHandler):
         if command["data"]["fans_medal_wearing_status"]:
             isFansMedalBelongToLive = True
             fansMedalLevel = command["data"]["fans_medal_level"]
-            fansMedalGuardLevel = guardLevelMap[command["data"]["guard_level"]]
         else:
             isFansMedalBelongToLive = False
             fansMedalLevel = 0
-            fansMedalGuardLevel = 0
+        guardLevel = guardLevelMap[command["data"]["guard_level"]]
         isEmoji = command['data']["dm_type"] == 1 or isAllCharactersEmoji(msg)
         replyUname = command["data"]["reply_uname"]
         timeLog(f"[Danmu] {uname}: {'@' + replyUname + ' ' if replyUname != '' else ''}{msg}")
-        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji, replyUname)
+        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname)
     
     def onOpenLiveGiftCallback(self, client: OpenLiveClient, command: dict):
         uid = command["data"]["uid"]
@@ -190,6 +203,7 @@ class LiveMsgHandler(BaseHandler):
         'USER_TOAST_MSG': onGuardBuyCallback,
         'SUPER_CHAT_MESSAGE': onSCCallback,
         'INTERACT_WORD': onInteractWordCallback,
+        'INTERACT_WORD_V2': onInteractWordV2Callback,
         'LIKE_INFO_V3_CLICK': onLikeCallback,
         'WARNING': onWarning,
         'CUT_OFF': onCutOff,

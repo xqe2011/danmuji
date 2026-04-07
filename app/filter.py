@@ -3,7 +3,7 @@ import regex
 import asyncio
 
 lastDanmuMessages = []
-def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel, msg, isEmoji):
+def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji):
     global lastDanmuMessages
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["danmu"]["enable"]:
@@ -18,7 +18,7 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGu
         return False
     if dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["danmu"]["fansMedalLevelBigger"]:
         return False
-    if dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"] != 0 and fansMedalGuardLevel < dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"]:
+    if dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"] != 0 and guardLevel < dynamicConfig["filter"]["danmu"]["fansMedalGuardLevelBigger"]:
         return False
     if dynamicConfig["filter"]["danmu"]["lengthShorter"] != 0 and len(msg) > dynamicConfig["filter"]["danmu"]["lengthShorter"]:
         return False
@@ -74,7 +74,7 @@ def filterGift(uid, uname, price, giftName, num, deduplicateCallback):
         return None
     return True
 
-def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
+def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["welcome"]["enable"]:
         return False
@@ -82,7 +82,7 @@ def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedal
         return False
     if dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"]:
         return False
-    if dynamicConfig["filter"]["welcome"]["fansMedalGuardLevelBigger"] != 0 and fansMedalGuardLevel < dynamicConfig["filter"]["welcome"]["fansMedalGuardLevelBigger"]:
+    if dynamicConfig["filter"]["welcome"]["fansMedalGuardLevelBigger"] != 0 and guardLevel < dynamicConfig["filter"]["welcome"]["fansMedalGuardLevelBigger"]:
         return False
     return True
 
@@ -103,7 +103,7 @@ def filterLike(uid, uname):
         likedUids[uid] = True
     return True
 
-def filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, fansMedalGuardLevel):
+def filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["subscribe"]["enable"]:
         return False
