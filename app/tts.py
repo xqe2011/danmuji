@@ -6,6 +6,7 @@ from .config import getJsonConfig
 from .logger import timeLog
 import winsdk.windows.media.speechsynthesis as speechsynthesis
 import winsdk.windows.storage.streams as streams
+from pydub import AudioSegment
 import pygame
 import io, json, os
 
@@ -124,7 +125,11 @@ async def tts(text, channel=0, config=None):
     while data_reader.unconsumed_buffer_length > 0:
         temp_buffer += bytes(data_reader.read_buffer(data_reader.unconsumed_buffer_length)) + b'\x00\x00\x00\x00\x00\x00\x00\x00'
 
-    byte_stream = io.BytesIO(temp_buffer)
+    temp_buffer = AudioSegment.from_file(io.BytesIO(temp_buffer), format="wav")
+    temp_buffer += 12
+    temp_buffer = temp_buffer.compress_dynamic_range(threshold=-3.0, ratio=20.0)
+    byte_stream = io.BytesIO()
+    temp_buffer.export(byte_stream, format='wav')
 
     pygame.mixer.Channel(channel).stop()
     while pygame.mixer.Channel(channel).get_busy():
