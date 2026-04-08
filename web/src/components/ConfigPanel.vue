@@ -37,9 +37,6 @@
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.welcome.enable" inset color="blue" label="启用进入直播间朗读" aria-label="启用进入直播间朗读"></v-switch>
-            <v-switch v-model="config.filter.welcome.isFansMedalBelongToLive" inset color="blue" label="粉丝牌必须为本直播间" aria-label="粉丝牌必须为本直播间"></v-switch>
-            <v-select v-model="config.filter.welcome.fansMedalGuardLevelBigger" :items="[{title: '无', value: 0}, {title: '舰长', value: 1}, {title: '提督', value: 2}, {title: '总督', value: 3}]" label="大航海大于等于" aria-label="直播间朗读大航海大于等于"></v-select>
-            <v-text-field type="number" v-model="config.filter.welcome.fansMedalLevelBigger" label="粉丝牌等级大于等于" aria-label="直播间朗读粉丝牌等级大于等于"></v-text-field>
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.subscribe.enable" inset color="blue" label="启用关注朗读" aria-label="启用关注朗读"></v-switch>
@@ -176,10 +173,7 @@ config.value = {
             deduplicate: true
         },
         welcome: {
-            enable: true,
-            isFansMedalBelongToLive: true,
-            fansMedalGuardLevelBigger: 0,
-            fansMedalLevelBigger: 0
+            enable: true
         },
         subscribe: {
             enable: true
@@ -251,8 +245,6 @@ function onSave() {
     config.value.filter.gift.deduplicateTime = Number(config.value.filter.gift.deduplicateTime);
     config.value.filter.gift.freeGiftCountBigger = Number(config.value.filter.gift.freeGiftCountBigger);
     config.value.filter.gift.moneyGiftPriceBigger = Number(config.value.filter.gift.moneyGiftPriceBigger);
-    config.value.filter.welcome.fansMedalGuardLevelBigger = Number(config.value.filter.welcome.fansMedalGuardLevelBigger);
-    config.value.filter.welcome.fansMedalLevelBigger = Number(config.value.filter.welcome.fansMedalLevelBigger);
     config.value.system.alertWhenMessagesQueueLonger.interval = Number(config.value.system.alertWhenMessagesQueueLonger.interval);
     config.value.system.alertWhenMessagesQueueLonger.threshold = Number(config.value.system.alertWhenMessagesQueueLonger.threshold);
 

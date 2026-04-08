@@ -74,15 +74,9 @@ def filterGift(uid, uname, price, giftName, num, deduplicateCallback):
         return None
     return True
 
-def filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
+def filterWelcome(uid, uname):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["welcome"]["enable"]:
-        return False
-    if dynamicConfig["filter"]["welcome"]["isFansMedalBelongToLive"] and not isFansMedalBelongToLive:
-        return False
-    if dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"] != 0 and fansMedalLevel < dynamicConfig["filter"]["welcome"]["fansMedalLevelBigger"]:
-        return False
-    if dynamicConfig["filter"]["welcome"]["fansMedalGuardLevelBigger"] != 0 and guardLevel < dynamicConfig["filter"]["welcome"]["fansMedalGuardLevelBigger"]:
         return False
     return True
 
@@ -103,7 +97,7 @@ def filterLike(uid, uname):
         likedUids[uid] = True
     return True
 
-def filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
+def filterSubscribe(uid, uname):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["subscribe"]["enable"]:
         return False

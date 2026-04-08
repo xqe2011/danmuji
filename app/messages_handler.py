@@ -165,8 +165,8 @@ async def onSuperChat(uid, uname, price, msg):
         appendSuperChatFilteredStats(uid=uid, uname=uname, price=price, msg=msg, filterd=True)
 
 @liveEvent.on('subscribe')
-async def onSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
-    if filterSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
+async def onSubscribe(uid, uname):
+    if filterSubscribe(uid, uname):
         appendSubscribeFilteredStats(uid=uid, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'subscribe',
@@ -178,8 +178,8 @@ async def onSubscribe(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guard
         appendSubscribeFilteredStats(uid=uid, uname=uname, filterd=True)
 
 @liveEvent.on('welcome')
-async def onWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
-    if filterWelcome(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel):
+async def onWelcome(uid, uname):
+    if filterWelcome(uid, uname):
         appendWelcomeFilteredStats(uid=uid, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'welcome',

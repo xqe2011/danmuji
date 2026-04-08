@@ -48,9 +48,6 @@ export type DynamicConfig = {
         },
         "welcome": {
             "enable": boolean,
-            "isFansMedalBelongToLive": boolean,
-            "fansMedalLevelBigger": number,
-            "fansMedalGuardLevelBigger": number,
         },
         "guardBuy": {
             "enable": boolean,

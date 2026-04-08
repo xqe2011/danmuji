@@ -8,7 +8,7 @@ from .config import getJsonConfig, updateJsonConfig, disableWebProtocol
 from .logger import timeLog
 from .tool import isAllCharactersEmoji
 from blivedm.blivedm import OpenLiveClient, BLiveClient, BaseHandler
-import aiohttp, concurrent.futures, asyncio, sys, time
+import aiohttp, concurrent.futures, asyncio, sys
 from bilibili_api import Credential, user, sync, login_v2, sync
 from bilibili_api.utils.network import get_client
 import tkinter as tk
@@ -92,26 +92,6 @@ class LiveMsgHandler(BaseHandler):
         price = price if command["data"]["coin_type"] == 'gold' else 0
         timeLog(f"[Gift] {uname} bought {price:.1f}元的{giftName} x {num}.")
         liveEvent.emit('gift', uid, uname, price, giftName, num)
-
-    def onInteractWordCallback(self, client: BLiveClient, command: dict):
-        if command["data"]["roomid"] != getJsonConfig()['engine']['bili']['liveID']:
-            return
-        uid = command["data"]["uid"]
-        uname = command["data"]["uname"]
-        if command["data"]["fans_medal"] != None:
-            isFansMedalBelongToLive = command["data"]["fans_medal"]["anchor_roomid"] == getJsonConfig()['engine']['bili']['liveID']
-            fansMedalLevel = command["data"]["fans_medal"]["medal_level"]
-        else:
-            isFansMedalBelongToLive = False
-            fansMedalLevel = 0
-        # TODO 未验证，等待B站播发这个数据进行验证
-        guardLevel = guardLevelMap[command["data"]["guard_level"]]
-        isSubscribe = command["data"]["msg_type"] == 2
-        timeLog(f"[Interact] {uname} {'subscribe' if isSubscribe else 'enter'} the stream.")
-        if isSubscribe:
-            liveEvent.emit('subscribe', uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel)
-        else:
-            liveEvent.emit('welcome', uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel)
     
     def onInteractWordV2Callback(self, client: BLiveClient, command: dict):
         proto = pb.InteractWordV2.loads(base64.b64decode(command['data']['pb']))
@@ -122,9 +102,9 @@ class LiveMsgHandler(BaseHandler):
         isSubscribe = proto.msg_type == 2
         timeLog(f"[Interact] {uname} {'subscribe' if isSubscribe else 'enter'} the stream.")
         if isSubscribe:
-            liveEvent.emit('subscribe', uid, uname, False, 0, 0)
+            liveEvent.emit('subscribe', uid, uname)
         else:
-            liveEvent.emit('welcome', uid, uname, False, 0, 0)
+            liveEvent.emit('welcome', uid, uname)
 
     def onLikeCallback(self, client: BLiveClient, command: dict):
         uid = command["data"]["uid"]
@@ -194,7 +174,7 @@ class LiveMsgHandler(BaseHandler):
         uid = command["data"]["uid"]
         uname = command["data"]["uname"]
         timeLog(f"[Interact] {uname} enter the stream.")
-        liveEvent.emit('welcome', uid, uname, False, 0, 0)
+        liveEvent.emit('welcome', uid, uname)
     
     _CMD_CALLBACK_DICT = {
         **BaseHandler._CMD_CALLBACK_DICT,
@@ -202,7 +182,6 @@ class LiveMsgHandler(BaseHandler):
         'SEND_GIFT': onGiftCallback,
         'USER_TOAST_MSG': onGuardBuyCallback,
         'SUPER_CHAT_MESSAGE': onSCCallback,
-        'INTERACT_WORD': onInteractWordCallback,
         'INTERACT_WORD_V2': onInteractWordV2Callback,
         'LIKE_INFO_V3_CLICK': onLikeCallback,
         'WARNING': onWarning,

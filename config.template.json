@@ -79,10 +79,7 @@
                 "deduplicate": true
             },
             "welcome": {
-                "enable": true,
-                "isFansMedalBelongToLive": false,
-                "fansMedalGuardLevelBigger": 0,
-                "fansMedalLevelBigger": 0
+                "enable": true
             },
             "subscribe": {
                 "enable": true
