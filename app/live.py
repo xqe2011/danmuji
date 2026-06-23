@@ -11,7 +11,6 @@ from blivedm.blivedm import OpenLiveClient, BLiveClient, BaseHandler
 import aiohttp, concurrent.futures, asyncio, sys
 from bilibili_api import Credential, user, sync, login_v2, sync
 from bilibili_api.utils.network import get_client
-import tkinter as tk
 import json
 
 liveEvent = AsyncIOEventEmitter()
@@ -228,6 +227,12 @@ async def getSelfLiveCode():
         return None
 
 def loginBili():
+    try:
+        import tkinter as tk
+    except ModuleNotFoundError as e:
+        timeLog('[Live] 当前 Python 缺少 tkinter，无法打开B站扫码登录窗口')
+        raise e
+
     qr = login_v2.QrCodeLogin(platform=login_v2.QrCodeLoginChannel.WEB) 
     sync(qr.generate_qrcode())
     img = qr.get_qrcode_picture()

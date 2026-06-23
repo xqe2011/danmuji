@@ -7,9 +7,7 @@ from .stats import statsTask, statsEvent, getMessagesLength
 from .remote import initRemote, remoteWSBroadcast
 from .keyboard import initalizeKeyboard
 from .config import configEvent, getJsonConfig
-# only load tts in windows
-if os.name == 'nt':
-    from .tts import ttsTask
+from .tts import isTTSSupported, ttsTask
 
 lastAlertTime = 0
 @statsEvent.on('stats')
@@ -37,7 +35,7 @@ def main():
     timeLog('[Main] Started')
     try:
         tasks = [statsTask, initRemote, initalizeKeyboard, initalizeLive]
-        if os.name == 'nt':
+        if isTTSSupported():
             tasks.append(ttsTask)
         startHttpServer(tasks)
     except KeyboardInterrupt:
