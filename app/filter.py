@@ -46,14 +46,8 @@ def filterGift(uid, uname, price, giftName, num, deduplicateCallback):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["gift"]["enable"]:
         return False
-    if price == 0:
-        if not dynamicConfig["filter"]["gift"]["freeGiftEnable"]:
-            return False
-        if dynamicConfig["filter"]["gift"]["freeGiftCountBigger"] != 0 and num < dynamicConfig["filter"]["gift"]["freeGiftCountBigger"]:
-            return False
-    else:
-        if dynamicConfig["filter"]["gift"]["moneyGiftPriceBigger"] != 0 and price < dynamicConfig["filter"]["gift"]["moneyGiftPriceBigger"]:
-            return False
+    if dynamicConfig["filter"]["gift"]["moneyGiftPriceBigger"] != 0 and price < dynamicConfig["filter"]["gift"]["moneyGiftPriceBigger"]:
+        return False
     # 开启了礼物聚合后，所有的礼物都不读除非超时和变化了礼物名称
     if dynamicConfig["filter"]["gift"]["deduplicateTime"] != 0:
         if uid not in giftUids:

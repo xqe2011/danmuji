@@ -88,8 +88,7 @@ class LiveMsgHandler(BaseHandler):
         uname = command["data"]["uname"]
         giftName = command["data"]["giftName"]
         num = command["data"]["num"]
-        price = command["data"]["price"] / 1000
-        price = price if command["data"]["coin_type"] == 'gold' else 0
+        price = command["data"]["price"] / 10
         timeLog(f"[Gift] {uname} bought {price:.1f}元的{giftName} x {num}.")
         liveEvent.emit('gift', uid, uname, price, giftName, num)
     
@@ -143,8 +142,7 @@ class LiveMsgHandler(BaseHandler):
         uname = command["data"]["uname"]
         giftName = command["data"]["gift_name"]
         num = command["data"]["gift_num"]
-        price = command["data"]["price"] / 1000
-        price = price if command["data"]["paid"] else 0
+        price = command["data"]["price"] / 10
         timeLog(f"[Gift] {uname} bought {price:.1f}元的{giftName} x {num}.")
         liveEvent.emit('gift', uid, uname, price, giftName, num)
 
@@ -152,7 +150,12 @@ class LiveMsgHandler(BaseHandler):
         uid = command["data"]["user_info"]["uid"]
         uname = command["data"]["user_info"]["uname"]
         num = command["data"]["guard_num"]
-        giftName = guardLevelMap[command["data"]["guard_level"]]
+        if command["data"]["guard_level"] == 1:
+            giftName = '总督'
+        elif command["data"]["guard_level"] == 2:
+            giftName = '提督'
+        elif command["data"]["guard_level"] == 3:
+            giftName = '舰长'
         timeLog(f"[GuardBuy] {uname} bought {giftName} x {num}.")
         liveEvent.emit('guardBuy', uid, uname, False, giftName, num)
     

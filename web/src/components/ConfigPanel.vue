@@ -23,9 +23,7 @@
             <v-divider></v-divider>
 
             <v-switch v-model="config.filter.gift.enable" inset color="blue" label="启用礼物朗读" aria-label="启用礼物朗读"></v-switch>
-            <v-switch v-model="config.filter.gift.freeGiftEnable" inset color="blue" label="启用免费礼物朗读" aria-label="启用免费礼物朗读"></v-switch>
             <v-text-field type="number" v-model="config.filter.gift.deduplicateTime" label="几秒内礼物不重复朗读" aria-label="几秒内礼物不重复朗读"></v-text-field>
-            <v-text-field type="number" v-model="config.filter.gift.freeGiftCountBigger" label="免费礼物数量大于等于" aria-label="免费礼物数量大于等于"></v-text-field>
             <v-text-field type="number" v-model="config.filter.gift.moneyGiftPriceBigger" label="付费礼物金额大于等于" aria-label="付费礼物金额大于等于"></v-text-field>
             <v-divider></v-divider>
 
@@ -160,9 +158,7 @@ config.value = {
         },
         gift: {
             enable: true,
-            freeGiftEnable: true,
             deduplicateTime: 0,
-            freeGiftCountBigger: 0,
             moneyGiftPriceBigger: 0
         },
         guardBuy: {
@@ -243,7 +239,6 @@ function onSave() {
     config.value.filter.danmu.fansMedalLevelBigger = Number(config.value.filter.danmu.fansMedalLevelBigger);
     config.value.filter.danmu.lengthShorter = Number(config.value.filter.danmu.lengthShorter);
     config.value.filter.gift.deduplicateTime = Number(config.value.filter.gift.deduplicateTime);
-    config.value.filter.gift.freeGiftCountBigger = Number(config.value.filter.gift.freeGiftCountBigger);
     config.value.filter.gift.moneyGiftPriceBigger = Number(config.value.filter.gift.moneyGiftPriceBigger);
     config.value.system.alertWhenMessagesQueueLonger.interval = Number(config.value.system.alertWhenMessagesQueueLonger.interval);
     config.value.system.alertWhenMessagesQueueLonger.threshold = Number(config.value.system.alertWhenMessagesQueueLonger.threshold);
