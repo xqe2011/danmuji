@@ -41,7 +41,9 @@ export type DynamicConfig = {
         },
         "gift": {
             "enable": boolean,
+            "freeGiftEnable": boolean,
             "deduplicateTime": number,
+            "freeGiftCountBigger": number,
             "moneyGiftPriceBigger": number,
         },
         "welcome": {
