@@ -152,7 +152,12 @@ class LiveMsgHandler(BaseHandler):
         uid = command["data"]["user_info"]["uid"]
         uname = command["data"]["user_info"]["uname"]
         num = command["data"]["guard_num"]
-        giftName = guardLevelMap[command["data"]["guard_level"]]
+        if command["data"]["guard_level"] == 1:
+            giftName = '总督'
+        elif command["data"]["guard_level"] == 2:
+            giftName = '提督'
+        elif command["data"]["guard_level"] == 3:
+            giftName = '舰长'
         timeLog(f"[GuardBuy] {uname} bought {giftName} x {num}.")
         liveEvent.emit('guardBuy', uid, uname, False, giftName, num)
     
