@@ -7,6 +7,7 @@ messagesQueue = []
 haveReadMessages = []
 onlyReportOnceConnectingOpenLive = False
 onlyReportOnceDisconnected = False
+onlyReportOnceUidIs0 = False
 
 def popMessagesQueue():
     global messagesQueue, haveReadMessages
@@ -30,6 +31,18 @@ def messagesQueueAppendAtStart(data):
     global messagesQueue
     messagesQueue.insert(0, data)
     setOutputMessagesLength(len(messagesQueue))
+
+@liveEvent.on('uidIs0')
+async def onUidIs0():
+    global onlyReportOnceUidIs0
+    if onlyReportOnceUidIs0:
+        return
+    onlyReportOnceUidIs0 = True
+    messagesQueueAppend({
+        'type': 'system',
+        'time': time.time(),
+        'msg': '检测到直播间接口UID为0 弹幕机可以正常运转 但是黑名单用户和白名单用户功能将失效'
+    })
 
 @liveEvent.on('liveCodeNotConfig')
 async def onLiveCodeNotConfig():
@@ -80,115 +93,115 @@ async def needLoginHandler():
     })
 
 @liveEvent.on('danmu')
-async def onDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname):
-    if filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji):
-        appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, isEmoji=isEmoji, filterd=False)
+async def onDanmu(ukey, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname):
+    if filterDanmu(ukey, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji):
+        appendDanmuFilteredStats(ukey=ukey, uname=uname, msg=msg, isEmoji=isEmoji, filterd=False)
         messagesQueueAppend({
             'type': 'danmu',
             'time': time.time(),
-            'uid': uid,
+            'ukey': ukey,
             'uname': uname,
             'replyUname': replyUname,
             'msg': msg
         })
     else:
-        appendDanmuFilteredStats(uid=uid, uname=uname, msg=msg, isEmoji=isEmoji, filterd=True)
+        appendDanmuFilteredStats(ukey=ukey, uname=uname, msg=msg, isEmoji=isEmoji, filterd=True)
 
 @liveEvent.on('gift')
-async def onGift(uid, uname, price, giftName, num):
+async def onGift(ukey, uname, price, giftName, num):
     def deduplicateCallback(userInfo, giftName):
         giftInfo = userInfo['gifts'][giftName]
         messagesQueueAppend({
             'type': 'gift',
             'time': time.time(),
-            'uid': userInfo['uid'],
+            'ukey': userInfo['ukey'],
             'uname': userInfo['uname'],
             'giftName': giftName,
             'num': giftInfo['count']
         })
-    result = filterGift(uid, uname, price, giftName, num, deduplicateCallback)
+    result = filterGift(ukey, uname, price, giftName, num, deduplicateCallback)
     if result == True:
-        appendGiftFilteredStats(uid=uid, uname=uname, giftName=giftName, num=num, filterd=False)
+        appendGiftFilteredStats(ukey=ukey, uname=uname, giftName=giftName, num=num, filterd=False)
         messagesQueueAppend({
             'type': 'gift',
             'time': time.time(),
-            'uid': uid,
+            'ukey': ukey,
             'uname': uname,
             'giftName': giftName,
             'num': num
         })
     else:
-        appendGiftFilteredStats(uid=uid, uname=uname, giftName=giftName, num=num, filterd=(result != None))
+        appendGiftFilteredStats(ukey=ukey, uname=uname, giftName=giftName, num=num, filterd=(result != None))
 
 @liveEvent.on('guardBuy')
-async def onGuardBuy(uid, uname, newGuard, giftName, num):
-    if filterGuardBuy(uid, uname, newGuard, giftName, num):
-        appendGuardBuyFilteredStats(uid=uid, uname=uname, newGuard=newGuard, giftName=giftName, num=num, filterd=False)
+async def onGuardBuy(ukey, uname, newGuard, giftName, num):
+    if filterGuardBuy(ukey, uname, newGuard, giftName, num):
+        appendGuardBuyFilteredStats(ukey=ukey, uname=uname, newGuard=newGuard, giftName=giftName, num=num, filterd=False)
         messagesQueueAppend({
             'type': 'guardBuy',
             'time': time.time(),
-            'uid': uid,
+            'ukey': ukey,
             'uname': uname,
             'newGuard': newGuard,
             'giftName': giftName,
             'num': num
         })
     else:
-        appendGuardBuyFilteredStats(uid=uid, uname=uname, newGuard=newGuard, giftName=giftName, num=num, filterd=True)
+        appendGuardBuyFilteredStats(ukey=ukey, uname=uname, newGuard=newGuard, giftName=giftName, num=num, filterd=True)
 
 @liveEvent.on('like')
-async def onLike(uid, uname):
-    if filterLike(uid, uname):
-        appendLikeFilteredStats(uid=uid, uname=uname, filterd=False)
+async def onLike(ukey, uname):
+    if filterLike(ukey, uname):
+        appendLikeFilteredStats(ukey=ukey, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'like',
             'time': time.time(),
-            'uid': uid,
+            'ukey': ukey,
             'uname': uname
         })
     else:
-        appendLikeFilteredStats(uid=uid, uname=uname, filterd=True)
+        appendLikeFilteredStats(ukey=ukey, uname=uname, filterd=True)
 
 @liveEvent.on('superChat')
-async def onSuperChat(uid, uname, price, msg):
-    if filterSuperChat(uid, uname, price, msg):
-        appendSuperChatFilteredStats(uid=uid, uname=uname, price=price, msg=msg, filterd=False)
+async def onSuperChat(ukey, uname, price, msg):
+    if filterSuperChat(ukey, uname, price, msg):
+        appendSuperChatFilteredStats(ukey=ukey, uname=uname, price=price, msg=msg, filterd=False)
         messagesQueueAppend({
             'type': 'superChat',
             'time': time.time(),
-            'uid': uid,
+            'ukey': ukey,
             'uname': uname,
             'price': price,
             'msg': msg
         })
     else:
-        appendSuperChatFilteredStats(uid=uid, uname=uname, price=price, msg=msg, filterd=True)
+        appendSuperChatFilteredStats(ukey=ukey, uname=uname, price=price, msg=msg, filterd=True)
 
 @liveEvent.on('subscribe')
-async def onSubscribe(uid, uname):
-    if filterSubscribe(uid, uname):
-        appendSubscribeFilteredStats(uid=uid, uname=uname, filterd=False)
+async def onSubscribe(ukey, uname):
+    if filterSubscribe(ukey, uname):
+        appendSubscribeFilteredStats(ukey=ukey, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'subscribe',
             'time': time.time(),
-            'uid': uid,
+            'ukey': ukey,
             'uname': uname
         })
     else:
-        appendSubscribeFilteredStats(uid=uid, uname=uname, filterd=True)
+        appendSubscribeFilteredStats(ukey=ukey, uname=uname, filterd=True)
 
 @liveEvent.on('welcome')
-async def onWelcome(uid, uname):
-    if filterWelcome(uid, uname):
-        appendWelcomeFilteredStats(uid=uid, uname=uname, filterd=False)
+async def onWelcome(ukey, uname):
+    if filterWelcome(ukey, uname):
+        appendWelcomeFilteredStats(ukey=ukey, uname=uname, filterd=False)
         messagesQueueAppend({
             'type': 'welcome',
             'time': time.time(),
-            'uid': uid,
+            'ukey': ukey,
             'uname': uname
         })
     else:
-        appendWelcomeFilteredStats(uid=uid, uname=uname, filterd=True)
+        appendWelcomeFilteredStats(ukey=ukey, uname=uname, filterd=True)
 
 @liveEvent.on('warning')
 async def onWarning(msg, isCutOff):

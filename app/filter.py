@@ -3,12 +3,12 @@ import regex
 import asyncio
 
 lastDanmuMessages = []
-def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji):
+def filterDanmu(ukey, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji):
     global lastDanmuMessages
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["danmu"]["enable"]:
         return False
-    if uid in dynamicConfig["filter"]["danmu"]["whitelistUsers"]:
+    if ukey in [f"uid:{uid}" for uid in dynamicConfig["filter"]["danmu"]["whitelistUsers"]]:
         return True
     if dynamicConfig["filter"]["danmu"]["whitelistKeywords"] != []:
         for keyword in dynamicConfig["filter"]["danmu"]["whitelistKeywords"]:
@@ -26,7 +26,7 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel,
         return False
     if not dynamicConfig["filter"]["danmu"]["emojiEnable"] and isEmoji:
         return False
-    if uid in dynamicConfig["filter"]["danmu"]["blacklistUsers"]:
+    if ukey in [f"uid:{uid}" for uid in dynamicConfig["filter"]["danmu"]["blacklistUsers"]]:
         return False
     for keyword in dynamicConfig["filter"]["danmu"]["blacklistKeywords"]:
         if keyword in msg:
@@ -40,9 +40,9 @@ def filterDanmu(uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel,
             lastDanmuMessages.pop(0)
     return True
 
-giftUids = {}
-def filterGift(uid, uname, price, giftName, num, deduplicateCallback):
-    global giftUids
+giftUkeys = {}
+def filterGift(ukey, uname, price, giftName, num, deduplicateCallback):
+    global giftUkeys
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["gift"]["enable"]:
         return False
@@ -56,54 +56,54 @@ def filterGift(uid, uname, price, giftName, num, deduplicateCallback):
             return False
     # 开启了礼物聚合后，所有的礼物都不读除非超时和变化了礼物名称
     if dynamicConfig["filter"]["gift"]["deduplicateTime"] != 0:
-        if uid not in giftUids:
-            giftUids[uid] = {
-                'uid': uid,
+        if ukey not in giftUkeys:
+            giftUkeys[ukey] = {
+                'ukey': ukey,
                 'uname': uname,
                 'gifts': {}
             }
-        if giftName in giftUids[uid]['gifts']:
-            giftUids[uid]['gifts'][giftName]['task'].cancel()
+        if giftName in giftUkeys[ukey]['gifts']:
+            giftUkeys[ukey]['gifts'][giftName]['task'].cancel()
         def callback():
-            deduplicateCallback(giftUids[uid], giftName)
-            del giftUids[uid]['gifts'][giftName]
-        giftUids[uid]['gifts'][giftName] = {
-            'count': giftUids[uid]['gifts'][giftName]['count'] + num if giftName in giftUids[uid]['gifts']  else num,
+            deduplicateCallback(giftUkeys[ukey], giftName)
+            del giftUkeys[ukey]['gifts'][giftName]
+        giftUkeys[ukey]['gifts'][giftName] = {
+            'count': giftUkeys[ukey]['gifts'][giftName]['count'] + num if giftName in giftUkeys[ukey]['gifts']  else num,
             'task': asyncio.get_running_loop().call_later(dynamicConfig["filter"]["gift"]["deduplicateTime"], callback)
         }
         return None
     return True
 
-def filterWelcome(uid, uname):
+def filterWelcome(ukey, uname):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["welcome"]["enable"]:
         return False
     return True
 
-def filterGuardBuy(uid, uname, newGuard, giftName, num):
+def filterGuardBuy(ukey, uname, newGuard, giftName, num):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["guardBuy"]["enable"]:
         return False
     return True
 
-likedUids = {}
-def filterLike(uid, uname):
+likedUkeys = {}
+def filterLike(ukey, uname):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["like"]["enable"]:
         return False
     if dynamicConfig["filter"]["like"]["deduplicate"]:
-        if uid in likedUids:
+        if ukey in likedUkeys:
             return False
-        likedUids[uid] = True
+        likedUkeys[ukey] = True
     return True
 
-def filterSubscribe(uid, uname):
+def filterSubscribe(ukey, uname):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["subscribe"]["enable"]:
         return False
     return True
 
-def filterSuperChat(uid, uname, price, msg):
+def filterSuperChat(ukey, uname, price, msg):
     dynamicConfig = getJsonConfig()['dynamic']
     if not dynamicConfig["filter"]["superChat"]["enable"]:
         return False

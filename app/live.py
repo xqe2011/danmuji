@@ -47,11 +47,20 @@ class LiveMsgHandler(BaseHandler):
             timeLog(f"[Live] Connected")
             liveEvent.emit('connected')
             firstHeartBeat = False
+    
+    def _convert_uid_uname_to_ukey(self, uid, uname):
+        if uid != 0:
+            return f"uid:{uid}"
+        else:
+            timeLog(f"[Live] Detected uid 0, use uname as unique id of the user: {uname}")
+            liveEvent.emit('uidIs0')
+            return f"uname:{uname}"
 
     def onDanmuCallback(self, client: BLiveClient, command: dict):
         uid = command["info"][2][0]
         msg = command['info'][1]
         uname = command["info"][2][1]
+        ukey = self._convert_uid_uname_to_ukey(uid, uname)
         if len(command["info"][3]) != 0:
             isFansMedalBelongToLive = command["info"][3][3] == getJsonConfig()['engine']['bili']['liveID']
             fansMedalLevel = command["info"][3][0]
@@ -62,7 +71,7 @@ class LiveMsgHandler(BaseHandler):
         isEmoji = command['info'][0][12] == 1 or isAllCharactersEmoji(msg)
         replyUname = json.loads(command['info'][0][15]['extra'])['reply_uname']
         timeLog(f"[Danmu] {uname}: {'@' + replyUname + ' ' if replyUname != '' else ''}{msg}")
-        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname)
+        liveEvent.emit('danmu', ukey, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname)
 
     def onGuardBuyCallback(self, client: BLiveClient, command: dict):
         if 'role_name' not in command['data'] or command['data']['role_name'] not in ['总督', '提督', '舰长']:
@@ -70,28 +79,31 @@ class LiveMsgHandler(BaseHandler):
         uid = command["data"]["uid"]
         num = command["data"]["num"]
         uname = command["data"]["username"]
+        ukey = self._convert_uid_uname_to_ukey(uid, uname)
         giftName = command['data']['role_name']
         newGuard = '第1天' == command["data"]["toast_msg"][-3:]
         timeLog(f"[GuardBuy] {uname} bought {'New ' if newGuard else ''}{giftName} x {num}.")
-        liveEvent.emit('guardBuy', uid, uname, newGuard, giftName, num)
+        liveEvent.emit('guardBuy', ukey, uname, newGuard, giftName, num)
 
     def onSCCallback(self, client: BLiveClient, command: dict):
         uid = command["data"]["uid"]
         uname = command["data"]["user_info"]["uname"]
+        ukey = self._convert_uid_uname_to_ukey(uid, uname)
         price = command["data"]["price"]
         msg = command["data"]["message"]
         timeLog(f"[SuperChat] {uname} bought {price}元的SC: {msg}")
-        liveEvent.emit('superChat', uid, uname, price, msg)
+        liveEvent.emit('superChat', ukey, uname, price, msg)
 
     def onGiftCallback(self, client: BLiveClient, command: dict):
         uid = command["data"]["uid"]
         uname = command["data"]["uname"]
+        ukey = self._convert_uid_uname_to_ukey(uid, uname)
         giftName = command["data"]["giftName"]
         num = command["data"]["num"]
         price = command["data"]["price"] / 1000
         price = price if command["data"]["coin_type"] == 'gold' else 0
         timeLog(f"[Gift] {uname} bought {price:.1f}元的{giftName} x {num}.")
-        liveEvent.emit('gift', uid, uname, price, giftName, num)
+        liveEvent.emit('gift', ukey, uname, price, giftName, num)
     
     def onInteractWordV2Callback(self, client: BLiveClient, command: dict):
         proto = pb.InteractWordV2.loads(base64.b64decode(command['data']['pb']))
@@ -99,18 +111,20 @@ class LiveMsgHandler(BaseHandler):
             return
         uid = proto.uid
         uname = proto.uname
+        ukey = self._convert_uid_uname_to_ukey(uid, uname)
         isSubscribe = proto.msg_type == 2
         timeLog(f"[Interact] {uname} {'subscribe' if isSubscribe else 'enter'} the stream.")
         if isSubscribe:
-            liveEvent.emit('subscribe', uid, uname)
+            liveEvent.emit('subscribe', ukey, uname)
         else:
-            liveEvent.emit('welcome', uid, uname)
+            liveEvent.emit('welcome', ukey, uname)
 
     def onLikeCallback(self, client: BLiveClient, command: dict):
         uid = command["data"]["uid"]
         uname = command["data"]["uname"]
+        ukey = self._convert_uid_uname_to_ukey(uid, uname)
         timeLog(f"[Like] {uname} liked the stream.")
-        liveEvent.emit('like', uid, uname)
+        liveEvent.emit('like', ukey, uname)
     
     def onWarning(self, client: BLiveClient, command: dict):
         msg = command['msg']
@@ -123,7 +137,7 @@ class LiveMsgHandler(BaseHandler):
         liveEvent.emit('warning', msg, True)
 
     def onOpenLiveDanmuCallback(self, client: OpenLiveClient, command: dict):
-        uid = command["data"]["uid"]
+        ukey = "openid:" + command["data"]["open_id"]
         msg = command["data"]["msg"]
         uname = command["data"]["uname"]
         if command["data"]["fans_medal_wearing_status"]:
@@ -136,20 +150,20 @@ class LiveMsgHandler(BaseHandler):
         isEmoji = command['data']["dm_type"] == 1 or isAllCharactersEmoji(msg)
         replyUname = command["data"]["reply_uname"]
         timeLog(f"[Danmu] {uname}: {'@' + replyUname + ' ' if replyUname != '' else ''}{msg}")
-        liveEvent.emit('danmu', uid, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname)
+        liveEvent.emit('danmu', ukey, uname, isFansMedalBelongToLive, fansMedalLevel, guardLevel, msg, isEmoji, replyUname)
     
     def onOpenLiveGiftCallback(self, client: OpenLiveClient, command: dict):
-        uid = command["data"]["uid"]
+        ukey = "openid:" + command["data"]["open_id"]
         uname = command["data"]["uname"]
         giftName = command["data"]["gift_name"]
         num = command["data"]["gift_num"]
         price = command["data"]["price"] / 1000
         price = price if command["data"]["paid"] else 0
         timeLog(f"[Gift] {uname} bought {price:.1f}元的{giftName} x {num}.")
-        liveEvent.emit('gift', uid, uname, price, giftName, num)
+        liveEvent.emit('gift', ukey, uname, price, giftName, num)
 
     def onOpenLiveGuardBuyCallback(self, client: OpenLiveClient, command: dict):
-        uid = command["data"]["user_info"]["uid"]
+        ukey = "openid:" + command["data"]["user_info"]["open_id"]
         uname = command["data"]["user_info"]["uname"]
         num = command["data"]["guard_num"]
         if command["data"]["guard_level"] == 1:
@@ -159,27 +173,27 @@ class LiveMsgHandler(BaseHandler):
         elif command["data"]["guard_level"] == 3:
             giftName = '舰长'
         timeLog(f"[GuardBuy] {uname} bought {giftName} x {num}.")
-        liveEvent.emit('guardBuy', uid, uname, False, giftName, num)
+        liveEvent.emit('guardBuy', ukey, uname, False, giftName, num)
     
     def onOpenLiveSuperChatCallback(self, client: OpenLiveClient, command: dict):
-        uid = command["data"]["uid"]
+        ukey = "openid:" + command["data"]["open_id"]
         uname = command["data"]["uname"]
         price = command["data"]["rmb"]
         msg = command["data"]["message"]
         timeLog(f"[SuperChat] {uname} bought {price}元的SC: {msg}")
-        liveEvent.emit('superChat', uid, uname, price, msg)
+        liveEvent.emit('superChat', ukey, uname, price, msg)
     
     def onOpenLiveLikeCallback(self, client: OpenLiveClient, command: dict):
-        uid = command["data"]["uid"]
+        ukey = "openid:" + command["data"]["open_id"]
         uname = command["data"]["uname"]
         timeLog(f"[Like] {uname} liked the stream.")
-        liveEvent.emit('like', uid, uname)
+        liveEvent.emit('like', ukey, uname)
     
     def onOpenLiveEnterRoomCallback(self, client: OpenLiveClient, command: dict):
-        uid = command["data"]["uid"]
+        ukey = "openid:" + command["data"]["open_id"]
         uname = command["data"]["uname"]
         timeLog(f"[Interact] {uname} enter the stream.")
-        liveEvent.emit('welcome', uid, uname)
+        liveEvent.emit('welcome', ukey, uname)
     
     _CMD_CALLBACK_DICT = {
         **BaseHandler._CMD_CALLBACK_DICT,

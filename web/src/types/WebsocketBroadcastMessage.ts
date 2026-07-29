@@ -3,7 +3,7 @@ import { DynamicConfig } from "./DynamicConfig";
 export type DanmuEvent = {
     'type': 'danmu',
     'filterd': boolean,
-    'uid': number,
+    'ukey': number,
     'uname': string,
     'msg': string
 };
@@ -11,7 +11,7 @@ export type DanmuEvent = {
 export type GiftEvent = {
     'type': 'gift',
     'filterd': boolean,
-    'uid': number,
+    'ukey': number,
     'uname': string,
     'giftName': string,
     'num': number
@@ -20,7 +20,7 @@ export type GiftEvent = {
 export type GuardBuyEvent = {
     'type': 'guardBuy',
     'filterd': boolean,
-    'uid': number,
+    'ukey': number,
     'uname': string,
     'newGuard': number,
     'giftName': string,
@@ -30,28 +30,28 @@ export type GuardBuyEvent = {
 export type LikeEvent = {
     'type': 'like',
     'filterd': boolean,
-    'uid': number,
+    'ukey': number,
     'uname': string
 };
 
 export type SubscribeEvent = {
     'type': 'subscribe',
     'filterd': boolean,
-    'uid': number,
+    'ukey': number,
     'uname': string
 };
 
 export type WelcomeEvent = {
     'type': 'welcome',
     'filterd': boolean,
-    'uid': number,
+    'ukey': number,
     'uname': string
 };
 
 export type SuperChatEvent = {
     "type": "superChat",
     "filterd": boolean,
-    "uid": number,
+    "ukey": number,
     "uname": string,
     "price": number,
     "msg": string
