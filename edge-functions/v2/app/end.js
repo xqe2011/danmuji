@@ -1,5 +1,6 @@
 import {
   handlePost,
+  jsonResponse,
   requestBiliAPI,
   requireStringField,
 } from "../../shared/common.js";
@@ -12,6 +13,6 @@ export async function onRequest(context) {
       app_id: config.APP_ID,
     });
     console.log(`[/v2/app/end] ${game_id} -> code=${data.code} msg=${data.message}`);
-    return Response.json(data, { status: 200 });
+    return jsonResponse(data, 200);
   });
 }

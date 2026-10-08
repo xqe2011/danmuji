@@ -54,6 +54,14 @@ export function getClientIP(request) {
   );
 }
 
+/** EdgeOne Makers V8 does not support Response.json(); use this instead. */
+export function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 export async function hmacSha256Hex(secret, data) {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -146,7 +154,7 @@ export async function handlePost(context, pathname, handler) {
   const body = await parseJsonBody(request);
   if (body === null) {
     console.warn(`[${pathname}] ${clientIP} -> status=400, msg=Invalid JSON`);
-    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+    return jsonResponse({ error: "Invalid JSON" }, 400);
   }
 
   try {
@@ -155,14 +163,14 @@ export async function handlePost(context, pathname, handler) {
   } catch (err) {
     if (err instanceof ValidationError) {
       console.warn(`[${pathname}] ${clientIP} -> status=400, msg=Schema Validation Error`);
-      return Response.json({ error: err.error }, { status: 400 });
+      return jsonResponse({ error: err.error }, 400);
     }
     if (err instanceof ConfigError) {
       console.error(`[${pathname}] ${clientIP} -> status=500, msg=${err.message}`);
-      return Response.json({ error: "Internal Server Error" }, { status: 500 });
+      return jsonResponse({ error: "Internal Server Error" }, 500);
     }
     console.error(`[${pathname}] ${clientIP} -> status=500, msg=Internal Server Error`);
     console.error(err);
-    return Response.json({ error: "Internal Server Error" }, { status: 500 });
+    return jsonResponse({ error: "Internal Server Error" }, 500);
   }
 }
